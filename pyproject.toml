@@ -1,0 +1,20 @@
+[project]
+name = "crease-and-cells"
+version = "0.1.0"
+description = "Gamified Excel and Google Sheets learning in a cricket world"
+requires-python = ">=3.11"
+dependencies = ["mcp>=2.0"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["backend"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["backend/tests"]

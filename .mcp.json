@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "crease-and-cells": {
+      "command": "python",
+      "args": ["-m", "backend.mcp_server"],
+      "env": { "CC_DB": "crease_cells.db", "CC_TRACE": "logs/trace.jsonl" }
+    }
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "missions": [
+    {
+      "id": "L1-001",
+      "level": 1,
+      "zone": "The Nets",
+      "npc": "Coach Rao",
+      "title": "Expensive Spells",
+      "story": "Coach Rao slaps the clipboard. \"Too many of my bowlers are leaking runs. Ujwal, how many spells in this log went for more than 8 an over?\"",
+      "task": "On the Spells sheet, economy is column G and the data runs from row 2 to row 61. Write a formula in any cell that counts the spells with an economy above 8.",
+      "dataset": {"generator": "bowling_spells", "seed": 101, "rows": 60},
+      "answer_spec": {"kind": "count_gt", "field": "economy", "value": 8},
+      "reference_solution": "=COUNTIF(G2:G61,\">8\")",
+      "required_all": [],
+      "required_any": ["COUNTIF", "COUNTIFS"],
+      "hints": [
+        "You need a function that counts only the cells that meet a condition.",
+        "COUNTIF takes two parts: the range to look at, then the condition in quotes.",
+        "A condition with an operator looks like \">3\" in quotes, for example =COUNTIF(A1:A10,\">3\"). Point it at the economy column."
+      ],
+      "reward": {"coins": 50, "xp": 100}
+    },
+    {
+      "id": "L1-002",
+      "level": 1,
+      "zone": "The Nets",
+      "npc": "Selector Mehta",
+      "title": "Ujwal's Wicket Tally",
+      "story": "Selector Mehta is shortlisting for the next tour. \"Show me how many wickets Ujwal Mojidra has taken across this log. Do not count anyone else's.\"",
+      "task": "Bowler names are in column B and wickets are in column F, rows 2 to 61. Write a formula that totals the wickets taken by Ujwal Mojidra only.",
+      "dataset": {"generator": "bowling_spells", "seed": 101, "rows": 60},
+      "answer_spec": {"kind": "sum_where", "where_field": "bowler", "where_value": "Ujwal Mojidra", "sum_field": "wickets"},
+      "reference_solution": "=SUMIF(B2:B61,\"Ujwal Mojidra\",F2:F61)",
+      "required_all": [],
+      "required_any": ["SUMIF", "SUMIFS"],
+      "hints": [
+        "You want to add up one column, but only for rows where another column matches a name.",
+        "SUMIF takes three parts: the range holding the condition, the condition itself, then the range to add up.",
+        "Text conditions go in quotes, for example =SUMIF(A1:A10,\"Tom\",B1:B10). Match it to the bowler column, then add the wickets column."
+      ],
+      "reward": {"coins": 60, "xp": 100}
+    },
+    {
+      "id": "L1-003",
+      "level": 1,
+      "zone": "The Nets",
+      "npc": "Analyst Priya",
+      "title": "Ujwal's Economy Rate",
+      "story": "Analyst Priya is building the scouting sheet. \"I need Ujwal's average economy rate, rounded to 2 decimal places. One formula, please.\"",
+      "task": "Using the economy values in column G and bowler names in column B (rows 2 to 61), write one formula that gives Ujwal Mojidra's average economy rounded to 2 decimal places.",
+      "dataset": {"generator": "bowling_spells", "seed": 101, "rows": 60},
+      "answer_spec": {"kind": "avg_where_round", "where_field": "bowler", "where_value": "Ujwal Mojidra", "avg_field": "economy", "digits": 2},
+      "reference_solution": "=ROUND(AVERAGEIF(B2:B61,\"Ujwal Mojidra\",G2:G61),2)",
+      "required_all": ["ROUND"],
+      "required_any": ["AVERAGEIF", "SUMIF"],
+      "hints": [
+        "Two ideas combine here: an average with a condition, wrapped in a rounding step.",
+        "AVERAGEIF works like SUMIF: condition range, condition, then the range to average. ROUND goes around the outside.",
+        "Shape: =ROUND(AVERAGEIF(condition_range, \"name\", value_range), digits). Fill the pieces from the bowler and economy columns."
+      ],
+      "reward": {"coins": 80, "xp": 150}
+    }
+  ]
+}

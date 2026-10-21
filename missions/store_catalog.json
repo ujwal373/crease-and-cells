@@ -1,0 +1,9 @@
+{
+  "default_kit": {"jersey": "basic_white", "cap": "none", "shoes": "basic_white", "sleeve": "none"},
+  "items": [
+    {"id": "cap_club", "name": "Club Cap", "slot": "cap", "tier": "club", "price": 80},
+    {"id": "jersey_club", "name": "Club Jersey", "slot": "jersey", "tier": "club", "price": 150},
+    {"id": "shoes_state", "name": "State Spikes", "slot": "shoes", "tier": "state", "price": 200},
+    {"id": "sleeve_national", "name": "National Arm Sleeve", "slot": "sleeve", "tier": "national", "price": 300}
+  ]
+}
