@@ -31,6 +31,8 @@ def test_hardcoded_answer_is_rejected(m):
 
 @pytest.mark.parametrize("m", MISSIONS, ids=lambda m: m["id"])
 def test_wrong_reference_range_fails(m):
+    if "61" not in m["reference_solution"]:
+        pytest.skip("reference solution has no row-range to truncate (single-cell formula)")
     grid, expected = _setup(m)
     broken = m["reference_solution"].replace("61", "30")  # forgot half the rows
     r = validate(broken, grid, expected, m["required_all"], m["required_any"])

@@ -94,7 +94,7 @@ The project MCP server is registered in `.mcp.json`. Use it to play missions thr
 
 ## Engine functions supported today
 
-SUM, AVERAGE, MIN, MAX, COUNT, COUNTA, COUNTIF, COUNTIFS, SUMIF, SUMIFS, AVERAGEIF, IF, ROUND, ABS. Operators: + - * / ^ & and comparisons. ROUND follows Excel (half away from zero). Next to add for Level 2 and 3: IFS, AND, OR, VLOOKUP, XLOOKUP, INDEX, MATCH, TRIM, plus absolute reference handling tests.
+SUM, AVERAGE, MIN, MAX, COUNT, COUNTA, COUNTIF, COUNTIFS, SUMIF, SUMIFS, AVERAGEIF, IF, IFS, AND, OR, ROUND, ABS. Operators: + - * / ^ & and comparisons. ROUND follows Excel (half away from zero). Absolute references ($G$2, $G$2:$G$61) are handled. Next to add for Level 3: VLOOKUP, XLOOKUP, INDEX, MATCH, TRIM.
 
 ## Adding a mission
 
@@ -151,7 +151,7 @@ Camera easing, chunked tile maps, spreadsheet overlay without scene change, mobi
 
 1. Phase 0, done: design, schemas, mission JSON.
 2. Phase 1, done: engine, validator, 3 Level 1 missions, agents on the bus, guardrails, tracing, MCP server.
-3. Phase 2, next: more Level 1 and 2 missions and functions, FastAPI layer, character creator, simple web grid UI, world map with 2 zones.
+3. Phase 2, in progress: IFS, AND, OR added to engine, absolute references tested, 4 Level 2 missions added. Remaining: FastAPI layer, character creator, simple web grid UI, world map with 2 zones.
 4. Phase 3: Claude-backed Mission and Tutor agents behind the guardrails, with evals and token and cost tracing.
 5. Phase 4: Dataset and Adaptive Difficulty agents, Levels 3 to 5.
 6. Phase 5: Levels 6 and 7, polish, sound, playtest, Terraform deployment.

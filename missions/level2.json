@@ -1,0 +1,108 @@
+{
+  "missions": [
+    {
+      "id": "L2-001",
+      "level": 2,
+      "zone": "Club House",
+      "npc": "Captain Singh",
+      "title": "Double Threat",
+      "story": "Captain Singh is nailing names to the performance board. \"I want the bowlers who did it all in one spell: took at least two wickets AND kept the economy below eight. How many spells in this log qualify?\"",
+      "task": "Wickets are in column F and economy in column G, rows 2 to 61. Write a COUNTIFS formula that counts spells where wickets >= 2 AND economy < 8. Both conditions must be true at the same time.",
+      "dataset": {"generator": "bowling_spells", "seed": 101, "rows": 60},
+      "answer_spec": {
+        "kind": "count_multi",
+        "conditions": [
+          {"field": "wickets", "op": ">=", "value": 2},
+          {"field": "economy", "op": "<",  "value": 8}
+        ]
+      },
+      "reference_solution": "=COUNTIFS(F2:F61,\">=2\",G2:G61,\"<8\")",
+      "required_all": [],
+      "required_any": ["COUNTIFS"],
+      "hints": [
+        "COUNTIFS applies several filters at the same time. Each filter is a range followed by its condition, written as pairs.",
+        "Each pair is: the column to check, then the condition in quotes. Add a second pair for the second column.",
+        "Structure: =COUNTIFS(wickets_range, condition_for_wickets, economy_range, condition_for_economy). Point each range at the right column and write the threshold in quotes."
+      ],
+      "reward": {"coins": 70, "xp": 120}
+    },
+    {
+      "id": "L2-002",
+      "level": 2,
+      "zone": "Club House",
+      "npc": "Analyst Priya",
+      "title": "When Wickets Cost",
+      "story": "Analyst Priya is studying Ujwal's impact. \"When he takes wickets he clearly works hard, but I want to see the run cost. Add up every run Ujwal Mojidra gave away in spells where he also took at least one wicket.\"",
+      "task": "Runs are in column E, bowler names in column B, wickets in column F, rows 2 to 61. Write a SUMIFS formula: sum column E where column B equals \"Ujwal Mojidra\" and column F is >= 1.",
+      "dataset": {"generator": "bowling_spells", "seed": 101, "rows": 60},
+      "answer_spec": {
+        "kind": "sum_multi",
+        "sum_field": "runs",
+        "conditions": [
+          {"field": "bowler",  "op": "=",  "value": "Ujwal Mojidra"},
+          {"field": "wickets", "op": ">=", "value": 1}
+        ]
+      },
+      "reference_solution": "=SUMIFS(E2:E61,B2:B61,\"Ujwal Mojidra\",F2:F61,\">=1\")",
+      "required_all": [],
+      "required_any": ["SUMIFS"],
+      "hints": [
+        "SUMIFS totals one column but only includes rows where every condition you set is true.",
+        "Put the column to sum first, then add condition pairs. You need two pairs here: one for the bowler name and one for the wicket count.",
+        "Structure: =SUMIFS(sum_range, bowler_range, \"Ujwal Mojidra\", wickets_range, \">=1\"). Column E is the run tally; the other two columns provide the filters."
+      ],
+      "reward": {"coins": 80, "xp": 130}
+    },
+    {
+      "id": "L2-003",
+      "level": 2,
+      "zone": "Club House",
+      "npc": "Selector Mehta",
+      "title": "Red or Green Light",
+      "story": "Selector Mehta runs a strict two-colour system. \"Under eight runs per over is a green light. Eight or above is a red light. Look at Ujwal's very first spell in this log and write a formula for cell H2 that gives me a green light as a one and a red light as a zero.\"",
+      "task": "Economy is in column G. Write an IF formula for cell H2: if G2 is less than 8 return 1, otherwise return 0.",
+      "dataset": {"generator": "bowling_spells", "seed": 101, "rows": 60},
+      "answer_spec": {
+        "kind": "if_single_cell",
+        "row_index": 0,
+        "field": "economy",
+        "op": "<",
+        "threshold": 8,
+        "true_value": 1,
+        "false_value": 0
+      },
+      "reference_solution": "=IF(G2<8,1,0)",
+      "required_all": ["IF"],
+      "required_any": [],
+      "hints": [
+        "IF has three parts separated by commas: the condition to test, the value to return when the condition is true, and the value to return when it is false.",
+        "Build the condition first: check whether the economy value in G2 clears the threshold the selector described.",
+        "Formula structure: =IF(condition, true_result, false_result). Replace the three pieces with what the selector wants to see."
+      ],
+      "reward": {"coins": 90, "xp": 140}
+    },
+    {
+      "id": "L2-004",
+      "level": 2,
+      "zone": "Club House",
+      "npc": "Manager Suresh",
+      "title": "XP Bonus Calculator",
+      "story": "Manager Suresh runs the XP bonus scheme after every match. \"Three wickets in a spell earns a hundred XP, two wickets earns seventy-five, one wicket earns fifty, and no wickets earns twenty-five. Write the formula for cell H2 so the board calculates Ujwal's bonus for his first spell automatically.\"",
+      "task": "Wickets for the first spell are in cell F2. Write an IFS formula for cell H2 that checks F2 = 3 (return 100), F2 = 2 (return 75), F2 = 1 (return 50), F2 = 0 (return 25). Cover all four cases.",
+      "dataset": {"generator": "bowling_spells", "seed": 101, "rows": 60},
+      "answer_spec": {
+        "kind": "ifs_xp",
+        "row_index": 0
+      },
+      "reference_solution": "=IFS(F2=3,100,F2=2,75,F2=1,50,F2=0,25)",
+      "required_all": ["IFS"],
+      "required_any": [],
+      "hints": [
+        "IFS tests conditions from left to right and returns the value paired with the first true condition.",
+        "Write one condition-value pair for each wicket count, starting with the highest count and working down to zero.",
+        "Structure: =IFS(cond_a, val_a, cond_b, val_b, cond_c, val_c, cond_d, val_d). Each condition checks F2 against a wicket count; the paired value is the XP from the manager's scheme."
+      ],
+      "reward": {"coins": 100, "xp": 150}
+    }
+  ]
+}

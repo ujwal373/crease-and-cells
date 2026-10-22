@@ -325,6 +325,49 @@ def _fn_if(a):
     return a[1] if _truthy(a[0]) else (a[2] if len(a) == 3 else False)
 
 
+def _fn_ifs(a):
+    if len(a) < 2 or len(a) % 2:
+        raise FormulaError("#VALUE!", "IFS requires an even number of arguments in pairs")
+    for i in range(0, len(a), 2):
+        if _truthy(a[i]):
+            return a[i + 1]
+    raise FormulaError("#N/A", "no IFS condition was true")
+
+
+def _fn_and(a):
+    if not a:
+        raise FormulaError("#VALUE!", "AND requires at least one argument")
+    found_any = False
+    for x in a:
+        vals = x.values if isinstance(x, Range) else [x]
+        for v in vals:
+            if v is None:
+                continue
+            found_any = True
+            if not _truthy(v):
+                return False
+    if not found_any:
+        raise FormulaError("#VALUE!", "AND found no values to evaluate")
+    return True
+
+
+def _fn_or(a):
+    if not a:
+        raise FormulaError("#VALUE!", "OR requires at least one argument")
+    found_any = False
+    for x in a:
+        vals = x.values if isinstance(x, Range) else [x]
+        for v in vals:
+            if v is None:
+                continue
+            found_any = True
+            if _truthy(v):
+                return True
+    if not found_any:
+        raise FormulaError("#VALUE!", "OR found no values to evaluate")
+    return False
+
+
 def _fn_round(a):
     if len(a) not in (1, 2):
         raise FormulaError("#VALUE!", "ROUND takes 1 or 2 arguments")
@@ -341,7 +384,9 @@ FUNCTIONS = {
     "SUM": _fn_sum, "AVERAGE": _fn_average, "MIN": _fn_min, "MAX": _fn_max,
     "COUNT": _fn_count, "COUNTA": _fn_counta, "COUNTIF": _fn_countif,
     "COUNTIFS": _fn_countifs, "SUMIF": _fn_sumif, "SUMIFS": _fn_sumifs,
-    "AVERAGEIF": _fn_averageif, "IF": _fn_if, "ROUND": _fn_round, "ABS": _fn_abs,
+    "AVERAGEIF": _fn_averageif, "IF": _fn_if, "IFS": _fn_ifs,
+    "AND": _fn_and, "OR": _fn_or,
+    "ROUND": _fn_round, "ABS": _fn_abs,
 }
 
 

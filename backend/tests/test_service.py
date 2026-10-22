@@ -50,11 +50,13 @@ def test_hints_progress_and_cap(svc):
 
 
 def test_all_missions_then_done(svc):
-    for mid in ("L1-001", "L1-002", "L1-003"):
+    all_ids = ("L1-001", "L1-002", "L1-003", "L2-001", "L2-002", "L2-003", "L2-004")
+    for mid in all_ids:
         assert solve(svc, "p1", mid)["passed"]
     assert svc.get_next_mission("p1")["done"]
     w = svc.get_wallet("p1")
-    assert w["xp"] == 350 and w["level"] == 2
+    # total XP: 100+100+150+120+130+140+150 = 890; level = 1 + 890//300 = 3
+    assert w["xp"] == 890 and w["level"] == 3
 
 
 def test_store_requires_coins_and_is_atomic(svc):
