@@ -19,6 +19,7 @@ from .formula_engine import Grid
 from .keys import compute_answer
 from .state import GameState
 from .tracing import span, trace
+from .tutor import TutorAgent
 from .validator import validate
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -126,7 +127,7 @@ class StoreAgent:
 
 
 class GameService:
-    def __init__(self, db_path: str = ":memory:"):
+    def __init__(self, db_path: str = ":memory:", tutor_client=None):
         self.bus = EventBus()
         self.state = GameState(db_path)
         self.missions = load_missions()
@@ -134,6 +135,7 @@ class GameService:
         self.mission_agent = MissionAgent(self.state, self.missions, self.bus)
         self.scoring_agent = ScoringAgent(self.state, self.missions, self.bus)
         self.store_agent = StoreAgent(self.state, load_catalog(), self.bus)
+        self._tutor: TutorAgent | None = TutorAgent(self.state, tutor_client) if tutor_client is not None else None
 
     # ----- missions -----
     def _mission(self, mission_id: str) -> dict:
@@ -182,28 +184,57 @@ class GameService:
             }
 
     # ----- coach -----
-    def get_hint(self, player_id: str, mission_id: str) -> dict:
-        self.state.ensure_player(player_id)
+    def _hint_response(
+        self,
+        player_id: str,
+        mission_id: str,
+        *,
+        formula: str = "",
+        failure_code: str = "",
+        message: str | None = None,
+    ) -> dict:
         mission = self._mission(mission_id)
         hints = mission["hints"]
         used = self.state.hints_used(player_id, mission_id)
-        text = hints[min(used, len(hints) - 1)]
-        rows, _ = _rows_for(mission)
+        hint_level = min(used + 1, len(hints))
+        static_text = hints[min(used, len(hints) - 1)]
+        rows, cols = _rows_for(mission)
         secrets = _fmt_secret(compute_answer(mission["answer_spec"], rows)) + [mission["reference_solution"]]
-        out = guardrails.check_output(text, secrets)
-        if not out.allowed:
-            trace("guardrail.blocked", kind="hint_output", reason=out.reason, mission_id=mission_id)
-            text = "Re-read the task and check which columns hold the condition and the values."
+        if self._tutor is not None:
+            result = self._tutor.get_hint(
+                player_id=player_id,
+                mission=mission,
+                hint_level=hint_level,
+                formula=formula,
+                failure_code=failure_code,
+                column_headers=cols,
+                message=message,
+                secrets=secrets,
+                static_fallback=static_text,
+            )
+            text = result.text
+        else:
+            out = guardrails.check_output(static_text, secrets)
+            if not out.allowed:
+                trace("guardrail.blocked", kind="hint_output", reason=out.reason, mission_id=mission_id)
+                text = "Re-read the task and check which columns hold the condition and the values."
+            else:
+                text = static_text
         self.state.bump_hints(player_id, mission_id)
         self.bus.publish(events.HINT_USED, {"player_id": player_id, "mission_id": mission_id})
-        return {"hint": text, "hint_number": min(used + 1, len(hints)), "of": len(hints), "no_hint_bonus_lost": True}
+        return {"hint": text, "hint_number": hint_level, "of": len(hints), "no_hint_bonus_lost": True}
+
+    def get_hint(self, player_id: str, mission_id: str) -> dict:
+        self.state.ensure_player(player_id)
+        return self._hint_response(player_id, mission_id)
 
     def ask_coach(self, player_id: str, mission_id: str, message: str) -> dict:
         guard = guardrails.check_chat_input(message)
         if not guard.allowed:
             trace("guardrail.blocked", kind="chat_input", reason=guard.reason, player_id=player_id)
             return {"blocked": True, "reply": "Coach: I can nudge you, but I can't hand over the answer. Try a hint."}
-        return self.get_hint(player_id, mission_id)
+        self.state.ensure_player(player_id)
+        return self._hint_response(player_id, mission_id, message=message)
 
     # ----- wallet and store -----
     def get_wallet(self, player_id: str) -> dict:

@@ -23,6 +23,17 @@ CREATE TABLE IF NOT EXISTS inventory (
 CREATE TABLE IF NOT EXISTS equipped (
     player_id TEXT, slot TEXT, item_id TEXT, PRIMARY KEY (player_id, slot)
 );
+CREATE TABLE IF NOT EXISTS hint_cache (
+    mission_id TEXT, failure_code TEXT, hint_level INTEGER, reply TEXT,
+    PRIMARY KEY (mission_id, failure_code, hint_level)
+);
+CREATE TABLE IF NOT EXISTS tutor_player_calls (
+    player_id TEXT, call_date TEXT, count INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (player_id, call_date)
+);
+CREATE TABLE IF NOT EXISTS tutor_daily_spend (
+    call_date TEXT PRIMARY KEY, spent_usd REAL NOT NULL DEFAULT 0.0
+);
 """
 
 
@@ -103,3 +114,54 @@ class GameState:
     def equipped(self, player_id: str) -> dict:
         rows = self.db.execute("SELECT slot, item_id FROM equipped WHERE player_id=?", (player_id,)).fetchall()
         return {r["slot"]: r["item_id"] for r in rows}
+
+    # ------------------------------------------------------------------
+    # Tutor: hint cache
+    # ------------------------------------------------------------------
+
+    def get_hint_cache(self, mission_id: str, failure_code: str, hint_level: int) -> str | None:
+        row = self.db.execute(
+            "SELECT reply FROM hint_cache WHERE mission_id=? AND failure_code=? AND hint_level=?",
+            (mission_id, failure_code, hint_level),
+        ).fetchone()
+        return row["reply"] if row else None
+
+    def set_hint_cache(self, mission_id: str, failure_code: str, hint_level: int, reply: str) -> None:
+        self.db.execute(
+            "INSERT OR REPLACE INTO hint_cache VALUES (?, ?, ?, ?)",
+            (mission_id, failure_code, hint_level, reply),
+        )
+        self.db.commit()
+
+    # ------------------------------------------------------------------
+    # Tutor: daily caps
+    # ------------------------------------------------------------------
+
+    def tutor_player_count(self, player_id: str, call_date: str) -> int:
+        row = self.db.execute(
+            "SELECT count FROM tutor_player_calls WHERE player_id=? AND call_date=?",
+            (player_id, call_date),
+        ).fetchone()
+        return row["count"] if row else 0
+
+    def increment_tutor_player_count(self, player_id: str, call_date: str) -> None:
+        self.db.execute(
+            "INSERT INTO tutor_player_calls (player_id, call_date, count) VALUES (?, ?, 1) "
+            "ON CONFLICT(player_id, call_date) DO UPDATE SET count = count + 1",
+            (player_id, call_date),
+        )
+        self.db.commit()
+
+    def tutor_daily_spend(self, call_date: str) -> float:
+        row = self.db.execute(
+            "SELECT spent_usd FROM tutor_daily_spend WHERE call_date=?", (call_date,)
+        ).fetchone()
+        return row["spent_usd"] if row else 0.0
+
+    def increment_tutor_spend(self, call_date: str, amount_usd: float) -> None:
+        self.db.execute(
+            "INSERT INTO tutor_daily_spend (call_date, spent_usd) VALUES (?, ?) "
+            "ON CONFLICT(call_date) DO UPDATE SET spent_usd = spent_usd + ?",
+            (call_date, amount_usd, amount_usd),
+        )
+        self.db.commit()

@@ -14,7 +14,18 @@ from mcp.server.mcpserver import MCPServer
 from .service import GameService
 
 server = MCPServer("crease-and-cells")
-service = GameService(os.environ.get("CC_DB", "crease_cells.db"))
+
+def _make_tutor_client():
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    if not api_key:
+        return None
+    import anthropic  # noqa: PLC0415
+    return anthropic.Anthropic(api_key=api_key)
+
+service = GameService(
+    os.environ.get("CC_DB", "crease_cells.db"),
+    tutor_client=_make_tutor_client(),
+)
 
 
 @server.tool()
