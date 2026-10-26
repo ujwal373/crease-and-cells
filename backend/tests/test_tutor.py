@@ -68,34 +68,15 @@ def state():
     return GameState(":memory:")
 
 
-def _minimal_mission() -> dict:
-    """Public fields only (no answer_spec, no reference_solution, no hints)."""
-    return {
-        "id": "L1-001",
-        "title": "Expensive Spells",
-        "task": "Count spells with economy above 8.",
-    }
-
-
 def _full_mission(svc: GameService) -> dict:
     return svc.by_id["L1-001"]
 
-
-# ---------------------------------------------------------------------------
-# Helper: build a TutorAgent with a FakeAnthropic injected
-# ---------------------------------------------------------------------------
 
 def _agent(state: GameState, fake: FakeAnthropic, player_cap: int = 5, budget: float = 1.0) -> TutorAgent:
     agent = TutorAgent(state, client=fake)
     agent._daily_player_cap = player_cap
     agent._daily_budget = budget
     return agent
-
-
-def _call_args(svc: GameService, fake: FakeAnthropic) -> dict[str, Any]:
-    """Return the kwargs captured on the first messages.create call."""
-    assert fake.messages.calls, "client.messages.create was not called"
-    return fake.messages.calls[0]
 
 
 # ---------------------------------------------------------------------------
@@ -205,7 +186,10 @@ def test_leaking_reply_is_replaced(state):
     rows = gen(ds["seed"], ds["rows"])
     from backend.keys import compute_answer
     expected = compute_answer(mission["answer_spec"], rows)
-    leaking_reply = f"The answer is {expected} spells with economy above 8."
+    # _fmt_secret converts float integers to the plain int string ("20.0" -> "20"),
+    # so the leaking reply must use the same form to actually trigger the guardrail.
+    secret_val = str(int(expected)) if isinstance(expected, float) and expected.is_integer() else str(expected)
+    leaking_reply = f"There are {secret_val} spells where the economy exceeds the threshold."
     fake = FakeAnthropic(reply=leaking_reply)
     agent = _agent(state, fake)
     kwargs = _hint_kwargs(svc, agent)

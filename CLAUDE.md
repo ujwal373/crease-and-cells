@@ -39,7 +39,7 @@ Status key: BUILT means working and tested. PLANNED means not started.
 2. Scoring Agent, BUILT: awards coins, XP, level, no-hint bonus. Idempotent, so a mission never pays twice.
 3. Store Agent, BUILT: catalog, purchase, equip. Atomic spend.
 4. Validator, BUILT: deterministic code, never an LLM.
-5. Tutor Agent, PLANNED: progressive hints today are static text. Planned: Claude Haiku generates hints from the player's formula and error, but never receives the answer key.
+5. Tutor Agent, BUILT: live hints via Claude Haiku (cc_tutor_model env var). Client injected for tests. Per-player daily cap, global USD budget cap, SQLite hint cache, guardrail check on every reply, full cost and latency tracing. Falls back to static hints on any failure. Answer key never enters the prompt.
 6. Dataset Agent, PLANNED: seeded cricket data generators. One generator exists (bowling_spells).
 7. Adaptive Difficulty Agent, PLANNED: mastery score per function, spaced repetition, steers the Mission Agent to weak spots.
 
@@ -70,7 +70,9 @@ backend/guardrails.py       input filter, injection screening, output leak check
 backend/tracing.py          JSONL traces with latency (CC_TRACE sets the file)
 backend/events.py           event bus and event names
 backend/service.py          GameService plus Mission, Scoring and Store agents
-backend/state.py            SQLite state: wallet, completed missions, inventory
+backend/state.py            SQLite state: wallet, completed missions, inventory, hint cache, caps
+backend/ai_config.py        model names, pricing and daily limit constants
+backend/tutor.py            TutorAgent: live hints via Haiku with caching, caps and fallback
 backend/mcp_server.py       MCP server exposing the game as 7 tools
 backend/cricket_data.py     seeded synthetic datasets
 backend/tests/              pytest suite
@@ -152,7 +154,7 @@ Camera easing, chunked tile maps, spreadsheet overlay without scene change, mobi
 1. Phase 0, done: design, schemas, mission JSON.
 2. Phase 1, done: engine, validator, 3 Level 1 missions, agents on the bus, guardrails, tracing, MCP server.
 3. Phase 2, in progress: IFS, AND, OR added to engine, absolute references tested, 4 Level 2 missions added. Remaining: FastAPI layer, character creator, simple web grid UI, world map with 2 zones.
-4. Phase 3: Claude-backed Mission and Tutor agents behind the guardrails, with evals and token and cost tracing.
+4. Phase 3, Stage 3A done: Tutor Agent live with Haiku, ai_config.py for model names and pricing, state.py extended with hint cache and daily caps, full tracing. Stages 3B and 3C not started.
 5. Phase 4: Dataset and Adaptive Difficulty agents, Levels 3 to 5.
 6. Phase 5: Levels 6 and 7, polish, sound, playtest, Terraform deployment.
 
