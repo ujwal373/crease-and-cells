@@ -154,7 +154,7 @@ Camera easing, chunked tile maps, spreadsheet overlay without scene change, mobi
 1. Phase 0, done: design, schemas, mission JSON.
 2. Phase 1, done: engine, validator, 3 Level 1 missions, agents on the bus, guardrails, tracing, MCP server.
 3. Phase 2, in progress: IFS, AND, OR added to engine, absolute references tested, 4 Level 2 missions added. Remaining: FastAPI layer, character creator, simple web grid UI, world map with 2 zones.
-4. Phase 3, Stage 3A done: Tutor Agent live with Haiku, ai_config.py for model names and pricing, state.py extended with hint cache and daily caps, full tracing. Stages 3B and 3C not started.
+4. Phase 3, Stages 3A and 3B done. Stage 3C not started. Stage 3A: Tutor Agent live with Haiku, ai_config.py for model names and pricing, state.py extended with hint cache and daily caps, full tracing. Stage 3B: scripts/generate_missions.py (offline Sonnet generation with validation pipeline), scripts/review_missions.py (approve or reject workflow), missions/generated/ pending directory.
 5. Phase 4: Dataset and Adaptive Difficulty agents, Levels 3 to 5.
 6. Phase 5: Levels 6 and 7, polish, sound, playtest, Terraform deployment.
 
