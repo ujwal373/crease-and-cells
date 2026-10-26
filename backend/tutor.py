@@ -125,24 +125,31 @@ class TutorAgent:
         The call path in order:
           cache lookup -> player cap -> global budget -> API -> guardrail check
         Any failure falls back to the static hint.
+
+        Caching rule: cache replies only when the request has no player message
+        and the failure_code is non-empty. Chat replies (message != None) are
+        personalised and must never be served to a different player from cache.
         """
         today = date.today().isoformat()
         mission_id = mission["id"]
+        # Cacheable only when there is no player message and a failure code exists.
+        can_cache = (message is None) and bool(failure_code)
 
-        # 1. Cache lookup
-        cached = self._state.get_hint_cache(mission_id, failure_code, hint_level)
-        if cached is not None:
-            out = guardrails.check_output(cached, secrets)
-            text = cached if out.allowed else static_fallback
-            result = TutorResult(
-                text=text, cache_hit=True,
-                fallback_used=not out.allowed,
-                fallback_reason="" if out.allowed else "cached_reply_leaked",
-                model=TUTOR_MODEL, input_tokens=0, output_tokens=0,
-                cost_usd=0.0, latency_ms=0.0,
-            )
-            self._trace(result, player_id, mission_id)
-            return result
+        # 1. Cache lookup (only for cacheable requests)
+        if can_cache:
+            cached = self._state.get_hint_cache(mission_id, failure_code, hint_level)
+            if cached is not None:
+                out = guardrails.check_tutor_output(cached, secrets)
+                text = cached if out.allowed else static_fallback
+                result = TutorResult(
+                    text=text, cache_hit=True,
+                    fallback_used=not out.allowed,
+                    fallback_reason="" if out.allowed else "cached_reply_leaked",
+                    model=TUTOR_MODEL, input_tokens=0, output_tokens=0,
+                    cost_usd=0.0, latency_ms=0.0,
+                )
+                self._trace(result, player_id, mission_id)
+                return result
 
         # 2. Player daily cap
         if self._state.tutor_player_count(player_id, today) >= self._daily_player_cap:
@@ -182,14 +189,15 @@ class TutorAgent:
             self._trace(result, player_id, mission_id)
             return result
 
-        # 5. Update caps and spend BEFORE caching (idempotent on cache)
+        # 5. Update caps and spend
         self._state.increment_tutor_player_count(player_id, today)
         self._state.increment_tutor_spend(today, call_cost)
 
-        # 6. Guardrail check on the model reply
-        out = guardrails.check_output(reply_text, secrets)
+        # 6. Guardrail check on the model reply (formula-pattern aware)
+        out = guardrails.check_tutor_output(reply_text, secrets)
         if out.allowed:
-            self._state.set_hint_cache(mission_id, failure_code, hint_level, reply_text)
+            if can_cache:
+                self._state.set_hint_cache(mission_id, failure_code, hint_level, reply_text)
             result = TutorResult(
                 text=reply_text, cache_hit=False, fallback_used=False,
                 fallback_reason="",

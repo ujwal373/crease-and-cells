@@ -1,15 +1,17 @@
 """Review and approve generated missions.
 
-Generated missions live in missions/generated/ with status=pending_review,
-needs_review, or verified. This script lists them and lets you approve or
-reject each one. Approved missions are ready to be manually merged into a
-levelN.json file.
+Generated missions live in missions/generated/ with status verified,
+needs_review, or invalid. This script lists them and lets you approve or
+reject each one. Approved missions are ready to be merged via merge_missions.py.
 
 Usage:
   python scripts/review_missions.py list
   python scripts/review_missions.py show   <mission-id>
-  python scripts/review_missions.py approve <mission-id>
+  python scripts/review_missions.py approve <mission-id>  [--force]
   python scripts/review_missions.py reject  <mission-id>
+
+approve refuses missions whose status is not "verified" unless --force is passed.
+--force should only be used after manually confirming the validation errors.
 """
 from __future__ import annotations
 
@@ -65,17 +67,37 @@ def cmd_show(mission_id: str) -> None:
     print(json.dumps(m, indent=2))
 
 
-def _set_status(mission_id: str, new_status: str) -> None:
+def cmd_approve(mission_id: str, *, force: bool = False) -> None:
     found = _find(mission_id)
     if not found:
         print(f"Mission {mission_id!r} not found.")
         return
     path, m = found
-    m["status"] = new_status
+    status = m.get("status", "")
+    if status != "verified" and not force:
+        errors = m.get("validation_errors", [])
+        print(f"Refused: mission status is {status!r}, not 'verified'.")
+        if errors:
+            print("Validation errors:")
+            for e in errors:
+                print(f"  {e}")
+        print("Pass --force to approve anyway after manually reviewing these errors.")
+        return
+    m["status"] = "approved"
     path.write_text(json.dumps(m, indent=2), encoding="utf-8")
-    print(f"Mission {mission_id} status set to {new_status!r}.")
-    if new_status == "approved":
-        print(f"Ready to merge into missions/level{m.get('level', '?')}.json.")
+    msg = " (forced)" if force and status != "verified" else ""
+    print(f"Mission {mission_id} approved{msg}. Run merge_missions.py to add it to the game.")
+
+
+def cmd_reject(mission_id: str) -> None:
+    found = _find(mission_id)
+    if not found:
+        print(f"Mission {mission_id!r} not found.")
+        return
+    path, m = found
+    m["status"] = "rejected"
+    path.write_text(json.dumps(m, indent=2), encoding="utf-8")
+    print(f"Mission {mission_id} rejected.")
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -84,10 +106,11 @@ def main(argv: list[str] | None = None) -> None:
         cmd_list()
     elif args[0] == "show" and len(args) == 2:
         cmd_show(args[1])
-    elif args[0] == "approve" and len(args) == 2:
-        _set_status(args[1], "approved")
+    elif args[0] == "approve" and len(args) >= 2:
+        force = "--force" in args
+        cmd_approve(args[1], force=force)
     elif args[0] == "reject" and len(args) == 2:
-        _set_status(args[1], "rejected")
+        cmd_reject(args[1])
     else:
         print(__doc__)
 

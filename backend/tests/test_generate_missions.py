@@ -147,7 +147,8 @@ def test_answer_spec_mismatch_needs_review():
     result = gen.generate()
 
     assert result.status == "needs_review"
-    assert any("answer_mismatch" in e for e in result.validation_errors)
+    # validator returns "wrong_value" when the formula result doesn't match the spec
+    assert any("validator" in e and "wrong_value" in e for e in result.validation_errors)
 
 
 # ---------------------------------------------------------------------------
@@ -245,3 +246,59 @@ def test_markdown_fence_stripped():
     result = gen.generate()
 
     assert result.status == "verified", result.validation_errors
+
+
+# ---------------------------------------------------------------------------
+# Test 11: hardcoded formula (no cell references) is rejected as invalid
+# ---------------------------------------------------------------------------
+
+def test_hardcoded_formula_invalid():
+    doc = json.loads(_valid_mission_json())
+    # =44 has no cell references; the validator returns "hardcoded_value"
+    doc["reference_solution"] = "=44"
+    gen, _ = _make_gen(json.dumps(doc))
+
+    result = gen.generate()
+
+    assert result.status == "invalid"
+    assert any("hardcoded_value" in e for e in result.validation_errors)
+
+
+# ---------------------------------------------------------------------------
+# Test 12: validation_errors are saved inside the generated file
+# ---------------------------------------------------------------------------
+
+def test_validation_errors_in_saved_file(tmp_path):
+    doc = json.loads(_valid_mission_json())
+    # Mismatch so it becomes needs_review with a validation error
+    doc["answer_spec"] = {"kind": "count_gt", "field": "economy", "value": 99}
+    gen, _ = _make_gen(json.dumps(doc))
+
+    result = gen.generate()
+    assert result.status == "needs_review"
+
+    path = save_result(result, out_dir=tmp_path)
+    assert path is not None
+
+    saved = json.loads(path.read_text())
+    assert "validation_errors" in saved
+    assert len(saved["validation_errors"]) > 0
+    assert any("wrong_value" in e for e in saved["validation_errors"])
+
+
+# ---------------------------------------------------------------------------
+# Test 13: nothing under missions/generated/ is loaded by load_missions()
+# ---------------------------------------------------------------------------
+
+def test_generated_missions_not_loaded_by_service(tmp_path):
+    from backend.service import load_missions
+    from pathlib import Path
+
+    missions = load_missions()
+    for m in missions:
+        # All ids loaded by the engine must follow the LN-NNN pattern,
+        # not the GEN-XXXXXXXX pattern used for generated candidates.
+        assert not m["id"].startswith("GEN-"), (
+            f"load_missions() loaded a generated mission: {m['id']}. "
+            "Generated missions must stay in missions/generated/ until merged."
+        )

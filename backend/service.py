@@ -172,6 +172,7 @@ class GameService:
             )
             if not result.passed:
                 self.bus.publish(events.ANSWER_REJECTED, {"player_id": player_id, "mission_id": mission_id})
+                self.state.set_last_attempt(player_id, mission_id, formula, result.reason)
                 return {"passed": False, "reason": result.reason, "your_value": result.player_value}
             payload = {"player_id": player_id, "mission_id": mission_id}
             self.bus.publish(events.MISSION_PASSED, payload)
@@ -226,7 +227,9 @@ class GameService:
 
     def get_hint(self, player_id: str, mission_id: str) -> dict:
         self.state.ensure_player(player_id)
-        return self._hint_response(player_id, mission_id)
+        last = self.state.get_last_attempt(player_id, mission_id)
+        formula, failure_code = last if last else ("", "")
+        return self._hint_response(player_id, mission_id, formula=formula, failure_code=failure_code)
 
     def ask_coach(self, player_id: str, mission_id: str, message: str) -> dict:
         guard = guardrails.check_chat_input(message)
@@ -234,7 +237,9 @@ class GameService:
             trace("guardrail.blocked", kind="chat_input", reason=guard.reason, player_id=player_id)
             return {"blocked": True, "reply": "Coach: I can nudge you, but I can't hand over the answer. Try a hint."}
         self.state.ensure_player(player_id)
-        return self._hint_response(player_id, mission_id, message=message)
+        last = self.state.get_last_attempt(player_id, mission_id)
+        formula, failure_code = last if last else ("", "")
+        return self._hint_response(player_id, mission_id, formula=formula, failure_code=failure_code, message=message)
 
     # ----- wallet and store -----
     def get_wallet(self, player_id: str) -> dict:

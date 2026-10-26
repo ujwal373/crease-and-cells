@@ -12,15 +12,17 @@ Rules that must always hold:
      values for existing missions.
   2. The model generates the formula and answer_spec as output; the validator
      then independently evaluates the formula on real data and compares.
-  3. Generated missions land in missions/generated/ with status=pending_review
-     until a human runs review_missions.py to approve or reject them.
-  4. No generated mission is ever loaded by the game engine until it has been
-     manually moved into a levelN.json file.
+  3. Generated missions land in missions/generated/ with one of three statuses:
+       verified     - formula works, answer_spec matches, hints clean
+       needs_review - formula works but answer_spec mismatches or hint leaks
+       invalid      - JSON bad, required field missing, formula syntax error,
+                      hardcoded value, or required function absent
+  4. No generated mission is ever loaded by the game engine until a human
+     runs merge_missions.py to move it into a levelN.json file.
 """
 from __future__ import annotations
 
 import json
-import math
 import re
 import sys
 import uuid
@@ -35,6 +37,7 @@ from backend.cricket_data import GENERATORS, to_grid
 from backend.formula_engine import FormulaError, Grid, evaluate
 from backend.guardrails import check_output
 from backend.keys import compute_answer
+from backend.validator import validate
 
 GENERATED_DIR = ROOT / "missions" / "generated"
 
@@ -179,7 +182,7 @@ class MissionGenerator:
     # ------------------------------------------------------------------
 
     @staticmethod
-    def _validate(raw: str, level: int, zone: str, npc: str, seed: int, rows: int) -> GenerateResult:
+    def _validate(raw: str, level: int, zone: str, seed: int, rows: int) -> GenerateResult:
         errors: list[str] = []
 
         # Step 1: JSON parse
@@ -213,35 +216,37 @@ class MissionGenerator:
         dataset_rows = gen(seed, rows)
         grid = Grid(to_grid(cols, dataset_rows))
 
-        # Step 4: Evaluate the formula
-        try:
-            eval_result = evaluate(ref_sol, grid)
-            formula_value = eval_result.value
-        except FormulaError as exc:
-            return GenerateResult(doc, "invalid", [f"formula_error: {exc}"], raw)
+        required_all = doc.get("required_all", [])
+        required_any = doc.get("required_any", [])
 
-        # Step 5: Compute answer from answer_spec
+        # Step 4: Compute answer from answer_spec (needed for validate)
         try:
             spec_value = compute_answer(doc["answer_spec"], dataset_rows)
         except (ValueError, KeyError, TypeError) as exc:
             errors.append(f"answer_spec_error: {exc}")
             spec_value = None
 
-        # Step 6: Compare formula result vs answer_spec result
+        # Step 5: Run the deterministic validator — catches hardcoded values,
+        # missing required functions, formula syntax errors, and value mismatches.
+        _INVALID_REASONS = ("hardcoded_value", "missing_function", "formula_error")
+        formula_value = None
         if spec_value is not None:
-            def _close(a, b) -> bool:
-                if isinstance(a, float) and isinstance(b, float):
-                    return math.isclose(a, b, rel_tol=1e-6, abs_tol=1e-9)
-                return a == b
+            val = validate(ref_sol, grid, spec_value, required_all, required_any)
+            if not val.passed:
+                if any(prefix in val.reason for prefix in _INVALID_REASONS):
+                    return GenerateResult(doc, "invalid", [f"validator: {val.reason}"], raw)
+                errors.append(f"validator: {val.reason}")
+            formula_value = val.player_value
+        else:
+            # No spec: evaluate directly to check the formula at least parses and runs.
+            try:
+                formula_value = evaluate(ref_sol, grid).value
+            except FormulaError as exc:
+                return GenerateResult(doc, "invalid", [f"formula_error: {exc}"], raw)
 
-            if not _close(formula_value, spec_value):
-                errors.append(
-                    f"answer_mismatch: formula={formula_value!r} answer_spec={spec_value!r}"
-                )
-
-        # Step 7: Hint guardrail check
+        # Step 6: Hint guardrail check
         from backend.service import _fmt_secret  # avoid circular at module load
-        secrets = _fmt_secret(formula_value) + [ref_sol]
+        secrets = _fmt_secret(formula_value) + [ref_sol] if formula_value is not None else [ref_sol]
         for i, hint in enumerate(hints, 1):
             if not isinstance(hint, str) or not hint.strip():
                 errors.append(f"hint_{i}_empty")
@@ -250,7 +255,8 @@ class MissionGenerator:
             if not guard.allowed:
                 errors.append(f"hint_{i}_leaks: {guard.reason}")
 
-        # Assemble the full mission dict
+        # Assemble the full mission dict (validation_errors included for review_missions.py)
+        status = "verified" if not errors else "needs_review"
         mission = {
             "id": f"GEN-{uuid.uuid4().hex[:8].upper()}",
             "level": level,
@@ -262,14 +268,14 @@ class MissionGenerator:
             "dataset": {"generator": "bowling_spells", "seed": seed, "rows": rows},
             "answer_spec": doc["answer_spec"],
             "reference_solution": ref_sol,
-            "required_all": doc.get("required_all", []),
-            "required_any": doc.get("required_any", []),
+            "required_all": required_all,
+            "required_any": required_any,
             "hints": hints,
             "reward": {"coins": 50 + level * 10, "xp": 100 + level * 10},
-            "status": "verified" if not errors else "needs_review",
+            "status": status,
+            "validation_errors": errors,
         }
 
-        status = "verified" if not errors else "needs_review"
         return GenerateResult(mission, status, errors, raw)
 
     # ------------------------------------------------------------------
@@ -290,7 +296,7 @@ class MissionGenerator:
             raw = self._call_model(level, zone, npc, topic, seed, rows)
         except Exception as exc:
             return GenerateResult(None, "invalid", [f"api_error: {type(exc).__name__}: {exc}"], "")
-        return self._validate(raw, level, zone, npc, seed, rows)
+        return self._validate(raw, level, zone, seed, rows)
 
 
 def save_result(result: GenerateResult, out_dir: Path = GENERATED_DIR) -> Path | None:

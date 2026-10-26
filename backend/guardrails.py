@@ -79,3 +79,20 @@ def check_output(text: str, secrets: list[str]) -> GuardResult:
         elif _norm(secret) in _norm(text):
             return GuardResult(False, "output contains the reference solution")
     return GuardResult(True)
+
+
+_FORMULA_PATTERN = re.compile(r"=\s*[A-Za-z][A-Za-z0-9_.]*\s*\(")
+
+
+def check_tutor_output(text: str, secrets: list[str]) -> GuardResult:
+    """check_output plus a block on formula-shaped patterns (=FUNC() style).
+
+    Used for live tutor replies only. Static hints are exempt and go through
+    check_output so they can contain structural examples without a function call.
+    """
+    base = check_output(text, secrets)
+    if not base.allowed:
+        return base
+    if _FORMULA_PATTERN.search(text):
+        return GuardResult(False, "output contains a formula pattern")
+    return GuardResult(True)

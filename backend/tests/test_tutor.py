@@ -274,3 +274,72 @@ def test_service_get_hint_uses_tutor():
 
     assert result["hint"] == "Check which column the economy lives in, champ."
     assert fake.messages.calls, "client should have been called"
+
+
+# ---------------------------------------------------------------------------
+# Test 9: a chat reply (message != None) is never served to a second player
+#         from the cache
+# ---------------------------------------------------------------------------
+
+def test_chat_reply_not_cached_for_another_player(state):
+    svc = GameService(":memory:")
+    fake = FakeAnthropic(reply="Great question, keep thinking about the range.")
+    agent = _agent(state, fake)
+    kwargs = _hint_kwargs(svc, agent, player_id="p1")
+
+    # First call is a chat message for player p1
+    kwargs["message"] = "Why does my formula return zero?"
+    r1 = agent.get_hint(**kwargs)
+    assert not r1.cache_hit
+    assert len(fake.messages.calls) == 1
+
+    # Second call, different player p2, same mission, same failure_code, no message
+    kwargs2 = _hint_kwargs(svc, agent, player_id="p2")
+    # This is a standard hint call (message=None). If the chat reply was wrongly cached,
+    # it would be served from cache — but it must NOT be because can_cache was False
+    # for p1's chat call.
+    r2 = agent.get_hint(**kwargs2)
+    # Cache was empty so a new API call must have been made
+    assert not r2.cache_hit
+    assert len(fake.messages.calls) == 2, (
+        "chat replies must not be cached; p2 should trigger a fresh API call"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Test 10: formula and failure_code are included in the prompt sent to the model
+# ---------------------------------------------------------------------------
+
+def test_formula_and_failure_code_reach_prompt(state):
+    svc = GameService(":memory:")
+    fake = FakeAnthropic()
+    agent = _agent(state, fake)
+    kwargs = _hint_kwargs(svc, agent)
+
+    kwargs["formula"] = "=SUM(G2:G61)"
+    kwargs["failure_code"] = "missing_function: use one of COUNTIF, COUNTIFS"
+
+    agent.get_hint(**kwargs)
+
+    assert fake.messages.calls
+    user_content = fake.messages.calls[0]["messages"][0]["content"]
+    assert "=SUM(G2:G61)" in user_content, "formula must appear in the prompt"
+    assert "missing_function" in user_content, "failure_code must appear in the prompt"
+
+
+# ---------------------------------------------------------------------------
+# Test 11: a tutor reply containing a formula pattern falls back to static hint
+# ---------------------------------------------------------------------------
+
+def test_formula_reply_triggers_fallback(state):
+    svc = GameService(":memory:")
+    # Reply contains =COUNTIF( — the formula-pattern guardrail must block this.
+    fake = FakeAnthropic(reply='Try =COUNTIF( on the economy column to count matching rows.')
+    agent = _agent(state, fake)
+    kwargs = _hint_kwargs(svc, agent)
+
+    result = agent.get_hint(**kwargs)
+
+    assert result.fallback_used, "formula-shaped reply must trigger fallback"
+    assert result.fallback_reason == "output_leaked"
+    assert result.text == kwargs["static_fallback"]

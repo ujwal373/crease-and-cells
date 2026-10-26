@@ -1,6 +1,6 @@
 import pytest
 
-from backend.guardrails import check_chat_input, check_formula_input, check_output
+from backend.guardrails import check_chat_input, check_formula_input, check_output, check_tutor_output
 from backend.keys import compute_answer
 from backend.service import GameService, load_missions, _rows_for
 
@@ -80,3 +80,32 @@ def test_coach_blocks_injection_and_does_not_charge_a_hint(svc: GameService):
     r = svc.ask_coach("p1", "L1-001", INJECTIONS[0])
     assert r["blocked"]
     assert svc.state.hints_used("p1", "L1-001") == 0
+
+
+# ---------------------------------------------------------------------------
+# check_tutor_output: formula-pattern guard (live tutor replies only)
+# ---------------------------------------------------------------------------
+
+def test_tutor_output_plain_text_passes():
+    assert check_tutor_output("Think about which column holds the economy figure.", []).allowed
+
+
+def test_tutor_output_blocks_formula_pattern():
+    result = check_tutor_output("Try =COUNTIF( on the economy column.", [])
+    assert not result.allowed
+    assert "formula" in result.reason
+
+
+def test_tutor_output_blocks_equivalent_formula_different_range():
+    # A different range from the mission's solution must still be blocked —
+    # any =FUNC( pattern is disallowed to prevent the model writing formulas.
+    result = check_tutor_output("Maybe =COUNTIF(G2:G30,\">8\") is closer.", [])
+    assert not result.allowed
+
+
+def test_tutor_output_checks_secrets_before_formula_pattern():
+    # A reply that leaks the answer value must be caught by the secrets check,
+    # even if it contains no formula pattern.
+    result = check_tutor_output("There are 17 spells over the threshold.", ["17"])
+    assert not result.allowed
+    assert "answer" in result.reason

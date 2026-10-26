@@ -34,6 +34,10 @@ CREATE TABLE IF NOT EXISTS tutor_player_calls (
 CREATE TABLE IF NOT EXISTS tutor_daily_spend (
     call_date TEXT PRIMARY KEY, spent_usd REAL NOT NULL DEFAULT 0.0
 );
+CREATE TABLE IF NOT EXISTS last_attempt (
+    player_id TEXT, mission_id TEXT, formula TEXT NOT NULL, failure_code TEXT NOT NULL,
+    PRIMARY KEY (player_id, mission_id)
+);
 """
 
 
@@ -165,3 +169,21 @@ class GameState:
             (call_date, amount_usd, amount_usd),
         )
         self.db.commit()
+
+    # ------------------------------------------------------------------
+    # Last submitted attempt per player per mission
+    # ------------------------------------------------------------------
+
+    def set_last_attempt(self, player_id: str, mission_id: str, formula: str, failure_code: str) -> None:
+        self.db.execute(
+            "INSERT OR REPLACE INTO last_attempt VALUES (?, ?, ?, ?)",
+            (player_id, mission_id, formula, failure_code),
+        )
+        self.db.commit()
+
+    def get_last_attempt(self, player_id: str, mission_id: str) -> tuple[str, str] | None:
+        row = self.db.execute(
+            "SELECT formula, failure_code FROM last_attempt WHERE player_id=? AND mission_id=?",
+            (player_id, mission_id),
+        ).fetchone()
+        return (row["formula"], row["failure_code"]) if row else None
