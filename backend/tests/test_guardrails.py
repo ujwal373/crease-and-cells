@@ -109,3 +109,17 @@ def test_tutor_output_checks_secrets_before_formula_pattern():
     result = check_tutor_output("There are 17 spells over the threshold.", ["17"])
     assert not result.allowed
     assert "answer" in result.reason
+
+
+def test_tutor_output_blocks_function_name_without_equals():
+    # COUNTIF(G2:G61,">8") with no leading = must be blocked.
+    result = check_tutor_output('Use COUNTIF(G2:G61,">8") on the economy column.', [])
+    assert not result.allowed
+    assert "formula" in result.reason
+
+
+def test_tutor_output_blocks_backtick_wrapped_function():
+    # `COUNTIF(` wrapped in backticks must be blocked.
+    result = check_tutor_output("The function `COUNTIF( range, criteria )` is what you need.", [])
+    assert not result.allowed
+    assert "formula" in result.reason
