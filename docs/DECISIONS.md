@@ -37,3 +37,13 @@ Claude Agent SDK is designed for agents that use tools, maintain memory, or run 
 LangGraph adds a graph-execution runtime suited to long-running pipelines with branching, retries, and state machines. The codebase already has an EventBus for agent coordination, which serves the same need for the current workflow count.
 
 Revisit when: an agent needs to call tools such as a search engine or a code interpreter, when a task spans multiple model turns with state that must persist between them, or when a human approval step is required mid-workflow. At that point, compare the Agent SDK (tight Anthropic integration, built-in tool loop) against LangGraph (framework-agnostic, richer orchestration primitives) based on the specific new workflow.
+
+## 6. Preview endpoint: server-side engine vs HyperFormula in the browser
+
+Evaluated: a server-side preview endpoint that calls the existing formula engine, versus shipping HyperFormula to the browser and evaluating there.
+
+Recommendation: server-side preview using the existing engine. Three reasons. First, one engine: the same code that evaluates the preview evaluates the submission, so the browser never sees a different result to what the server will judge. HyperFormula or any other browser engine may diverge on edge cases (ROUND half-away-from-zero, relative reference resolution) and confuse players. Second, license: HyperFormula is GPL or requires a commercial licence. Avoiding it keeps the project's licence unconstrained. Third, simplicity: no additional JS dependency and no need to keep two engines in sync as new functions are added.
+
+The trade-off is a round trip per keystroke. A 300 ms debounce keeps this unnoticeable on a fast connection. The preview endpoint has its own stricter rate limit (20 req/min per player vs 60 for other endpoints) to keep costs low.
+
+Revisit when: offline support is a requirement, or mobile players on slow connections report noticeable lag even with debounce. At that point, evaluate shipping the formula engine as a WASM module compiled from the Python implementation, keeping a single source of truth.

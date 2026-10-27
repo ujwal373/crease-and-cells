@@ -7,6 +7,7 @@ Set CC_TRACE to change the file location.
 """
 from __future__ import annotations
 
+import contextvars
 import json
 import os
 import time
@@ -14,12 +15,23 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Iterator
 
+# Set by the API request-ID middleware so every trace record carries the
+# originating HTTP request ID. Empty string means no active request context.
+_request_id: contextvars.ContextVar[str] = contextvars.ContextVar("request_id", default="")
+
+
+def set_request_id(req_id: str) -> None:
+    _request_id.set(req_id)
+
 
 def _path() -> Path:
     return Path(os.environ.get("CC_TRACE", "logs/trace.jsonl"))
 
 
 def trace(event: str, **fields) -> None:
+    req_id = _request_id.get()
+    if req_id:
+        fields["request_id"] = req_id
     record = {"ts": round(time.time(), 3), "event": event, **fields}
     try:
         path = _path()

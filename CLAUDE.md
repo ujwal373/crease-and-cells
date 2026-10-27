@@ -68,7 +68,8 @@ backend/formula_engine.py   tokenizer, parser, evaluator, allowlisted functions
 backend/validator.py        compares the formula result to the expected value
 backend/keys.py             answer keys computed independently from the engine
 backend/guardrails.py       input filter, injection screening, output leak check
-backend/tracing.py          JSONL traces with latency (CC_TRACE sets the file)
+backend/tracing.py          JSONL traces with latency (CC_TRACE sets the file; request_id context var set by API middleware)
+backend/api.py              FastAPI app wrapping GameService (CC_DB_PATH, CC_CORS_ORIGINS, ANTHROPIC_API_KEY)
 backend/events.py           event bus and event names
 backend/service.py          GameService plus Mission, Scoring and Store agents
 backend/state.py            SQLite state: wallet, completed missions, inventory, hint cache, caps
@@ -98,7 +99,15 @@ python scripts/review_missions.py approve <id> --force
 python scripts/merge_missions.py <id>
 python -m backend.cricket_data
 python -m backend.mcp_server
+uvicorn backend.api:app --reload
+CC_DB_PATH=game.db CC_CORS_ORIGINS='["http://localhost:5173"]' uvicorn backend.api:app --reload
 ```
+
+Environment variables for the API:
+CC_DB_PATH        SQLite file path (default: game.db)
+CC_CORS_ORIGINS   JSON array or comma-separated allowed origins (default: http://localhost:5173)
+ANTHROPIC_API_KEY Enables live Tutor hints; omit to disable
+CC_TRACE          Trace output file (default: logs/trace.jsonl)
 
 The project MCP server is registered in `.mcp.json`. Use it to play missions through real tool calls: get_next_mission, submit_answer, get_hint, ask_coach, get_wallet, list_store, buy_item.
 
@@ -164,7 +173,8 @@ Camera easing, chunked tile maps, spreadsheet overlay without scene change, mobi
 2. Phase 1, done: engine, validator, 3 Level 1 missions, agents on the bus, guardrails, tracing, MCP server.
 3. Phase 2, in progress: IFS, AND, OR added to engine, absolute references tested, 4 Level 2 missions added. Remaining: FastAPI layer, character creator, simple web grid UI, world map with 2 zones.
 4. Phase 3, done. Stage 3A: Tutor Agent live with Haiku, ai_config.py for model names and pricing, state.py extended with hint cache and daily caps, full tracing. Stage 3B: scripts/generate_missions.py (offline Sonnet generation with validation pipeline), scripts/review_missions.py (approve or reject workflow), scripts/merge_missions.py (promote to levelN.json), missions/generated/ pending directory. Stage 3C: adversarial eval set (evals/adversarial_cases.json, 27 cases), offline tutor evals and live eval mode in run_evals.py, scripts/trace_report.py for log summaries, HintProvider Protocol in tutor.py, DECISIONS.md entry for agent framework choice, CLAUDE.md updated.
-5. Phase 4: Dataset and Adaptive Difficulty agents, Levels 3 to 5.
+5. Phase 2 (FastAPI layer), Stage 2A in progress. backend/api.py wraps GameService: 8 endpoints including a preview endpoint, Pydantic response models with extra=ignore, UUID v4 player ID validation, per-player and per-IP in-memory rate limiting, CORS, 10 KB body limit, request-ID middleware, WAL mode + threading lock in GameState, DECISIONS.md entry for preview endpoint. Stage 2B (frontend) pending approval.
+6. Phase 4: Dataset and Adaptive Difficulty agents, Levels 3 to 5.
 6. Phase 5: Levels 6 and 7, polish, sound, playtest, Terraform deployment.
 
 ## Engineering showcase goals

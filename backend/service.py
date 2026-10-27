@@ -15,7 +15,7 @@ from pathlib import Path
 from . import events, guardrails
 from .cricket_data import GENERATORS, to_grid
 from .events import EventBus
-from .formula_engine import Grid
+from .formula_engine import FormulaError, Grid, evaluate
 from .keys import compute_answer
 from .state import GameState
 from .tracing import span, trace
@@ -240,6 +240,26 @@ class GameService:
         last = self.state.get_last_attempt(player_id, mission_id)
         formula, failure_code = last if last else ("", "")
         return self._hint_response(player_id, mission_id, formula=formula, failure_code=failure_code, message=message)
+
+    # ----- preview (formula value only, never pass/fail) -----
+    def preview_formula(self, player_id: str, mission_id: str, formula: str) -> dict:
+        """Evaluate formula on the mission grid. Returns value or error; never reveals correctness."""
+        self.state.ensure_player(player_id)
+        mission = self._mission(mission_id)
+        guard = guardrails.check_formula_input(formula)
+        if not guard.allowed:
+            return {"error": "invalid_formula"}
+        rows, cols = _rows_for(mission)
+        try:
+            result = evaluate(formula, Grid(to_grid(cols, rows)))
+            value = result.value
+            if isinstance(value, float) and value.is_integer():
+                value = int(value)
+            return {"value": value}
+        except FormulaError as exc:
+            return {"error": exc.code}
+        except Exception:
+            return {"error": "eval_error"}
 
     # ----- wallet and store -----
     def get_wallet(self, player_id: str) -> dict:

@@ -25,3 +25,57 @@ Context: the live Tutor is backend/tutor.py (TutorAgent, Haiku, injected client,
 7. Run python -m pytest and python evals/run_evals.py. Both must pass.
 
 Formatting for anything you write for me to read: no ** bold markers, no dash bullets, no em dashes.
+
+---
+
+## Phase 2
+
+Save this whole task text into docs/PHASES.md under the heading Phase 2 before coding. Read CLAUDE.md fully before doing anything. Then do the rest of Phase 2 in two stages. After each stage, run python -m pytest and python evals/run_evals.py, show me a short summary, and STOP and wait for my go ahead. Do not start the next stage early.
+
+Rules: the answer key, answer_spec and reference_solution never leave the backend. No API key in any frontend file. GameService stays the single source of truth, so do not copy game logic into the API layer or the frontend.
+
+Stage 2A: FastAPI layer
+
+1. Add fastapi, uvicorn and httpx (for tests) to pyproject.toml dependencies.
+
+2. Create backend/api.py. It wraps GameService in a FastAPI app. Endpoints: next_mission, submit_answer, hint, ask_coach, wallet, store_list, buy_item.
+
+3. Define a Pydantic response model for every endpoint that lists only the allowed public fields. Use extra=ignore so a new private field can never leak by accident. Add a test that walks the generated OpenAPI schema and fails if any field named answer_spec, reference_solution, hints, required_all or required_any appears in a response model.
+
+4. Add a preview endpoint. It evaluates a formula against the mission sheet with the existing formula engine and returns only the resulting value or an error code. It must not return pass or fail, rewards, or anything about the answer. Apply a stricter per-player rate limit on this endpoint.
+
+5. Validate player IDs as UUID v4. Add a comment marking where auth will plug in later.
+
+6. Add request size limits (reject bodies larger than 10 KB), CORS restricted to origins listed in the CC_CORS_ORIGINS env var (default localhost:5173), and simple in-memory per-player and per-IP rate limiting. Document in code that the in-memory limiter needs Redis for multi-instance deployments.
+
+7. The API must build GameService with the tutor client when ANTHROPIC_API_KEY is set, the same way backend/mcp_server.py does, and run without it otherwise.
+
+8. GameState currently uses one shared SQLite connection. Make it safe for concurrent requests (a lock, or a connection per call with WAL mode). Write a concurrency test showing that many simultaneous purchases or submissions never overspend coins or double-award a mission.
+
+9. Return clear error shapes (never raw exception text). Return 404 for unknown mission IDs. Return 429 for rate-limit violations.
+
+10. Tests in backend/tests/test_api.py using FastAPI TestClient. Cover: no private fields in any response, preview endpoint reveals nothing about correctness, oversized body is rejected, rate limit triggers 429, invalid player ID is rejected, a blocked injection to the coach returns a safe reply.
+
+11. Add an entry to docs/DECISIONS.md on the preview endpoint decision: server-side preview with the existing formula engine versus HyperFormula running in the browser.
+
+12. Update CLAUDE.md: add the uvicorn run command and any new env vars (CC_CORS_ORIGINS, CC_DB_PATH).
+
+Stage 2B: first playable web page
+
+Do not start Stage 2B until Stage 2A is reviewed and approved.
+
+1. Create a frontend/ directory. Use Vite with TypeScript in strict mode. No framework (plain TypeScript), unless Phaser is already a dependency from CLAUDE.md, in which case add it now but do not start the full open world yet.
+
+2. Build one page with three panels: a mission panel (NPC name, title, story, task), a spreadsheet grid, and a formula bar with a Submit button and a Hint button. Add a coach chat input below the grid. Add a wallet display (coins, xp, level) in the corner, and a Store button that opens a simple overlay list of items.
+
+3. Store the player ID in localStorage (with try/catch, fall back to a freshly generated UUID v4 if localStorage is unavailable or empty).
+
+4. Wire the preview call to the formula bar with a short debounce (300 ms). Show the preview result in a small status line. Preview must never show pass or fail, only the computed value or an error code.
+
+5. On submit, show a clear pass or fail message. On a pass, show the coins and xp awarded. On a fail, show the reason. The Submit button must be disabled while a request is in flight.
+
+6. Friendly messages for error states: rate limit hit, server down, invalid formula. Mobile-friendly layout (the grid scrolls horizontally on small screens).
+
+7. Add a brief README section on how to run both processes together (uvicorn and vite dev server), and what CORS origins to set.
+
+Formatting for anything you write for me to read: no ** bold markers, no dash bullets, no em dashes.
