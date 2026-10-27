@@ -292,13 +292,59 @@ def test_validation_errors_in_saved_file(tmp_path):
 
 def test_generated_missions_not_loaded_by_service(tmp_path):
     from backend.service import load_missions
-    from pathlib import Path
 
     missions = load_missions()
     for m in missions:
-        # All ids loaded by the engine must follow the LN-NNN pattern,
-        # not the GEN-XXXXXXXX pattern used for generated candidates.
         assert not m["id"].startswith("GEN-"), (
             f"load_missions() loaded a generated mission: {m['id']}. "
             "Generated missions must stay in missions/generated/ until merged."
         )
+
+
+# ---------------------------------------------------------------------------
+# Test 14: merge_missions refuses a mission that is not approved
+# ---------------------------------------------------------------------------
+
+def test_merge_refuses_non_approved(tmp_path):
+    import sys
+    from pathlib import Path
+
+    ROOT = Path(__file__).resolve().parent.parent.parent
+    sys.path.insert(0, str(ROOT))
+    from scripts.merge_missions import merge
+
+    # Write a needs_review mission into a tmp generated dir
+    gen_dir = tmp_path / "generated"
+    gen_dir.mkdir()
+    mission = {
+        "id": "GEN-TESTTEST",
+        "level": 1,
+        "status": "needs_review",
+        "title": "Test",
+        "zone": "The Nets",
+        "npc": "Coach Rao",
+        "story": "x",
+        "task": "y",
+        "dataset": {"generator": "bowling_spells", "seed": 101, "rows": 60},
+        "answer_spec": {"kind": "count_gt", "field": "economy", "value": 8},
+        "reference_solution": "=COUNTIF(G2:G61,\">8\")",
+        "required_all": [],
+        "required_any": ["COUNTIF"],
+        "hints": ["h1", "h2", "h3"],
+        "reward": {"coins": 60, "xp": 110},
+        "validation_errors": ["validator: wrong_value"],
+    }
+    (gen_dir / "gen-testtest.json").write_text(json.dumps(mission), encoding="utf-8")
+
+    # Monkey-patch GENERATED_DIR inside the module
+    import scripts.merge_missions as mm
+    original_dir = mm.GENERATED_DIR
+    mm.GENERATED_DIR = gen_dir
+    try:
+        import pytest
+        with pytest.raises(SystemExit):
+            merge("GEN-TESTTEST")
+        # The mission file must still be present (was not deleted)
+        assert (gen_dir / "gen-testtest.json").exists()
+    finally:
+        mm.GENERATED_DIR = original_dir

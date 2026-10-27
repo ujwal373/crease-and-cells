@@ -83,9 +83,23 @@ def check_output(text: str, secrets: list[str]) -> GuardResult:
 
 _FORMULA_PATTERN = re.compile(r"=\s*[A-Za-z][A-Za-z0-9_.]*\s*\(")
 
+# Lazy import at call time to avoid a circular dependency at module load.
+def _fn_name_pattern() -> re.Pattern[str]:
+    """Return a compiled regex that matches any FUNCTIONS name followed by '('."""
+    from .formula_engine import FUNCTIONS  # noqa: PLC0415
+    names = "|".join(re.escape(name) for name in sorted(FUNCTIONS, key=len, reverse=True))
+    # Match the function name preceded by a word boundary or a backtick,
+    # optionally wrapped in backticks, and followed by optional whitespace + '('.
+    return re.compile(rf"(?i)(?:^|[^A-Za-z0-9_])({names})\s*\(")
+
 
 def check_tutor_output(text: str, secrets: list[str]) -> GuardResult:
-    """check_output plus a block on formula-shaped patterns (=FUNC() style).
+    """check_output plus a block on formula-shaped patterns.
+
+    Blocks any of:
+      * =FUNC( (the leading-equals form)
+      * FUNC( with no equals sign, e.g. COUNTIF(G2:G61,">8")
+      * `FUNC(` wrapped in backticks
 
     Used for live tutor replies only. Static hints are exempt and go through
     check_output so they can contain structural examples without a function call.
@@ -94,5 +108,7 @@ def check_tutor_output(text: str, secrets: list[str]) -> GuardResult:
     if not base.allowed:
         return base
     if _FORMULA_PATTERN.search(text):
+        return GuardResult(False, "output contains a formula pattern")
+    if _fn_name_pattern().search(text):
         return GuardResult(False, "output contains a formula pattern")
     return GuardResult(True)

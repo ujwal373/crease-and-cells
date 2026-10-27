@@ -18,6 +18,7 @@ OPUS_MODEL: str = "claude-opus-5-5"           # offline boss-mission authoring o
 # Pricing (USD per token, October 2026)
 # ---------------------------------------------------------------------------
 _INPUT_PRICE: dict[str, float] = {
+    # Haiku prices are listed as "from" prices on the official page — treat as a floor.
     "claude-haiku-5-5":  0.10 / 1_000_000,
     "claude-sonnet-5-5": 2.00 / 1_000_000,
     "claude-opus-5-5":   4.00 / 1_000_000,
