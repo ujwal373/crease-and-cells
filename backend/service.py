@@ -19,7 +19,7 @@ from .formula_engine import Grid
 from .keys import compute_answer
 from .state import GameState
 from .tracing import span, trace
-from .tutor import TutorAgent
+from .tutor import HintProvider, TutorAgent
 from .validator import validate
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -135,7 +135,7 @@ class GameService:
         self.mission_agent = MissionAgent(self.state, self.missions, self.bus)
         self.scoring_agent = ScoringAgent(self.state, self.missions, self.bus)
         self.store_agent = StoreAgent(self.state, load_catalog(), self.bus)
-        self._tutor: TutorAgent | None = TutorAgent(self.state, tutor_client) if tutor_client is not None else None
+        self._tutor: HintProvider | None = TutorAgent(self.state, tutor_client) if tutor_client is not None else None
 
     # ----- missions -----
     def _mission(self, mission_id: str) -> dict:

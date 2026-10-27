@@ -25,3 +25,15 @@ Revisit when: the coach becomes an LLM with tool access. Add a classifier-based 
 Evaluated: Crossplane, Terraform, Pulumi.
 Recommendation for this project: Terraform or Pulumi. Crossplane needs a Kubernetes control plane, which is more than a single stateless API needs. Not built yet.
 Revisit when: running on several clouds with a platform team that already operates Kubernetes.
+
+## 5. Agent framework for Claude-backed agents
+
+Evaluated: plain Anthropic Python SDK, Claude Agent SDK, LangGraph.
+
+Plain Anthropic SDK is the recommendation for now. The workflows here are small and fixed: the Tutor makes one API call, applies guardrails, checks the cache, enforces caps, and falls back. That is a straight function call, not an agent loop. The plain SDK gives full control over every step: guardrail placement, cache keys, cost accounting, and the fallback path. There are no additional dependencies, the code is easy to read, and tests run offline with a trivially injected fake client.
+
+Claude Agent SDK is designed for agents that use tools, maintain memory, or run multi-step loops with human approval points. None of those apply to the Tutor or the offline Mission generator today. Adding the Agent SDK now would bring in an abstraction layer that hides the exact API call and makes the guardrail and cost logic harder to place precisely.
+
+LangGraph adds a graph-execution runtime suited to long-running pipelines with branching, retries, and state machines. The codebase already has an EventBus for agent coordination, which serves the same need for the current workflow count.
+
+Revisit when: an agent needs to call tools such as a search engine or a code interpreter, when a task spans multiple model turns with state that must persist between them, or when a human approval step is required mid-workflow. At that point, compare the Agent SDK (tight Anthropic integration, built-in tool loop) against LangGraph (framework-agnostic, richer orchestration primitives) based on the specific new workflow.

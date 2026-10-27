@@ -39,8 +39,9 @@ Status key: BUILT means working and tested. PLANNED means not started.
 2. Scoring Agent, BUILT: awards coins, XP, level, no-hint bonus. Idempotent, so a mission never pays twice.
 3. Store Agent, BUILT: catalog, purchase, equip. Atomic spend.
 4. Validator, BUILT: deterministic code, never an LLM.
-5. Tutor Agent, BUILT: live hints via Claude Haiku (cc_tutor_model env var). Client injected for tests. Per-player daily cap, global USD budget cap, SQLite hint cache, guardrail check on every reply, full cost and latency tracing. Falls back to static hints on any failure. Answer key never enters the prompt.
-6. Dataset Agent, PLANNED: seeded cricket data generators. One generator exists (bowling_spells).
+5. Tutor Agent, BUILT: live hints via Claude Haiku (CC_TUTOR_MODEL env var). Client injected for tests. Per-player daily cap, global USD budget cap, SQLite hint cache, guardrail check on every reply (check_tutor_output blocks formulas and secrets), full cost and latency tracing. Falls back to static hints on any failure. Answer key never enters the prompt. Personalised: last submitted formula and validator failure code are stored per player per mission and passed to the prompt. Implements HintProvider Protocol so it can be swapped without changing GameService. Adversarial eval set in evals/adversarial_cases.json covers 27 cases across 5 attack groups.
+6. Mission Generator, BUILT: offline Sonnet-backed generator in scripts/generate_missions.py. Validation pipeline catches hardcoded formulas, missing required functions, answer_spec mismatches and hint leaks. Review workflow in scripts/review_missions.py (approve/reject with --force override). Merge workflow in scripts/merge_missions.py promotes approved missions into levelN.json with sequential ids.
+7. Dataset Agent, PLANNED: seeded cricket data generators. One generator exists (bowling_spells).
 7. Adaptive Difficulty Agent, PLANNED: mastery score per function, spaced repetition, steers the Mission Agent to weak spots.
 
 Agents never call each other. They communicate through events on the bus in `backend/events.py`.
@@ -88,6 +89,13 @@ docs/DECISIONS.md           technology recommendations and reasoning
 pip install -e ".[dev]"
 python -m pytest
 python evals/run_evals.py
+python evals/run_evals.py --live
+python scripts/trace_report.py
+python scripts/generate_missions.py --level 1 --zone "The Nets" --npc "Coach Rao" --topic wickets
+python scripts/review_missions.py list
+python scripts/review_missions.py approve <id>
+python scripts/review_missions.py approve <id> --force
+python scripts/merge_missions.py <id>
 python -m backend.cricket_data
 python -m backend.mcp_server
 ```
@@ -135,11 +143,12 @@ Coins come from missions: base reward plus a no-hint bonus of 10, with streak an
 ## AI cost rules
 
 1. Claude API is separate from the Claude subscription. Keys come from the Claude Console with prepaid credits and a monthly spend limit.
-2. Models: Haiku for hints and NPC chatter, Sonnet for mission generation and explanations, Opus only offline for authoring boss missions. Check current pricing before budgeting.
+2. Models: Haiku for live hints (CC_TUTOR_MODEL, default claude-haiku-5-5), Sonnet for offline mission generation (GENERATOR_MODEL), Opus only offline for authoring boss missions. All model names and prices live in backend/ai_config.py. Haiku prices are listed as "from" prices on the official page and should be treated as a floor.
 3. Validator is pure code, zero cost.
-4. Pre-generate mission variants offline in batches, store them, and serve from the database.
-5. Tutor hints are the only live LLM call: cap per player per day, cache common hints by mission and error type, and fall back to static hints if the API is slow or down.
-6. Enforce a hard daily AI budget in code.
+4. Pre-generate mission variants offline in batches using scripts/generate_missions.py, review with scripts/review_missions.py, and merge into the game with scripts/merge_missions.py.
+5. Tutor hints are the only live LLM call. Cap per player per day (CC_DAILY_PLAYER_CAP, default 5). Cache hints by mission id, failure code and hint level when message is None and failure_code is non-empty. Fall back to static hints on any failure, API error, or cap hit.
+6. Hard daily AI budget in code (CC_DAILY_BUDGET_USD, default $1.00). The live eval mode uses a separate $0.05 ceiling and a temporary database.
+7. Personalised hints (last formula and failure code) are cached only for cacheable requests. Chat replies are never cached so one player's session never reaches another player.
 
 ## Traffic readiness
 
@@ -154,7 +163,7 @@ Camera easing, chunked tile maps, spreadsheet overlay without scene change, mobi
 1. Phase 0, done: design, schemas, mission JSON.
 2. Phase 1, done: engine, validator, 3 Level 1 missions, agents on the bus, guardrails, tracing, MCP server.
 3. Phase 2, in progress: IFS, AND, OR added to engine, absolute references tested, 4 Level 2 missions added. Remaining: FastAPI layer, character creator, simple web grid UI, world map with 2 zones.
-4. Phase 3, Stages 3A and 3B done. Stage 3C not started. Stage 3A: Tutor Agent live with Haiku, ai_config.py for model names and pricing, state.py extended with hint cache and daily caps, full tracing. Stage 3B: scripts/generate_missions.py (offline Sonnet generation with validation pipeline), scripts/review_missions.py (approve or reject workflow), missions/generated/ pending directory.
+4. Phase 3, done. Stage 3A: Tutor Agent live with Haiku, ai_config.py for model names and pricing, state.py extended with hint cache and daily caps, full tracing. Stage 3B: scripts/generate_missions.py (offline Sonnet generation with validation pipeline), scripts/review_missions.py (approve or reject workflow), scripts/merge_missions.py (promote to levelN.json), missions/generated/ pending directory. Stage 3C: adversarial eval set (evals/adversarial_cases.json, 27 cases), offline tutor evals and live eval mode in run_evals.py, scripts/trace_report.py for log summaries, HintProvider Protocol in tutor.py, DECISIONS.md entry for agent framework choice, CLAUDE.md updated.
 5. Phase 4: Dataset and Adaptive Difficulty agents, Levels 3 to 5.
 6. Phase 5: Levels 6 and 7, polish, sound, playtest, Terraform deployment.
 

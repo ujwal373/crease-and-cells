@@ -16,6 +16,7 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass
 from datetime import date
+from typing import Protocol, runtime_checkable
 
 from . import guardrails
 from .ai_config import (
@@ -55,6 +56,28 @@ class TutorResult:
     output_tokens: int
     cost_usd: float
     latency_ms: float
+
+
+# --------------------------------------------------------------------------
+# Protocol — allows GameService to depend on an interface, not the concrete
+# class, so the tutor can be swapped in tests or future implementations.
+# --------------------------------------------------------------------------
+
+@runtime_checkable
+class HintProvider(Protocol):
+    def get_hint(
+        self,
+        *,
+        player_id: str,
+        mission: dict,
+        hint_level: int,
+        formula: str,
+        failure_code: str,
+        column_headers: list[str],
+        message: str | None,
+        secrets: list[str],
+        static_fallback: str,
+    ) -> TutorResult: ...
 
 
 # --------------------------------------------------------------------------
