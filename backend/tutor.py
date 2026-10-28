@@ -21,7 +21,7 @@ from typing import Protocol, runtime_checkable
 from . import guardrails
 from .ai_config import (
     TUTOR_MODEL, TUTOR_TIMEOUT,
-    DEFAULT_DAILY_PLAYER_CAP, DEFAULT_DAILY_BUDGET_USD,
+    DEFAULT_DAILY_PLAYER_CAP, DEFAULT_DAILY_BUDGET_USD, DEFAULT_IP_DAILY_CAP,
     cost_usd,
 )
 from .state import GameState
@@ -77,6 +77,7 @@ class HintProvider(Protocol):
         message: str | None,
         secrets: list[str],
         static_fallback: str,
+        requester_ip: str = "",
     ) -> TutorResult: ...
 
 
@@ -118,6 +119,7 @@ class TutorAgent:
         self._client = client
         self._daily_player_cap: int = DEFAULT_DAILY_PLAYER_CAP
         self._daily_budget: float = DEFAULT_DAILY_BUDGET_USD
+        self._ip_daily_cap: int = DEFAULT_IP_DAILY_CAP
 
     def _get_client(self):
         if self._client is not None:
@@ -142,6 +144,7 @@ class TutorAgent:
         message: str | None,
         secrets: list[str],
         static_fallback: str,
+        requester_ip: str = "",
     ) -> TutorResult:
         """Return a hint text with full tracing metadata.
 
@@ -174,15 +177,18 @@ class TutorAgent:
                 self._trace(result, player_id, mission_id)
                 return result
 
-        # 2. Player daily cap
+        # 2. Per-IP daily cap (checked after cache so cached hints always work)
+        if requester_ip and self._state.ip_tutor_count(requester_ip, today) >= self._ip_daily_cap:
+            return self._fallback(static_fallback, "ip_daily_cap_reached", player_id, mission_id)
+
         if self._state.tutor_player_count(player_id, today) >= self._daily_player_cap:
             return self._fallback(static_fallback, "player_daily_cap_reached", player_id, mission_id)
 
-        # 3. Global budget cap
+        # 4. Global budget cap
         if self._state.tutor_daily_spend(today) >= self._daily_budget:
             return self._fallback(static_fallback, "global_budget_exhausted", player_id, mission_id)
 
-        # 4. API call
+        # 5. API call
         user_msg = _build_user_message(
             mission, hint_level, formula, failure_code, column_headers, message
         )
@@ -212,11 +218,13 @@ class TutorAgent:
             self._trace(result, player_id, mission_id)
             return result
 
-        # 5. Update caps and spend
+        # 6. Update caps and spend
         self._state.increment_tutor_player_count(player_id, today)
         self._state.increment_tutor_spend(today, call_cost)
+        if requester_ip:
+            self._state.increment_ip_tutor_daily(requester_ip, today)
 
-        # 6. Guardrail check on the model reply (formula-pattern aware)
+        # 7. Guardrail check on the model reply (formula-pattern aware)
         out = guardrails.check_tutor_output(reply_text, secrets)
         if out.allowed:
             if can_cache:

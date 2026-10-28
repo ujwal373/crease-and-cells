@@ -113,12 +113,9 @@ class StoreAgent:
         item = self.items.get(item_id)
         if not item:
             return {"ok": False, "reason": "unknown item"}
-        if self.state.owns(player_id, item_id):
-            return {"ok": False, "reason": "already owned"}
-        if not self.state.spend(player_id, item["price"]):
-            return {"ok": False, "reason": "not enough coins"}
-        self.state.add_item(player_id, item_id)
-        self.state.equip(player_id, item["slot"], item_id)
+        reason = self.state.buy_item_atomic(player_id, item_id, item["price"], item["slot"])
+        if reason:
+            return {"ok": False, "reason": reason}
         self.bus.publish(events.ITEM_PURCHASED, {"player_id": player_id, "item_id": item_id})
         return {"ok": True, "item": item["name"], "wallet": self.state.wallet(player_id), "equipped": self.outfit(player_id)}
 
@@ -193,6 +190,7 @@ class GameService:
         formula: str = "",
         failure_code: str = "",
         message: str | None = None,
+        requester_ip: str = "",
     ) -> dict:
         mission = self._mission(mission_id)
         hints = mission["hints"]
@@ -212,6 +210,7 @@ class GameService:
                 message=message,
                 secrets=secrets,
                 static_fallback=static_text,
+                requester_ip=requester_ip,
             )
             text = result.text
         else:
@@ -225,13 +224,13 @@ class GameService:
         self.bus.publish(events.HINT_USED, {"player_id": player_id, "mission_id": mission_id})
         return {"hint": text, "hint_number": hint_level, "of": len(hints), "no_hint_bonus_lost": True}
 
-    def get_hint(self, player_id: str, mission_id: str) -> dict:
+    def get_hint(self, player_id: str, mission_id: str, *, requester_ip: str = "") -> dict:
         self.state.ensure_player(player_id)
         last = self.state.get_last_attempt(player_id, mission_id)
         formula, failure_code = last if last else ("", "")
-        return self._hint_response(player_id, mission_id, formula=formula, failure_code=failure_code)
+        return self._hint_response(player_id, mission_id, formula=formula, failure_code=failure_code, requester_ip=requester_ip)
 
-    def ask_coach(self, player_id: str, mission_id: str, message: str) -> dict:
+    def ask_coach(self, player_id: str, mission_id: str, message: str, *, requester_ip: str = "") -> dict:
         guard = guardrails.check_chat_input(message)
         if not guard.allowed:
             trace("guardrail.blocked", kind="chat_input", reason=guard.reason, player_id=player_id)
@@ -239,7 +238,7 @@ class GameService:
         self.state.ensure_player(player_id)
         last = self.state.get_last_attempt(player_id, mission_id)
         formula, failure_code = last if last else ("", "")
-        return self._hint_response(player_id, mission_id, formula=formula, failure_code=failure_code, message=message)
+        return self._hint_response(player_id, mission_id, formula=formula, failure_code=failure_code, message=message, requester_ip=requester_ip)
 
     # ----- preview (formula value only, never pass/fail) -----
     def preview_formula(self, player_id: str, mission_id: str, formula: str) -> dict:

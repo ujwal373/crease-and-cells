@@ -39,6 +39,10 @@ CREATE TABLE IF NOT EXISTS last_attempt (
     player_id TEXT, mission_id TEXT, formula TEXT NOT NULL, failure_code TEXT NOT NULL,
     PRIMARY KEY (player_id, mission_id)
 );
+CREATE TABLE IF NOT EXISTS ip_tutor_daily (
+    ip TEXT, call_date TEXT, count INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (ip, call_date)
+);
 """
 
 
@@ -213,3 +217,53 @@ class GameState:
                 (player_id, mission_id),
             ).fetchone()
             return (row["formula"], row["failure_code"]) if row else None
+
+    # ------------------------------------------------------------------
+    # Atomic store purchase: own-check + spend + add + equip under one lock
+    # ------------------------------------------------------------------
+
+    def buy_item_atomic(self, player_id: str, item_id: str, price: int, slot: str) -> str | None:
+        """Atomically check ownership, spend, add to inventory, and equip.
+
+        Returns None on success, or a failure-reason string. Holding a single
+        lock for the entire sequence prevents a player with sufficient coins
+        from completing the same purchase twice concurrently.
+        """
+        with self._lock:
+            if self.db.execute(
+                "SELECT 1 FROM inventory WHERE player_id=? AND item_id=?",
+                (player_id, item_id),
+            ).fetchone():
+                return "already owned"
+            cur = self.db.execute(
+                "UPDATE players SET coins = coins - ? WHERE id=? AND coins >= ?",
+                (price, player_id, price),
+            )
+            if cur.rowcount == 0:
+                self.db.commit()
+                return "not enough coins"
+            self.db.execute("INSERT OR IGNORE INTO inventory VALUES (?, ?)", (player_id, item_id))
+            self.db.execute("INSERT OR REPLACE INTO equipped VALUES (?, ?, ?)", (player_id, slot, item_id))
+            self.db.commit()
+            return None
+
+    # ------------------------------------------------------------------
+    # Tutor: per-IP daily cap
+    # ------------------------------------------------------------------
+
+    def ip_tutor_count(self, ip: str, call_date: str) -> int:
+        with self._lock:
+            row = self.db.execute(
+                "SELECT count FROM ip_tutor_daily WHERE ip=? AND call_date=?",
+                (ip, call_date),
+            ).fetchone()
+            return row["count"] if row else 0
+
+    def increment_ip_tutor_daily(self, ip: str, call_date: str) -> None:
+        with self._lock:
+            self.db.execute(
+                "INSERT INTO ip_tutor_daily (ip, call_date, count) VALUES (?, ?, 1) "
+                "ON CONFLICT(ip, call_date) DO UPDATE SET count = count + 1",
+                (ip, call_date),
+            )
+            self.db.commit()

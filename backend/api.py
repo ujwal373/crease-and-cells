@@ -1,10 +1,20 @@
 """FastAPI layer wrapping GameService.
 
 Environment variables:
-  CC_DB_PATH        SQLite database file (default: game.db)
-  CC_CORS_ORIGINS   JSON array or comma-separated list of allowed origins
-                    (default: ["http://localhost:5173"])
-  ANTHROPIC_API_KEY If set, the Tutor Agent is enabled for live hints.
+  CC_DB_PATH             SQLite database file (default: game.db)
+  CC_CORS_ORIGINS        JSON array or comma-separated list of allowed origins
+                         (default: ["http://localhost:5173"])
+  ANTHROPIC_API_KEY      If set, the Tutor Agent is enabled for live hints.
+  CC_TRUSTED_PROXIES     Number of trusted reverse proxies in front of this
+                         server (default: 0). When set to N > 0, the Nth IP
+                         from the right in X-Forwarded-For is used as the
+                         client IP. Set this only when you control the proxy
+                         chain; trusting X-Forwarded-For from untrusted clients
+                         allows IP spoofing.
+  CC_IP_TUTOR_DAILY      Max live tutor calls per IP per day (default: 20,
+                         read by ai_config.DEFAULT_IP_DAILY_CAP).
+  CC_IP_NEW_PLAYER_HOURLY Max new player registrations per IP per hour
+                         (default: 10).
 
 Rate limiting note: the in-memory limiters work for a single process.
 For multi-instance deployments, replace _RateLimiter with a Redis-backed
@@ -42,10 +52,24 @@ class _RateLimiter:
         self._window = window_secs
         self._calls: dict[str, deque] = defaultdict(deque)
         self._lock = threading.Lock()
+        self._call_count = 0
 
     def is_allowed(self, key: str) -> bool:
         now = time.monotonic()
         with self._lock:
+            # Lazy eviction every 1 000 calls: drain expired entries from ALL
+            # deques, then remove any that became empty.  This keeps the dict
+            # bounded even for keys that were only called once long ago.
+            self._call_count += 1
+            if self._call_count >= 1000:
+                self._call_count = 0
+                cutoff = now - self._window
+                for dq in self._calls.values():
+                    while dq and dq[0] < cutoff:
+                        dq.popleft()
+                stale = [k for k, dq in self._calls.items() if not dq]
+                for k in stale:
+                    del self._calls[k]
             dq = self._calls[key]
             while dq and dq[0] < now - self._window:
                 dq.popleft()
@@ -54,19 +78,88 @@ class _RateLimiter:
             dq.append(now)
             return True
 
+    def evict(self) -> int:
+        """Drain expired entries from all deques, then remove empty keys.
 
-_player_limiter = _RateLimiter(60, 60)    # 60 req/min per player
-_preview_limiter = _RateLimiter(20, 60)   # 20 req/min per player (preview only)
-_ip_limiter = _RateLimiter(200, 60)       # 200 req/min per IP
+        Returns the number of keys removed. Called automatically every
+        1 000 is_allowed() calls; also callable directly from tests or
+        maintenance tasks.
+        """
+        now = time.monotonic()
+        with self._lock:
+            cutoff = now - self._window
+            for dq in self._calls.values():
+                while dq and dq[0] < cutoff:
+                    dq.popleft()
+            stale = [k for k, dq in self._calls.items() if not dq]
+            for k in stale:
+                del self._calls[k]
+            return len(stale)
 
 
-def _check_rate(player_id: str, request: Request, *, preview: bool = False) -> None:
-    ip = request.client.host if request.client else "unknown"
+_player_limiter = _RateLimiter(60, 60)         # 60 req/min per player
+_preview_limiter = _RateLimiter(20, 60)        # 20 req/min per player (preview only)
+_ip_limiter = _RateLimiter(200, 60)            # 200 req/min per IP
+_new_player_ip_limiter = _RateLimiter(
+    int(os.environ.get("CC_IP_NEW_PLAYER_HOURLY", "10")), 3600
+)                                              # 10 new players/IP/hour
+
+# Tracks player IDs already seen this process run, to detect first appearances.
+# Maps player_id -> monotonic timestamp of first sight; evicted after 2 h.
+_seen_players: dict[str, float] = {}
+_seen_players_lock = threading.Lock()
+
+
+# ---------------------------------------------------------------------------
+# Client IP resolution
+# ---------------------------------------------------------------------------
+
+def _get_client_ip(request: Request) -> str:
+    """Return the real client IP, honouring CC_TRUSTED_PROXIES when set.
+
+    Without CC_TRUSTED_PROXIES (or when set to 0), always return the direct
+    connection address. Setting it to N > 0 trusts the Nth IP from the right
+    in the X-Forwarded-For header, which is correct when exactly N reverse
+    proxies sit in front of this server. Never trust client-supplied
+    X-Forwarded-For without this setting.
+    """
+    n_proxies = int(os.environ.get("CC_TRUSTED_PROXIES", "0"))
+    if n_proxies > 0:
+        xff = request.headers.get("x-forwarded-for", "")
+        ips = [ip.strip() for ip in xff.split(",") if ip.strip()]
+        # The rightmost N entries were added by trusted proxies; the one
+        # just to the left of those is the actual client.
+        idx = len(ips) - n_proxies
+        if idx > 0:
+            return ips[idx - 1]
+    return request.client.host if request.client else "unknown"
+
+
+def _check_rate(player_id: str, request: Request, *, preview: bool = False) -> str:
+    """Run all rate-limit checks. Returns the resolved client IP."""
+    ip = _get_client_ip(request)
     if not _ip_limiter.is_allowed(ip):
         raise HTTPException(status_code=429, detail={"error": "rate_limit_exceeded"})
     limiter = _preview_limiter if preview else _player_limiter
     if not limiter.is_allowed(player_id):
         raise HTTPException(status_code=429, detail={"error": "rate_limit_exceeded"})
+    return ip
+
+
+def _check_new_player(player_id: str, ip: str) -> None:
+    """Limit new player registrations per IP per hour."""
+    now = time.monotonic()
+    with _seen_players_lock:
+        # Evict entries older than 2 h to keep the dict bounded
+        cutoff = now - 7200
+        stale = [k for k, t in _seen_players.items() if t < cutoff]
+        for k in stale:
+            del _seen_players[k]
+        if player_id in _seen_players:
+            return  # known player, no limit applies
+        if not _new_player_ip_limiter.is_allowed(ip):
+            raise HTTPException(status_code=429, detail={"error": "too_many_players_from_ip"})
+        _seen_players[player_id] = now
 
 
 # ---------------------------------------------------------------------------
@@ -264,23 +357,28 @@ async def _request_id_middleware(request: Request, call_next):
 
 @app.middleware("http")
 async def _body_size_middleware(request: Request, call_next):
-    cl = request.headers.get("content-length")
-    if cl is not None:
-        try:
-            if int(cl) > _MAX_BODY_BYTES:
-                return JSONResponse({"error": "request_too_large"}, status_code=413)
-        except ValueError:
-            pass
+    """Enforce the body-size limit on the bytes actually received.
+
+    Reading the stream rather than trusting Content-Length means the limit
+    is enforced for chunked transfer-encoded bodies too.
+    """
+    body = b""
+    async for chunk in request.stream():
+        body += chunk
+        if len(body) > _MAX_BODY_BYTES:
+            return JSONResponse({"error": "request_too_large"}, status_code=413)
+    # Re-cache the body so downstream route handlers can read it via request.body()
+    request._body = body  # type: ignore[attr-defined]
     return await call_next(request)
 
 
 @app.exception_handler(KeyError)
-async def _key_error_handler(request: Request, exc: KeyError):
+async def _key_error_handler(_request: Request, exc: KeyError):
     return JSONResponse({"error": "not_found", "detail": str(exc)}, status_code=404)
 
 
 @app.exception_handler(Exception)
-async def _generic_error_handler(request: Request, exc: Exception):
+async def _generic_error_handler(_request: Request, exc: Exception):
     tracing.trace("api.error", error=type(exc).__name__, detail=str(exc))
     return JSONResponse({"error": "internal_error"}, status_code=500)
 
@@ -296,7 +394,8 @@ def _svc(request: Request) -> GameService:
 @app.get("/api/mission", response_model=MissionOut)
 def get_mission(request: Request, player_id: str, name: str | None = None):
     _validate_player_id(player_id)
-    _check_rate(player_id, request)
+    ip = _check_rate(player_id, request)
+    _check_new_player(player_id, ip)
     return _svc(request).get_next_mission(player_id, name)
 
 
@@ -310,15 +409,15 @@ def submit_answer(mission_id: str, body: SubmitBody, request: Request):
 @app.post("/api/mission/{mission_id}/hint", response_model=HintOut)
 def get_hint(mission_id: str, body: HintBody, request: Request):
     _validate_player_id(body.player_id)
-    _check_rate(body.player_id, request)
-    return _svc(request).get_hint(body.player_id, mission_id)
+    ip = _check_rate(body.player_id, request)
+    return _svc(request).get_hint(body.player_id, mission_id, requester_ip=ip)
 
 
 @app.post("/api/mission/{mission_id}/coach", response_model=CoachOut)
 def ask_coach(mission_id: str, body: CoachBody, request: Request):
     _validate_player_id(body.player_id)
-    _check_rate(body.player_id, request)
-    return _svc(request).ask_coach(body.player_id, mission_id, body.message)
+    ip = _check_rate(body.player_id, request)
+    return _svc(request).ask_coach(body.player_id, mission_id, body.message, requester_ip=ip)
 
 
 @app.post("/api/mission/{mission_id}/preview", response_model=PreviewOut)

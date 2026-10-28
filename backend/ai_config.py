@@ -47,3 +47,4 @@ def cost_usd(model: str, input_tokens: int, output_tokens: int) -> float:
 TUTOR_TIMEOUT: float = float(os.environ.get("CC_TUTOR_TIMEOUT", "8"))
 DEFAULT_DAILY_PLAYER_CAP: int = int(os.environ.get("CC_DAILY_PLAYER_CAP", "5"))
 DEFAULT_DAILY_BUDGET_USD: float = float(os.environ.get("CC_DAILY_BUDGET_USD", "1.00"))
+DEFAULT_IP_DAILY_CAP: int = int(os.environ.get("CC_IP_TUTOR_DAILY", "20"))

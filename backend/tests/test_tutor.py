@@ -360,3 +360,58 @@ def test_formula_reply_triggers_fallback(state):
     assert result.fallback_used, "formula-shaped reply must trigger fallback"
     assert result.fallback_reason == "output_leaked"
     assert result.text == kwargs["static_fallback"]
+
+
+# ---------------------------------------------------------------------------
+# Test 13: per-IP daily cap blocks live calls; cached hints still work
+# ---------------------------------------------------------------------------
+
+def test_ip_daily_cap_blocks_live_call(state):
+    """After an IP exhausts its daily live-call allowance, new (uncached) hint
+    requests fall back to the static hint. Cached results bypass the cap."""
+    svc = GameService(":memory:")
+    fake = FakeAnthropic()
+    agent = _agent(state, fake)
+    agent._ip_daily_cap = 1
+
+    base = _hint_kwargs(svc)
+    base["failure_code"] = "wrong_value_ip_a"
+
+    # First call: live API call succeeds and result is cached.
+    r1 = agent.get_hint(**base, requester_ip="1.2.3.4")
+    assert not r1.fallback_used
+    assert len(fake.messages.calls) == 1
+
+    # Second call: different failure_code so not in cache; IP cap is now reached.
+    second = _hint_kwargs(svc)
+    second["failure_code"] = "wrong_value_ip_b"
+    r2 = agent.get_hint(**second, requester_ip="1.2.3.4")
+    assert r2.fallback_used
+    assert r2.fallback_reason == "ip_daily_cap_reached"
+    assert len(fake.messages.calls) == 1  # no second live call
+
+    # Third call: same failure_code as r1 so the cache was populated; served
+    # from cache even though the IP cap is still reached.
+    r3 = agent.get_hint(**base, requester_ip="1.2.3.4")
+    assert r3.cache_hit, "cached hint must bypass the IP daily cap"
+    assert not r3.fallback_used
+
+
+def test_ip_daily_cap_not_shared_across_ips(state):
+    """The cap is per-IP; a different IP is unaffected."""
+    svc = GameService(":memory:")
+    fake = FakeAnthropic()
+    agent = _agent(state, fake)
+    agent._ip_daily_cap = 1
+
+    kwargs_a = _hint_kwargs(svc)
+    kwargs_a["failure_code"] = "wrong_value_cross_a"
+    kwargs_b = _hint_kwargs(svc)
+    kwargs_b["failure_code"] = "wrong_value_cross_b"
+
+    # IP-A exhausts its cap
+    agent.get_hint(**kwargs_a, requester_ip="10.0.0.1")
+
+    # IP-B should still be able to make a live call
+    r = agent.get_hint(**kwargs_b, requester_ip="10.0.0.2")
+    assert not r.fallback_used, "a different IP must not be affected by another IP's cap"
