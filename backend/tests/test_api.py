@@ -432,3 +432,36 @@ def test_concurrent_purchases_do_not_overspend(client):
 
     wallet = client.get(f"/api/wallet?player_id={pid}").json()
     assert wallet["coins"] == 0
+
+
+def test_concurrent_purchases_200_coins_leaves_120(client):
+    """200 coins, 6 threads buying the 80-coin cap_club: exactly 1 succeeds, 120 remain."""
+    pid = _new_pid()
+    svc = app.state.svc
+    svc.state.ensure_player(pid)
+    with svc.state._lock:
+        svc.state.db.execute("UPDATE players SET coins=200 WHERE id=?", (pid,))
+        svc.state.db.commit()
+
+    results: list[dict] = []
+    results_lock = threading.Lock()
+
+    def try_buy():
+        r = client.post("/api/store/buy", json={"player_id": pid, "item_id": "cap_club"})
+        with results_lock:
+            results.append(r.json())
+
+    threads = [threading.Thread(target=try_buy) for _ in range(6)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+
+    successes = [r for r in results if r.get("ok")]
+    assert len(successes) == 1, f"Expected exactly 1 success, got {len(successes)}: {results}"
+
+    wallet = client.get(f"/api/wallet?player_id={pid}").json()
+    assert wallet["coins"] == 120, (
+        f"Expected 120 coins (200 - 80), got {wallet['coins']}. "
+        "If this fails, multiple purchases succeeded."
+    )
