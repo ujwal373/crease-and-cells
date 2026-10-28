@@ -26,6 +26,32 @@ Planned: Phaser 3 world and spreadsheet panel, FastAPI layer, LLM-backed Tutor a
 
 Add the server to Claude Code with the `.mcp.json` in this repo, then ask Claude to play: get a mission, submit a formula, check the wallet, buy a cap.
 
+## Running locally
+
+Start both processes from the project root.
+
+Backend (port 8000):
+
+    CC_DB_PATH=game.db CC_CORS_ORIGINS='["http://localhost:5173"]' uvicorn backend.api:app --reload
+
+The default CC_CORS_ORIGINS already allows localhost:5173, so the env var above is only needed if you change the frontend port.
+
+Frontend (port 5173):
+
+    cd frontend
+    npm install
+    npm run dev
+
+The Vite dev server proxies all /api/* requests to localhost:8000, so no CORS configuration is required during development. Open http://localhost:5173 in a browser.
+
+For a production build:
+
+    cd frontend && npm run build
+
+The output is in frontend/dist. Serve it from any static host and set VITE_API_URL to the backend's public URL at build time:
+
+    VITE_API_URL=https://your-backend.example.com npm run build
+
 ## Design notes
 
 See CLAUDE.md for the rules and layout, and docs/DECISIONS.md for the technology recommendations.
