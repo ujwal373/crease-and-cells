@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crease and Cells</title>
+  </head>
+  <body>
+    <div id="app">
+      <header class="wallet-bar">
+        <span class="app-title">Crease &amp; Cells</span>
+        <div class="wallet-stats">
+          <span id="stat-coins">0 coins</span>
+          <span id="stat-xp">0 XP</span>
+          <span id="stat-level">Lv 1</span>
+        </div>
+        <button id="btn-store" class="btn-secondary">Store</button>
+      </header>
+
+      <main class="layout">
+        <aside class="mission-panel" id="mission-panel">
+          <div id="npc-badge" class="npc-badge"></div>
+          <h2 id="mission-title" class="mission-title"></h2>
+          <p id="mission-story" class="mission-story"></p>
+          <div class="task-box">
+            <span class="task-label">Task</span>
+            <p id="mission-task"></p>
+          </div>
+          <div id="hint-area" class="hint-area hidden"></div>
+        </aside>
+
+        <section class="grid-panel" id="grid-panel">
+          <div class="sheet-name-bar" id="sheet-name"></div>
+
+          <div class="grid-scroll">
+            <table id="sheet-table" class="sheet-table"></table>
+          </div>
+
+          <div class="formula-area">
+            <span class="formula-label">fx</span>
+            <input
+              id="formula-input"
+              type="text"
+              class="formula-input"
+              placeholder='=COUNTIF(G2:G61,"&gt;8")'
+              autocomplete="off"
+              spellcheck="false"
+            />
+          </div>
+          <div id="preview-status" class="preview-status hidden"></div>
+
+          <div class="action-row">
+            <button id="btn-submit" class="btn-primary" disabled>Submit</button>
+            <button id="btn-hint" class="btn-secondary">Hint</button>
+          </div>
+
+          <div id="result-panel" class="result-panel hidden"></div>
+
+          <div class="coach-area">
+            <div class="coach-input-row">
+              <input
+                id="coach-input"
+                type="text"
+                class="coach-input"
+                placeholder="Ask Coach Rao a question…"
+                autocomplete="off"
+              />
+              <button id="btn-coach" class="btn-secondary">Ask</button>
+            </div>
+            <div id="coach-reply" class="coach-reply hidden"></div>
+          </div>
+        </section>
+      </main>
+
+      <div id="loading-overlay" class="overlay loading-overlay">
+        <div class="loading-box">Loading…</div>
+      </div>
+
+      <div id="store-overlay" class="overlay hidden">
+        <div class="overlay-dialog" role="dialog" aria-label="Store">
+          <div class="overlay-header">
+            <h3>Store</h3>
+            <button id="btn-close-store" class="btn-icon" aria-label="Close store">✕</button>
+          </div>
+          <ul id="store-list" class="store-list"></ul>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
