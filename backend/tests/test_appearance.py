@@ -221,3 +221,65 @@ def test_wallet_appearance_reflects_saved_values(client):
     wallet = client.get(f"/api/wallet?player_id={pid}").json()
     assert wallet["appearance"]["skin_tone"] == "dark"
     assert wallet["appearance"]["hair_style"] == "spiky"
+
+
+# ── Fix 1: ValueError handler returns safe messages only ──────────────────
+
+
+def test_value_error_response_does_not_leak_internals(client):
+    """The response detail must be a safe fixed string, not the raw ValueError."""
+    pid = _new_pid()
+    r = client.post("/api/appearance", json=_valid_body(pid, body_type="giant"))
+    assert r.status_code == 400
+    body = r.json()
+    # Safe mapped message present
+    assert body.get("detail") == "invalid body_type"
+    # Raw internal enum list must not be in the response body
+    assert "lean" not in str(body)
+    assert "must be" not in str(body)
+
+
+def test_value_error_response_maps_display_name_too_long(client):
+    pid = _new_pid()
+    r = client.post("/api/appearance", json=_valid_body(pid, display_name="A" * 31))
+    assert r.status_code == 400
+    assert r.json().get("detail") == "display_name is too long"
+
+
+# ── Fix 2: Whitespace-only display_name falls back to empty ───────────────
+
+
+def test_whitespace_only_name_stored_as_empty(client):
+    pid = _new_pid()
+    r = client.post("/api/appearance", json=_valid_body(pid, display_name="   "))
+    assert r.status_code == 200
+    assert r.json()["display_name"] == ""
+
+
+def test_whitespace_only_name_does_not_update_wallet_name(client):
+    pid = _new_pid()
+    # First set a real name
+    client.post("/api/appearance", json=_valid_body(pid, display_name="Ujwal"))
+    # Then submit whitespace-only name
+    client.post("/api/appearance", json=_valid_body(pid, display_name="   "))
+    wallet = client.get(f"/api/wallet?player_id={pid}").json()
+    # Wallet name must stay as the previous real name
+    assert wallet["name"] == "Ujwal"
+
+
+# ── Fix 3: Server-side first-visit signal via display_name ────────────────
+
+
+def test_new_player_wallet_appearance_display_name_is_empty(client):
+    """An empty display_name signals the client to show the character creator."""
+    pid = _new_pid()
+    wallet = client.get(f"/api/wallet?player_id={pid}").json()
+    assert wallet["appearance"]["display_name"] == ""
+
+
+def test_saved_name_wallet_appearance_display_name_nonempty(client):
+    """A non-empty display_name signals the client that setup is done."""
+    pid = _new_pid()
+    client.post("/api/appearance", json=_valid_body(pid, display_name="Ujwal"))
+    wallet = client.get(f"/api/wallet?player_id={pid}").json()
+    assert wallet["appearance"]["display_name"] == "Ujwal"

@@ -14,6 +14,7 @@ import {
 import { renderGrid } from './grid';
 import { initCreator, openCreator } from './creator';
 import type { Mission, WalletData, StoreItem, Appearance } from './types';
+import type { NpcDef } from './world';
 
 // ── DOM helpers ───────────────────────────────────────────────────────────────
 
@@ -42,6 +43,8 @@ let currentMission: Mission | null = null;
 let currentAppearance: Appearance | undefined = undefined;
 let previewTimer: ReturnType<typeof setTimeout> | null = null;
 let submitting = false;
+let worldHandle: { destroy: () => void } | null = null;
+let worldActive = false;
 
 // DOM refs — assigned in init() before any other function runs
 let formulaInput!: HTMLInputElement;
@@ -347,6 +350,71 @@ async function handleBuy(itemId: string, price: number, btn: HTMLButtonElement):
   }
 }
 
+// ── World ─────────────────────────────────────────────────────────────────
+
+function _openMissionPanel(): void {
+  const layout = document.getElementById('main-layout');
+  const backBar = document.getElementById('world-back-bar');
+  if (layout) layout.classList.add('mission-visible');
+  if (backBar) backBar.classList.remove('hidden');
+}
+
+function _closeMissionPanel(): void {
+  const layout = document.getElementById('main-layout');
+  const backBar = document.getElementById('world-back-bar');
+  if (layout) layout.classList.remove('mission-visible');
+  if (backBar) backBar.classList.add('hidden');
+}
+
+function _handleNpcInteract(_npc: NpcDef): void {
+  _openMissionPanel();
+}
+
+async function openWorld(): Promise<void> {
+  if (worldActive) return;
+  worldActive = true;
+
+  const app = document.getElementById('app');
+  app?.classList.add('world-active');
+
+  document.getElementById('world-section')?.classList.remove('hidden');
+  document.getElementById('main-layout')?.classList.remove('mission-visible');
+  document.getElementById('world-back-bar')?.classList.add('hidden');
+  el('btn-world').textContent = 'Close World';
+
+  if (!worldHandle) {
+    const container = document.getElementById('world-canvas-container');
+    if (!container) return;
+    // Lazy import keeps Phaser out of the initial bundle
+    const { initWorld } = await import('./world');
+    const level = (() => {
+      const lvText = document.getElementById('stat-level')?.textContent ?? 'Lv 1';
+      return parseInt(lvText.replace('Lv ', ''), 10) || 1;
+    })();
+    worldHandle = await initWorld(
+      container,
+      { appearance: currentAppearance ?? { display_name: '', body_type: 'medium', skin_tone: 'medium', hair_style: 'short', hair_colour: 'black' }, playerLevel: level },
+      _handleNpcInteract,
+    );
+  }
+}
+
+function closeWorld(): void {
+  if (!worldActive) return;
+  worldActive = false;
+
+  const app = document.getElementById('app');
+  app?.classList.remove('world-active');
+
+  document.getElementById('world-section')?.classList.add('hidden');
+  const layout = document.getElementById('main-layout');
+  if (layout) {
+    layout.classList.remove('mission-visible');
+  }
+  document.getElementById('world-back-bar')?.classList.add('hidden');
+  el('btn-world').textContent = 'Open World';
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 
 function showInitError(message: string): void {
@@ -413,6 +481,13 @@ async function init(): Promise<void> {
     openCreator(playerId, currentAppearance, false, handleAppearanceSaved);
   });
 
+  el('btn-world').addEventListener('click', () => {
+    if (worldActive) closeWorld(); else void openWorld();
+  });
+
+  const backBtn = document.getElementById('btn-back-world');
+  if (backBtn) backBtn.addEventListener('click', _closeMissionPanel);
+
   show('loading-overlay');
 
   try {
@@ -423,10 +498,14 @@ async function init(): Promise<void> {
 
     renderWallet(wallet);
 
-    // Show character creator on first visit (before mission loads)
-    let creatorDone = false;
-    try { creatorDone = !!localStorage.getItem('cc_creator_done'); } catch { /* ignore */ }
-    if (!creatorDone) {
+    // Show character creator on first visit.
+    // Server truth: appearance.display_name is non-empty only after the player
+    // has saved their character. localStorage is a secondary cache so the creator
+    // does not flash on repeat visits when the server is slow.
+    const serverDone = !!(wallet.appearance?.display_name);
+    let localDone = false;
+    try { localDone = !!localStorage.getItem('cc_creator_done'); } catch { /* ignore */ }
+    if (!serverDone && !localDone) {
       openCreator(playerId, wallet.appearance, true, handleAppearanceSaved);
     }
 

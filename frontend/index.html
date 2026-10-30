@@ -14,11 +14,16 @@
           <span id="stat-xp">0 XP</span>
           <span id="stat-level">Lv 1</span>
         </div>
+        <button id="btn-world" class="btn-secondary">Open World</button>
         <button id="btn-customize" class="btn-secondary">Customize</button>
         <button id="btn-store" class="btn-secondary">Store</button>
       </header>
 
-      <main class="layout">
+      <!-- Normal mission view -->
+      <main id="main-layout" class="layout">
+        <div id="world-back-bar" class="hidden">
+          <button id="btn-back-world" class="btn-secondary">Back to World</button>
+        </div>
         <aside class="mission-panel" id="mission-panel">
           <div id="npc-badge" class="npc-badge"></div>
           <h2 id="mission-title" class="mission-title"></h2>
@@ -72,6 +77,11 @@
           </div>
         </section>
       </main>
+
+      <!-- World view -->
+      <div id="world-section" class="hidden">
+        <div id="world-canvas-container"></div>
+      </div>
 
       <div id="loading-overlay" class="overlay loading-overlay">
         <div class="loading-box">Loading…</div>

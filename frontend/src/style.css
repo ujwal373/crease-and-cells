@@ -661,3 +661,62 @@ button:disabled {
   gap: 8px;
   padding-top: 4px;
 }
+
+/* ── World section ── */
+
+#world-section {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: #3a6644;
+}
+
+#world-canvas-container {
+  width: 100%;
+  height: calc(100vh - 50px);
+}
+
+#world-canvas-container canvas {
+  display: block;
+}
+
+/* Back bar shown when mission panel overlays the world */
+#world-back-bar {
+  padding: 8px 12px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+
+/* World-active mode: layout slides in from the right as a panel */
+#app.world-active #main-layout {
+  position: fixed;
+  top: 50px;
+  right: 0;
+  width: min(820px, 100vw);
+  height: calc(100vh - 50px);
+  z-index: 20;
+  background: var(--bg);
+  border-left: 1px solid var(--border);
+  overflow-y: auto;
+  transform: translateX(100%);
+  transition: transform 0.22s ease;
+  flex-direction: column;
+}
+
+#app.world-active #main-layout.mission-visible {
+  transform: translateX(0);
+}
+
+/* In world mode make the grid panel full-width */
+#app.world-active .grid-panel {
+  width: 100%;
+  border-right: none;
+}
+
+#app.world-active .mission-panel {
+  border-right: none;
+  border-bottom: 1px solid var(--border);
+  width: 100%;
+  max-height: none;
+  position: static;
+}

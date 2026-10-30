@@ -297,6 +297,7 @@ class GameService:
         hair_style: str,
         hair_colour: str,
     ) -> dict:
+        display_name = display_name.strip()
         if len(display_name) > MAX_NAME_LEN:
             raise ValueError(f"display_name exceeds {MAX_NAME_LEN} characters")
         if display_name:

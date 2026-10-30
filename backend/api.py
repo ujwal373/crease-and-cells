@@ -396,9 +396,24 @@ async def _key_error_handler(_request: Request, exc: KeyError):
     return JSONResponse({"error": "not_found", "detail": str(exc)}, status_code=404)
 
 
+_SAFE_VALIDATION_MESSAGES: list[tuple[str, str]] = [
+    ("display_name exceeds",        "display_name is too long"),
+    ("display_name rejected",       "display_name contains disallowed content"),
+    ("body_type must be",           "invalid body_type"),
+    ("skin_tone must be",           "invalid skin_tone"),
+    ("hair_style must be",          "invalid hair_style"),
+    ("hair_colour must be",         "invalid hair_colour"),
+]
+
+
 @app.exception_handler(ValueError)
 async def _value_error_handler(_request: Request, exc: ValueError):
-    return JSONResponse({"error": "validation_error", "detail": str(exc)}, status_code=400)
+    raw = str(exc)
+    tracing.trace("api.validation_error", detail=raw)
+    for prefix, safe_msg in _SAFE_VALIDATION_MESSAGES:
+        if raw.startswith(prefix):
+            return JSONResponse({"error": "validation_error", "detail": safe_msg}, status_code=400)
+    return JSONResponse({"error": "invalid_appearance_field"}, status_code=400)
 
 
 @app.exception_handler(Exception)

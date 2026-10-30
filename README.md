@@ -15,7 +15,7 @@ Built and tested (Phase 0 and 1 vertical slice):
 - MCP server exposing the game as tools
 - 84 tests and an eval report
 
-Planned: Phaser 3 world and spreadsheet panel, FastAPI layer, LLM-backed Tutor and Mission generation, Adaptive Difficulty agent, character creator, Terraform deployment, Levels 2 to 7.
+Phase 2 complete: FastAPI layer, character creator, Phaser 3 open world (two zones, procedural tile map, WASD and touch joystick, NPC interaction). Planned: Adaptive Difficulty agent, Levels 3 to 7, Terraform deployment.
 
 ## Quick start
 
@@ -51,6 +51,24 @@ For a production build:
 The output is in frontend/dist. Serve it from any static host and set VITE_API_URL to the backend's public URL at build time:
 
     VITE_API_URL=https://your-backend.example.com npm run build
+
+## Open world (Phaser 3)
+
+The frontend includes a Phaser 3 open world behind the "Open World" button. Phaser is lazily
+imported so the mission UI loads instantly without waiting for the 1.4 MB game engine.
+
+Two zones are on the map: The Nets (always open) and Club House (door locked until level 2).
+All tile graphics are drawn procedurally in code with Phaser GameObjects.Graphics. No external
+tileset images or Tiled files are used. The player sprite comes from the character renderer at
+48x72. Movement: WASD, arrow keys, and a virtual on-screen joystick for touch devices.
+
+Walking into range of an NPC or clicking on them opens the mission panel as a side overlay
+without stopping or restarting the Phaser scene. The "Back to World" button dismisses the panel
+and returns focus to the world.
+
+To run the frontend tests:
+
+    cd frontend && npm test
 
 ## Design notes
 
