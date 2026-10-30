@@ -79,3 +79,25 @@ Do not start Stage 2B until Stage 2A is reviewed and approved.
 7. Add a brief README section on how to run both processes together (uvicorn and vite dev server), and what CORS origins to set.
 
 Formatting for anything you write for me to read: no ** bold markers, no dash bullets, no em dashes.
+
+---
+
+## Phase 2 part 2
+
+Save this whole task text into docs/PHASES.md under the heading Phase 2 part 2 before coding. Read CLAUDE.md and docs/PHASES.md first. Do two stages. After each stage run python -m pytest, python evals/run_evals.py and the frontend type check and build, show me a short summary, and STOP and wait for my go ahead.
+
+Rules: the server decides which mission a player gets and what they earn. The world is only a way to reach missions, never a place where rewards or progress are calculated. No game logic copied into the frontend. No copyrighted art or characters: draw placeholder art in code, or use CC0 assets and record each one with its licence in docs/ASSETS.md.
+
+STAGE 2C: Character creator
+
+Backend: add an appearance table (player_id, display_name, body_type, skin_tone, hair_style, hair_colour). Serve GET /api/appearance and POST /api/appearance. Validate every field server-side against an allowlist. Filter display_name through the existing guardrails.check_chat_input and cap it at 30 characters. Include the appearance object in the wallet response. Tests: validation rejects bad values, injection name blocked, no cross-player access, wallet includes appearance.
+
+Frontend: character creator screen shown on first visit (no cc_creator_done in localStorage) and reachable from a Customize button in the wallet bar. Form fields: display_name (default Ujwal Mojidra), body_type, skin_tone, hair_style, hair_colour. Live canvas preview updates on every change. Save calls POST /api/appearance. On success set cc_creator_done in localStorage and update the wallet display.
+
+Character renderer module frontend/src/character.ts: exports drawCharacter(ctx, width, height, appearance, outfit). Draws a layered cricket player using Canvas 2D geometric shapes only, no external images. Layers in order: trousers, jersey body, arms with optional sleeve bands, shoes, neck, head, hair, cap. Scales uniformly from a 200x300 design space. Reusable for the world sprite in Stage 2D.
+
+STAGE 2D: Open world with Phaser 3
+
+npm install phaser (lazily imported so the mission UI does not wait for it). Two zones on a single tilemap: The Nets (always open) and Club House (visually locked, door blocked until level 2). Tile-based maps with collision layers, drawn procedurally in code (no Tiled files or external tileset images). Movement: WASD and arrow keys, plus a virtual on-screen joystick for touch. NPCs standing at fixed positions with a quest-marker sprite above them. Clicking or walking into range of an NPC opens the mission panel as an overlay without a scene change. Club House door shows a locked padlock and a level-2 tooltip when the player is below level 2. Player sprite generated from the character renderer at 48x72, cached as a Phaser texture. vitest unit tests for pure logic only (tile collision checks, zone unlock predicate). README: add Phaser note and how to start the world. Commit separately from Stage 2C.
+
+Formatting for anything you write for me to read: no ** bold markers, no dash bullets, no em dashes.

@@ -14,6 +14,7 @@
           <span id="stat-xp">0 XP</span>
           <span id="stat-level">Lv 1</span>
         </div>
+        <button id="btn-customize" class="btn-secondary">Customize</button>
         <button id="btn-store" class="btn-secondary">Store</button>
       </header>
 
@@ -83,6 +84,69 @@
             <button id="btn-close-store" class="btn-icon" aria-label="Close store">✕</button>
           </div>
           <ul id="store-list" class="store-list"></ul>
+        </div>
+      </div>
+
+      <div id="creator-overlay" class="overlay hidden">
+        <div class="overlay-dialog creator-dialog" role="dialog" aria-label="Character Creator">
+          <div class="overlay-header">
+            <h3>Create Your Character</h3>
+          </div>
+          <div class="creator-body">
+            <div class="creator-preview">
+              <canvas id="creator-canvas" width="160" height="240"></canvas>
+            </div>
+            <div class="creator-form">
+              <div class="creator-field">
+                <label for="creator-name">Name</label>
+                <input id="creator-name" type="text" maxlength="30" autocomplete="off" />
+              </div>
+              <div class="creator-field">
+                <label for="creator-body-type">Build</label>
+                <select id="creator-body-type">
+                  <option value="lean">Lean</option>
+                  <option value="medium" selected>Medium</option>
+                  <option value="stocky">Stocky</option>
+                </select>
+              </div>
+              <div class="creator-field">
+                <label for="creator-skin-tone">Skin Tone</label>
+                <select id="creator-skin-tone">
+                  <option value="light">Light</option>
+                  <option value="medium_light">Medium Light</option>
+                  <option value="medium" selected>Medium</option>
+                  <option value="medium_dark">Medium Dark</option>
+                  <option value="dark">Dark</option>
+                </select>
+              </div>
+              <div class="creator-field">
+                <label for="creator-hair-style">Hair Style</label>
+                <select id="creator-hair-style">
+                  <option value="short" selected>Short</option>
+                  <option value="medium">Medium</option>
+                  <option value="long">Long</option>
+                  <option value="bald">Bald</option>
+                  <option value="spiky">Spiky</option>
+                </select>
+              </div>
+              <div class="creator-field">
+                <label for="creator-hair-colour">Hair Colour</label>
+                <select id="creator-hair-colour">
+                  <option value="black" selected>Black</option>
+                  <option value="brown">Brown</option>
+                  <option value="blonde">Blonde</option>
+                  <option value="red">Red</option>
+                  <option value="grey">Grey</option>
+                  <option value="white">White</option>
+                </select>
+              </div>
+              <div id="creator-error" class="creator-error hidden"></div>
+              <div class="creator-actions">
+                <button id="btn-creator-save" class="btn-primary">Save</button>
+                <button id="btn-creator-cancel" class="btn-secondary">Cancel</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

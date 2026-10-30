@@ -43,6 +43,14 @@ CREATE TABLE IF NOT EXISTS ip_tutor_daily (
     ip TEXT, call_date TEXT, count INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (ip, call_date)
 );
+CREATE TABLE IF NOT EXISTS appearance (
+    player_id TEXT PRIMARY KEY,
+    display_name TEXT NOT NULL DEFAULT '',
+    body_type TEXT NOT NULL DEFAULT 'medium',
+    skin_tone TEXT NOT NULL DEFAULT 'medium',
+    hair_style TEXT NOT NULL DEFAULT 'short',
+    hair_colour TEXT NOT NULL DEFAULT 'black'
+);
 """
 
 
@@ -265,5 +273,48 @@ class GameState:
                 "INSERT INTO ip_tutor_daily (ip, call_date, count) VALUES (?, ?, 1) "
                 "ON CONFLICT(ip, call_date) DO UPDATE SET count = count + 1",
                 (ip, call_date),
+            )
+            self.db.commit()
+
+    # ------------------------------------------------------------------
+    # Character appearance
+    # ------------------------------------------------------------------
+
+    def get_appearance(self, player_id: str) -> dict:
+        with self._lock:
+            row = self.db.execute(
+                "SELECT display_name, body_type, skin_tone, hair_style, hair_colour "
+                "FROM appearance WHERE player_id=?",
+                (player_id,),
+            ).fetchone()
+            if row:
+                return dict(row)
+            return {
+                "display_name": "",
+                "body_type": "medium",
+                "skin_tone": "medium",
+                "hair_style": "short",
+                "hair_colour": "black",
+            }
+
+    def set_appearance(
+        self,
+        player_id: str,
+        display_name: str,
+        body_type: str,
+        skin_tone: str,
+        hair_style: str,
+        hair_colour: str,
+    ) -> None:
+        with self._lock:
+            if display_name:
+                self.db.execute(
+                    "UPDATE players SET name=? WHERE id=?", (display_name, player_id)
+                )
+            self.db.execute(
+                "INSERT OR REPLACE INTO appearance "
+                "(player_id, display_name, body_type, skin_tone, hair_style, hair_colour) "
+                "VALUES (?, ?, ?, ?, ?, ?)",
+                (player_id, display_name, body_type, skin_tone, hair_style, hair_colour),
             )
             self.db.commit()

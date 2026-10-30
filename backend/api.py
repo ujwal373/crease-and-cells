@@ -240,6 +240,15 @@ class PreviewOut(BaseModel):
     error: str | None = None
 
 
+class AppearanceOut(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    display_name: str
+    body_type: str
+    skin_tone: str
+    hair_style: str
+    hair_colour: str
+
+
 class WalletOut(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str
@@ -248,6 +257,7 @@ class WalletOut(BaseModel):
     xp: int
     level: int
     outfit: dict
+    appearance: AppearanceOut | None = None
 
 
 class StoreItemOut(BaseModel):
@@ -295,6 +305,15 @@ class PreviewBody(BaseModel):
 class BuyBody(BaseModel):
     player_id: str
     item_id: str
+
+
+class AppearanceBody(BaseModel):
+    player_id: str
+    display_name: str = ""
+    body_type: str = "medium"
+    skin_tone: str = "medium"
+    hair_style: str = "short"
+    hair_colour: str = "black"
 
 
 # ---------------------------------------------------------------------------
@@ -377,6 +396,11 @@ async def _key_error_handler(_request: Request, exc: KeyError):
     return JSONResponse({"error": "not_found", "detail": str(exc)}, status_code=404)
 
 
+@app.exception_handler(ValueError)
+async def _value_error_handler(_request: Request, exc: ValueError):
+    return JSONResponse({"error": "validation_error", "detail": str(exc)}, status_code=400)
+
+
 @app.exception_handler(Exception)
 async def _generic_error_handler(_request: Request, exc: Exception):
     tracing.trace("api.error", error=type(exc).__name__, detail=str(exc))
@@ -446,3 +470,24 @@ def buy_item(body: BuyBody, request: Request):
     _validate_player_id(body.player_id)
     _check_rate(body.player_id, request)
     return _svc(request).buy_item(body.player_id, body.item_id)
+
+
+@app.get("/api/appearance", response_model=AppearanceOut)
+def get_appearance(request: Request, player_id: str):
+    _validate_player_id(player_id)
+    _check_rate(player_id, request)
+    return _svc(request).get_appearance(player_id)
+
+
+@app.post("/api/appearance", response_model=AppearanceOut)
+def save_appearance(body: AppearanceBody, request: Request):
+    _validate_player_id(body.player_id)
+    _check_rate(body.player_id, request)
+    return _svc(request).save_appearance(
+        body.player_id,
+        body.display_name,
+        body.body_type,
+        body.skin_tone,
+        body.hair_style,
+        body.hair_colour,
+    )

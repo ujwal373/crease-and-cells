@@ -47,6 +47,14 @@ export interface PreviewResult {
   error?: string;
 }
 
+export interface Appearance {
+  display_name: string;
+  body_type: string;
+  skin_tone: string;
+  hair_style: string;
+  hair_colour: string;
+}
+
 export interface WalletData {
   id: string;
   name: string;
@@ -54,6 +62,7 @@ export interface WalletData {
   xp: number;
   level: number;
   outfit: Record<string, string>;
+  appearance?: Appearance;
 }
 
 export interface StoreItem {

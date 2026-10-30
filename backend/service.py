@@ -27,6 +27,12 @@ NO_HINT_BONUS = 10
 
 _PRIVATE_FIELDS = {"answer_spec", "reference_solution", "hints", "required_all", "required_any"}
 
+BODY_TYPES = ["lean", "medium", "stocky"]
+SKIN_TONES = ["light", "medium_light", "medium", "medium_dark", "dark"]
+HAIR_STYLES = ["short", "medium", "long", "bald", "spiky"]
+HAIR_COLOURS = ["black", "brown", "blonde", "red", "grey", "white"]
+MAX_NAME_LEN = 30
+
 
 def load_missions() -> list[dict]:
     missions: list[dict] = []
@@ -263,7 +269,11 @@ class GameService:
     # ----- wallet and store -----
     def get_wallet(self, player_id: str) -> dict:
         self.state.ensure_player(player_id)
-        return {**self.state.wallet(player_id), "outfit": self.store_agent.outfit(player_id)}
+        return {
+            **self.state.wallet(player_id),
+            "outfit": self.store_agent.outfit(player_id),
+            "appearance": self.state.get_appearance(player_id),
+        }
 
     def list_store(self, player_id: str) -> list[dict]:
         self.state.ensure_player(player_id)
@@ -272,3 +282,35 @@ class GameService:
     def buy_item(self, player_id: str, item_id: str) -> dict:
         self.state.ensure_player(player_id)
         return self.store_agent.buy(player_id, item_id)
+
+    # ----- appearance -----
+    def get_appearance(self, player_id: str) -> dict:
+        self.state.ensure_player(player_id)
+        return self.state.get_appearance(player_id)
+
+    def save_appearance(
+        self,
+        player_id: str,
+        display_name: str,
+        body_type: str,
+        skin_tone: str,
+        hair_style: str,
+        hair_colour: str,
+    ) -> dict:
+        if len(display_name) > MAX_NAME_LEN:
+            raise ValueError(f"display_name exceeds {MAX_NAME_LEN} characters")
+        if display_name:
+            guard = guardrails.check_chat_input(display_name)
+            if not guard.allowed:
+                raise ValueError(f"display_name rejected: {guard.reason}")
+        if body_type not in BODY_TYPES:
+            raise ValueError(f"body_type must be one of {BODY_TYPES}")
+        if skin_tone not in SKIN_TONES:
+            raise ValueError(f"skin_tone must be one of {SKIN_TONES}")
+        if hair_style not in HAIR_STYLES:
+            raise ValueError(f"hair_style must be one of {HAIR_STYLES}")
+        if hair_colour not in HAIR_COLOURS:
+            raise ValueError(f"hair_colour must be one of {HAIR_COLOURS}")
+        self.state.ensure_player(player_id)
+        self.state.set_appearance(player_id, display_name, body_type, skin_tone, hair_style, hair_colour)
+        return self.state.get_appearance(player_id)

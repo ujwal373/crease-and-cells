@@ -12,7 +12,8 @@ import {
   isApiError,
 } from './api';
 import { renderGrid } from './grid';
-import type { Mission, WalletData, StoreItem } from './types';
+import { initCreator, openCreator } from './creator';
+import type { Mission, WalletData, StoreItem, Appearance } from './types';
 
 // ── DOM helpers ───────────────────────────────────────────────────────────────
 
@@ -38,6 +39,7 @@ function setText(id: string, text: string): void {
 
 let playerId = '';
 let currentMission: Mission | null = null;
+let currentAppearance: Appearance | undefined = undefined;
 let previewTimer: ReturnType<typeof setTimeout> | null = null;
 let submitting = false;
 
@@ -68,6 +70,12 @@ function renderWallet(wallet: WalletData): void {
   setText('stat-coins', `${wallet.coins} coins`);
   setText('stat-xp', `${wallet.xp} XP`);
   setText('stat-level', `Lv ${wallet.level}`);
+  if (wallet.appearance) currentAppearance = wallet.appearance;
+}
+
+function handleAppearanceSaved(appearance: Appearance): void {
+  currentAppearance = appearance;
+  void getWallet(playerId).then(renderWallet).catch(() => undefined);
 }
 
 // ── Mission ────────────────────────────────────────────────────────────────────
@@ -373,6 +381,8 @@ async function init(): Promise<void> {
   coachInput   = el<HTMLInputElement>('coach-input');
   coachBtn     = el<HTMLButtonElement>('btn-coach');
 
+  initCreator();
+
   // Formula input: debounced preview + submit-button gate
   formulaInput.addEventListener('input', () => {
     updateSubmitState();
@@ -399,6 +409,10 @@ async function init(): Promise<void> {
     if (e.target === e.currentTarget) hide('store-overlay');
   });
 
+  el('btn-customize').addEventListener('click', () => {
+    openCreator(playerId, currentAppearance, false, handleAppearanceSaved);
+  });
+
   show('loading-overlay');
 
   try {
@@ -408,6 +422,13 @@ async function init(): Promise<void> {
     ]);
 
     renderWallet(wallet);
+
+    // Show character creator on first visit (before mission loads)
+    let creatorDone = false;
+    try { creatorDone = !!localStorage.getItem('cc_creator_done'); } catch { /* ignore */ }
+    if (!creatorDone) {
+      openCreator(playerId, wallet.appearance, true, handleAppearanceSaved);
+    }
 
     if (mission.done) {
       showAllDone(mission.message ?? 'All missions complete. New zones coming soon!');

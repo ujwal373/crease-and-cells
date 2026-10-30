@@ -8,6 +8,7 @@ import type {
   StoreItem,
   BuyResult,
   ApiError,
+  Appearance,
 } from './types';
 
 // In development, Vite proxies /api/* to localhost:8000.
@@ -120,5 +121,19 @@ export function buyItem(playerId: string, itemId: string): Promise<BuyResult> {
   return apiFetch<BuyResult>('/api/store/buy', {
     method: 'POST',
     body: JSON.stringify({ player_id: playerId, item_id: itemId }),
+  });
+}
+
+export function getAppearance(playerId: string): Promise<Appearance> {
+  return apiFetch<Appearance>(`/api/appearance?player_id=${encodeURIComponent(playerId)}`);
+}
+
+export function saveAppearance(
+  playerId: string,
+  appearance: Omit<Appearance, never>,
+): Promise<Appearance> {
+  return apiFetch<Appearance>('/api/appearance', {
+    method: 'POST',
+    body: JSON.stringify({ player_id: playerId, ...appearance }),
   });
 }
