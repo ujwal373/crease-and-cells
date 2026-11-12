@@ -31,13 +31,23 @@ from collections import defaultdict, deque
 from contextlib import asynccontextmanager
 from typing import Any
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 from pydantic import BaseModel, ConfigDict
 
+from .encounter_service import EncounterError, EncounterService
+from .game_config import (
+    CHECKPOINTS, CLUBS, FACILITY_TIER, FAMILIES, ITEMS,
+    LEVEL_XP, SESSIONS, SKILL_XP,
+)
+from .npc_config import NPC_CONFIG
 from .service import GameService
 from . import tracing
+
+ROOT = Path(__file__).resolve().parent.parent
 
 _MAX_BODY_BYTES = 10 * 1024  # 10 KB
 
@@ -303,8 +313,10 @@ class PreviewBody(BaseModel):
 
 
 class BuyBody(BaseModel):
-    player_id: str
-    item_id: str
+    # Old frontend: player_id + item_id. New frontend (Bearer auth): itemId.
+    player_id: str | None = None
+    item_id: str | None = None
+    itemId: str | None = None
 
 
 class AppearanceBody(BaseModel):
@@ -351,7 +363,9 @@ def _db_path() -> str:
 
 @asynccontextmanager
 async def _lifespan(app: FastAPI):
-    app.state.svc = GameService(_db_path(), tutor_client=_make_tutor_client())
+    svc = GameService(_db_path(), tutor_client=_make_tutor_client())
+    app.state.svc     = svc
+    app.state.enc_svc = EncounterService(svc)
     yield
 
 
@@ -361,7 +375,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=_cors_origins(),
     allow_methods=["GET", "POST"],
-    allow_headers=["Content-Type"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
 
@@ -426,6 +440,36 @@ def _svc(request: Request) -> GameService:
     return request.app.state.svc
 
 
+def _enc_svc(request: Request) -> EncounterService:
+    return request.app.state.enc_svc
+
+
+# ---------------------------------------------------------------------------
+# Bearer-token player identity (new frontend)
+# ---------------------------------------------------------------------------
+
+def _bearer_player(
+    request: Request,
+    authorization: str | None = Header(default=None),
+) -> str:
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(401, detail={"code": "UNAUTHORIZED", "message": "Missing Authorization header"})
+    pid = authorization.removeprefix("Bearer ").strip()
+    _validate_player_id(pid)
+    ip = _get_client_ip(request)
+    _check_new_player(pid, ip)
+    if not _ip_limiter.is_allowed(ip):
+        raise HTTPException(429, detail={"code": "RATE_LIMIT", "message": "Too many requests"})
+    if not _player_limiter.is_allowed(pid):
+        raise HTTPException(429, detail={"code": "RATE_LIMIT", "message": "Too many requests"})
+    _svc(request).state.ensure_player(pid)
+    return pid
+
+
+def _handle_encounter_error(exc: EncounterError) -> JSONResponse:
+    return JSONResponse({"code": exc.code, "message": exc.message}, status_code=400)
+
+
 # ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
@@ -480,11 +524,223 @@ def list_store(request: Request, player_id: str):
     return _svc(request).list_store(player_id)
 
 
-@app.post("/api/store/buy", response_model=BuyOut)
-def buy_item(body: BuyBody, request: Request):
+@app.post("/api/store/buy")
+def buy_item(body: BuyBody, request: Request, authorization: str | None = Header(default=None)):
+    """Handles both old shape {player_id, item_id} and new shape (Bearer + {itemId})."""
+    from .game_config import ITEMS_BY_ID
+    if authorization and authorization.startswith("Bearer "):
+        # New frontend path: Bearer auth, itemId field
+        pid    = authorization.removeprefix("Bearer ").strip()
+        _validate_player_id(pid)
+        _svc(request).state.ensure_player(pid)
+        iid  = body.itemId or body.item_id
+        if not iid:
+            return JSONResponse({"code": "NOT_FOUND", "message": "itemId required."}, status_code=400)
+        item = ITEMS_BY_ID.get(iid)
+        if not item:
+            return JSONResponse({"code": "NOT_FOUND", "message": "Unknown item."}, status_code=400)
+        reason = _svc(request).state.buy_item_atomic(pid, iid, item["price"], item["slot"])
+        if reason == "already owned":
+            return JSONResponse({"code": "OWNED", "message": "You already own this."}, status_code=400)
+        if reason == "not enough coins":
+            return JSONResponse({"code": "FUNDS", "message": "Not enough coins."}, status_code=400)
+        snap = _svc(request).player_snap(pid)
+        return {"ok": True, "item": item, "player": snap}
+    # Old frontend path: player_id + item_id in body
+    if not body.player_id:
+        raise HTTPException(400, detail={"error": "player_id required"})
     _validate_player_id(body.player_id)
     _check_rate(body.player_id, request)
-    return _svc(request).buy_item(body.player_id, body.item_id)
+    item_id = body.item_id or body.itemId
+    if not item_id:
+        raise HTTPException(400, detail={"error": "item_id required"})
+    return _svc(request).buy_item(body.player_id, item_id)
+
+
+# ---------------------------------------------------------------------------
+# New frontend request bodies
+# ---------------------------------------------------------------------------
+
+class EquipBody(BaseModel):
+    itemId: str
+
+
+class PlayerBody(BaseModel):
+    name: str = ""
+    gender: str = ""
+    body: str = "medium"
+    skin: str = "medium"
+    hairStyle: str = "short"
+    hairColor: str = "black"
+
+
+class AnswerBody(BaseModel):
+    answer: Any = None
+
+
+class BeginBody(BaseModel):
+    relaxed: bool = False
+
+
+class LessonBody(BaseModel):
+    topic: str
+
+
+# ---------------------------------------------------------------------------
+# New frontend endpoints — all use _bearer_player
+# ---------------------------------------------------------------------------
+
+@app.get("/api/world")
+def get_world(
+    request: Request,
+    player_id: str = Depends(_bearer_player),
+):
+    """Return world config + player snapshot + NPC markers.
+
+    Matches MockAdapter world() shape exactly so the frontend needs no changes.
+    Markers are computed for every known NPC (all keys in NPC_CONFIG).
+    """
+    svc     = _svc(request)
+    enc_svc = _enc_svc(request)
+    snap    = svc.player_snap(player_id)
+    markers = enc_svc.compute_markers(player_id, list(NPC_CONFIG.keys()))
+    return {
+        "config": {
+            "levelXp":   LEVEL_XP,
+            "skillXp":   SKILL_XP,
+            "families":  FAMILIES,
+            "items":     ITEMS,
+            "clubs":     [{"id": c["id"], "tier": c["tier"], "name": c["name"], "venue": c["venue"]} for c in CLUBS],
+            "facilities": FACILITY_TIER,
+            "sessions":  SESSIONS,
+            "checkpoints": CHECKPOINTS,
+        },
+        "player":  snap,
+        "markers": markers,
+        "now":     int(time.time() * 1000),
+    }
+
+
+@app.post("/api/player")
+def create_player(
+    body: PlayerBody,
+    request: Request,
+    player_id: str = Depends(_bearer_player),
+):
+    """Save character appearance and mark as created."""
+    svc = _svc(request)
+    svc.save_appearance(
+        player_id,
+        body.name,
+        body.body,
+        body.skin,
+        body.hairStyle,
+        body.hairColor,
+    )
+    svc.state.set_player_created(player_id)
+    # store gender in appearance table via display_name workaround — just snap
+    snap = svc.player_snap(player_id)
+    return snap
+
+
+@app.post("/api/npcs/{npc_id}/encounter")
+def npc_encounter(
+    npc_id: str,
+    request: Request,
+    player_id: str = Depends(_bearer_player),
+):
+    enc_svc = _enc_svc(request)
+    try:
+        return enc_svc.create_encounter(player_id, npc_id)
+    except EncounterError as exc:
+        return _handle_encounter_error(exc)
+
+
+@app.post("/api/encounters/{enc_id}/answer")
+def answer_encounter(
+    enc_id: str,
+    body: AnswerBody,
+    request: Request,
+    player_id: str = Depends(_bearer_player),
+):
+    enc_svc = _enc_svc(request)
+    try:
+        return enc_svc.answer_encounter(player_id, enc_id, body.answer)
+    except EncounterError as exc:
+        return _handle_encounter_error(exc)
+
+
+@app.post("/api/encounters/{enc_id}/begin")
+def begin_session(
+    enc_id: str,
+    body: BeginBody,
+    request: Request,
+    player_id: str = Depends(_bearer_player),
+):
+    enc_svc = _enc_svc(request)
+    try:
+        return enc_svc.begin_session(player_id, enc_id, {"relaxed": body.relaxed})
+    except EncounterError as exc:
+        return _handle_encounter_error(exc)
+
+
+@app.post("/api/encounters/{enc_id}/lesson")
+def lesson_topic(
+    enc_id: str,
+    body: LessonBody,
+    request: Request,
+    player_id: str = Depends(_bearer_player),
+):
+    enc_svc = _enc_svc(request)
+    try:
+        return enc_svc.lesson_topic(player_id, enc_id, body.topic)
+    except EncounterError as exc:
+        return _handle_encounter_error(exc)
+
+
+@app.post("/api/facilities/{fac_id}/visit")
+def visit_facility(
+    fac_id: str,
+    request: Request,
+    player_id: str = Depends(_bearer_player),
+):
+    enc_svc = _enc_svc(request)
+    try:
+        return enc_svc.visit_facility(player_id, fac_id)
+    except EncounterError as exc:
+        return _handle_encounter_error(exc)
+
+
+@app.post("/api/avatar/equip")
+def equip_item(
+    body: EquipBody,
+    request: Request,
+    player_id: str = Depends(_bearer_player),
+):
+    from .game_config import ITEMS_BY_ID
+    item = ITEMS_BY_ID.get(body.itemId)
+    if not item:
+        return JSONResponse({"code": "NOT_FOUND", "message": "Unknown item."}, status_code=400)
+    svc = _svc(request)
+    if not svc.state.owns(player_id, body.itemId):
+        return JSONResponse({"code": "NOT_OWNED", "message": "You do not own this item."}, status_code=400)
+    svc.state.equip(player_id, item["slot"], body.itemId)
+    snap = svc.player_snap(player_id)
+    return {"ok": True, "player": snap}
+
+
+@app.get("/api/clubs")
+def get_clubs(
+    request: Request,
+    player_id: str = Depends(_bearer_player),
+):
+    return _enc_svc(request).clubs_list(player_id)
+
+
+@app.get("/api/leaderboard")
+def get_leaderboard(request: Request, limit: int = 20):
+    svc = _svc(request)
+    return {"leaderboard": svc.state.get_leaderboard(min(limit, 100))}
 
 
 @app.get("/api/appearance", response_model=AppearanceOut)
@@ -505,4 +761,17 @@ def save_appearance(body: AppearanceBody, request: Request):
         body.skin_tone,
         body.hair_style,
         body.hair_colour,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Static files — mounted last; FastAPI always matches /api/... routes first
+# ---------------------------------------------------------------------------
+
+_FRONTEND_DIR = ROOT / "game_frontend_new" / "project"
+if _FRONTEND_DIR.exists():
+    app.mount(
+        "/game",
+        StaticFiles(directory=str(_FRONTEND_DIR), html=True),
+        name="game_new",
     )

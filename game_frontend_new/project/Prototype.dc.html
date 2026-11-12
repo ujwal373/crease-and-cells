@@ -8,6 +8,11 @@
 <script src="/_blob/969a345dc3273deac6b918496c993af9"></script>
 <script src="/_blob/0973df3abba64705a996f4579a92a14d"></script>
 <script src="/_blob/f1395e74f1fee6c8469877415befc531"></script>
+<script>
+  var _pid = localStorage.getItem('cc_pid') || crypto.randomUUID();
+  localStorage.setItem('cc_pid', _pid);
+  CCApi.use('http', { baseUrl: '', headers: { Authorization: 'Bearer ' + _pid } });
+</script>
 </head>
 <body>
 <x-dc>
