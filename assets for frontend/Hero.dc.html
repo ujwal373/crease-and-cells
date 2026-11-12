@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Hero sprite</title>
+<script src="./vendor/react.js"></script>
+<script src="./vendor/react-dom.js"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="display: block; width: {{wpx}}px; height: {{hpx}}px">
+<svg viewBox="0 0 120 190" width="100%" height="100%" role="img" aria-label="{{label}}" style="display: block; overflow: visible">
+
+<sc-if value="{{hairLong}}" hint-placeholder-val="{{ false }}">
+<polygon points="43,30 46,21 60,17 74,21 77,30 80,72 71,66 49,66 40,72" fill="{{hairBack}}"></polygon>
+</sc-if>
+
+<polygon points="55,56 65,56 65,67 55,67" fill="{{skinS}}"></polygon>
+
+<polygon points="{{legL}}" fill="#F4F1E8"></polygon>
+<polygon points="{{legR}}" fill="#D9D4C2"></polygon>
+<polygon points="{{shoeL}}" fill="{{shoeBase}}"></polygon>
+<polygon points="{{soleL}}" fill="{{shoeSole}}"></polygon>
+<polygon points="{{shoeR}}" fill="{{shoeShade}}"></polygon>
+<polygon points="{{soleR}}" fill="{{shoeSole}}"></polygon>
+<polyline points="{{laceL}}" fill="none" stroke="{{shoeLace}}" stroke-width="2" stroke-linecap="round"></polyline>
+<polyline points="{{laceR}}" fill="none" stroke="{{shoeLace}}" stroke-width="2" stroke-linecap="round"></polyline>
+
+<polygon points="{{armLUp}}" fill="{{jBase}}"></polygon>
+<polygon points="{{armLLow}}" fill="{{skin}}"></polygon>
+<polygon points="{{handL}}" fill="{{skin}}"></polygon>
+<polygon points="{{armRUp}}" fill="{{jShade}}"></polygon>
+<polygon points="{{armRLow}}" fill="{{sleeveBase}}"></polygon>
+<polygon points="{{cuffR}}" fill="{{sleeveTrim}}"></polygon>
+<polygon points="{{handR}}" fill="{{skinS}}"></polygon>
+
+<polygon points="{{torso}}" fill="{{jBase}}"></polygon>
+<polygon points="{{torsoShade}}" fill="#1F2A24" fill-opacity="0.14"></polygon>
+<polygon points="{{hem}}" fill="{{jTrim}}"></polygon>
+<sc-if value="{{patBand}}" hint-placeholder-val="{{ false }}">
+<polygon points="{{band}}" fill="{{jTrim}}"></polygon>
+</sc-if>
+<sc-if value="{{patStripe}}" hint-placeholder-val="{{ false }}">
+<rect x="{{stripe1}}" y="72" width="3" height="42" fill="{{jTrim}}"></rect>
+<rect x="{{stripe2}}" y="72" width="3" height="42" fill="{{jTrim}}"></rect>
+<rect x="{{stripe3}}" y="72" width="3" height="42" fill="{{jTrim}}"></rect>
+</sc-if>
+<polygon points="54,66 66,66 60,75" fill="{{skinS}}"></polygon>
+<polyline points="52,66 60,77 68,66" fill="none" stroke="{{jTrim}}" stroke-width="3" stroke-linejoin="round"></polyline>
+
+<polygon points="44,38 47,38 47,46 44,45" fill="{{skinS}}"></polygon>
+<polygon points="76,38 73,38 73,46 76,45" fill="{{skinS}}"></polygon>
+<polygon points="60,24 74,31 73,48 60,58 47,48 46,31" fill="{{skin}}"></polygon>
+<polygon points="60,24 74,31 73,48 60,58" fill="{{skinS}}" fill-opacity="0.55"></polygon>
+<rect x="53" y="41" width="3" height="4" fill="#2A1B14"></rect>
+<rect x="65" y="41" width="3" height="4" fill="#2A1B14"></rect>
+<path d="M55 50 Q60 54 65 50" fill="none" stroke="#2A1B14" stroke-width="1.6" stroke-linecap="round"></path>
+
+<sc-if value="{{hairShort}}" hint-placeholder-val="{{ true }}">
+<polygon points="46,32 47,23 53,19 60,18 67,19 73,23 74,32 70,28 60,26 50,28" fill="{{hair}}"></polygon>
+</sc-if>
+<sc-if value="{{hairCurly}}" hint-placeholder-val="{{ false }}">
+<polygon points="43,40 43,29 48,22 53,25 58,17 63,24 68,18 72,25 77,29 77,40 73,31 60,28 47,31" fill="{{hair}}"></polygon>
+</sc-if>
+<sc-if value="{{hairLong}}" hint-placeholder-val="{{ false }}">
+<polygon points="46,32 47,23 53,19 60,18 67,19 73,23 74,32 70,28 60,26 50,28" fill="{{hair}}"></polygon>
+</sc-if>
+<sc-if value="{{hairBun}}" hint-placeholder-val="{{ false }}">
+<polygon points="55,12 65,12 70,18 65,24 55,24 50,18" fill="{{hair}}"></polygon>
+<polygon points="46,32 47,23 53,19 60,18 67,19 73,23 74,32 70,28 60,26 50,28" fill="{{hair}}"></polygon>
+</sc-if>
+
+<sc-if value="{{capIsCap}}" hint-placeholder-val="{{ true }}">
+<polygon points="45,34 46,24 52,19 60,17 68,19 74,24 75,34 60,30" fill="{{capBase}}"></polygon>
+<polygon points="60,17 68,19 74,24 75,34 60,30" fill="#1F2A24" fill-opacity="0.12"></polygon>
+<polygon points="42,33 78,33 76,39 60,41 44,39" fill="{{capShade}}"></polygon>
+<sc-if value="{{capBadge}}" hint-placeholder-val="{{ false }}">
+<polygon points="60,22 64,25 62,29 58,29 56,25" fill="{{capTrim}}"></polygon>
+</sc-if>
+</sc-if>
+<sc-if value="{{capIsHat}}" hint-placeholder-val="{{ false }}">
+<polygon points="26,35 44,30 76,30 94,35 86,41 34,41" fill="{{capShade}}"></polygon>
+<polygon points="46,32 48,21 60,18 72,21 74,32" fill="{{capBase}}"></polygon>
+<polygon points="46,28 74,28 74,32 46,32" fill="{{capTrim}}"></polygon>
+</sc-if>
+<sc-if value="{{capIsHelmet}}" hint-placeholder-val="{{ false }}">
+<polygon points="44,36 44,26 50,19 60,16 70,19 76,26 76,36 70,34 50,34" fill="{{capBase}}"></polygon>
+<polygon points="60,16 70,19 76,26 76,36 70,34 60,34" fill="#1F2A24" fill-opacity="0.16"></polygon>
+<polygon points="44,32 76,32 80,37 40,37" fill="{{capShade}}"></polygon>
+<g fill="none" stroke="{{capTrim}}" stroke-width="1.8" stroke-linecap="round">
+<line x1="50" y1="38" x2="49" y2="56"></line>
+<line x1="60" y1="38" x2="60" y2="58"></line>
+<line x1="70" y1="38" x2="71" y2="56"></line>
+<line x1="48" y1="47" x2="72" y2="47"></line>
+</g>
+</sc-if>
+
+</svg>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"body":{"editor":null,"default":"regular"},"skin":{"editor":null,"default":"#C68A5E"},"hairStyle":{"editor":null,"default":"short"},"hairColor":{"editor":null,"default":"#2A1B14"},"jersey":{"editor":null,"default":"j_white"},"cap":{"editor":null,"default":"c_white"},"shoes":{"editor":null,"default":"s_white"},"sleeve":{"editor":null,"default":"a_white"},"size":{"editor":"int","default":380,"min":80,"max":600,"unit":"px"},"$preview":{"width":240,"height":380}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props;
+    const shade = (hex, f) => {
+      const h = String(hex).replace('#', '');
+      const n = [0, 2, 4].map((i) => Math.max(0, Math.min(255, Math.round(parseInt(h.substr(i, 2), 16) * f))));
+      return '#' + n.map((v) => ('0' + v.toString(16)).slice(-2)).join('');
+    };
+    const JERSEY = {
+      j_white: { base: '#F4F1E8', trim: '#BDB7A3', pat: 'none' },
+      j_sunrise: { base: '#F2B632', trim: '#3B2A12', pat: 'band' },
+      j_teal: { base: '#1F7A7A', trim: '#F3E6C8', pat: 'stripe' },
+      j_terra: { base: '#D9805F', trim: '#F3E6C8', pat: 'stripe' }
+    };
+    const CAP = {
+      c_white: { type: 'cap', base: '#F4F1E8', trim: '#BDB7A3', badge: false },
+      c_sun: { type: 'cap', base: '#F2B632', trim: '#3B2A12', badge: true },
+      c_hat: { type: 'hat', base: '#E9D8A6', trim: '#1F7A7A', badge: false },
+      c_helm: { type: 'helmet', base: '#2C3E6B', trim: '#F3E6C8', badge: false }
+    };
+    const SHOES = {
+      s_white: { base: '#F4F1E8', sole: '#8D887A', lace: '#8D887A' },
+      s_gold: { base: '#F2B632', sole: '#3B2A12', lace: '#3B2A12' },
+      s_teal: { base: '#1F7A7A', sole: '#F3E6C8', lace: '#F3E6C8' },
+      s_night: { base: '#26262B', sole: '#F4F1E8', lace: '#F4F1E8' }
+    };
+    const SLEEVE = {
+      a_white: { base: '#F4F1E8', trim: '#BDB7A3' },
+      a_teal: { base: '#1F7A7A', trim: '#F3E6C8' },
+      a_gold: { base: '#F2B632', trim: '#3B2A12' },
+      a_terra: { base: '#D9805F', trim: '#F3E6C8' }
+    };
+    const body = p.body || 'regular';
+    const hw = body === 'slim' ? 16 : body === 'broad' ? 25 : 20;
+    const skin = p.skin || '#C68A5E';
+    const hairStyle = p.hairStyle || 'short';
+    const hair = p.hairColor || '#2A1B14';
+    const j = JERSEY[p.jersey] || JERSEY.j_white;
+    const c = CAP[p.cap] || CAP.c_white;
+    const s = SHOES[p.shoes] || SHOES.s_white;
+    const a = SLEEVE[p.sleeve] || SLEEVE.a_white;
+    const xl = 60 - hw;
+    const xr = 60 + hw;
+    const hpx = p.size ? Number(p.size) : 380;
+    const wpx = Math.round((hpx * 120) / 190);
+    return {
+      hpx: hpx,
+      wpx: wpx,
+      label: 'Hero in a ' + body + ' build, wearing ' + (p.jersey || 'j_white').replace('j_', '') + ' jersey',
+      skin: skin,
+      skinS: shade(skin, 0.8),
+      hair: hair,
+      hairBack: shade(hair, 0.8),
+      hairShort: hairStyle === 'short',
+      hairCurly: hairStyle === 'curly',
+      hairLong: hairStyle === 'long',
+      hairBun: hairStyle === 'bun',
+      jBase: j.base,
+      jShade: shade(j.base, 0.9),
+      jTrim: j.trim,
+      patBand: j.pat === 'band',
+      patStripe: j.pat === 'stripe',
+      stripe1: xl + 5,
+      stripe2: 58.5,
+      stripe3: xr - 8,
+      torso: xl + ',66 ' + xr + ',66 ' + (xr - 3) + ',120 ' + (xl + 3) + ',120',
+      torsoShade: '60,66 ' + xr + ',66 ' + (xr - 3) + ',120 60,120',
+      hem: (xl + 3) + ',114 ' + (xr - 3) + ',114 ' + (xr - 3) + ',120 ' + (xl + 3) + ',120',
+      band: (xl + 1) + ',84 ' + (xr - 1) + ',84 ' + (xr - 1) + ',94 ' + (xl + 1) + ',94',
+      armLUp: (xl - 9) + ',70 ' + xl + ',66 ' + (xl + 1) + ',92 ' + (xl - 8) + ',94',
+      armLLow: (xl - 8) + ',94 ' + (xl + 1) + ',92 ' + (xl - 1) + ',116 ' + (xl - 9) + ',118',
+      handL: (xl - 9) + ',118 ' + (xl - 1) + ',116 ' + (xl - 2) + ',127 ' + (xl - 8) + ',128',
+      armRUp: xr + ',66 ' + (xr + 9) + ',70 ' + (xr + 8) + ',94 ' + (xr - 1) + ',92',
+      armRLow: (xr - 1) + ',92 ' + (xr + 8) + ',94 ' + (xr + 9) + ',118 ' + (xr + 1) + ',116',
+      cuffR: (xr + 1) + ',111 ' + (xr + 9) + ',113 ' + (xr + 9) + ',118 ' + (xr + 1) + ',116',
+      handR: (xr + 1) + ',116 ' + (xr + 9) + ',118 ' + (xr + 8) + ',128 ' + (xr + 2) + ',127',
+      sleeveBase: a.base,
+      sleeveTrim: a.trim,
+      legL: (xl + 3) + ',118 59,118 58,172 ' + (xl + 6) + ',172',
+      legR: '61,118 ' + (xr - 3) + ',118 ' + (xr - 6) + ',172 62,172',
+      shoeL: (xl + 6) + ',170 58,170 58,183 ' + (xl - 4) + ',183 ' + (xl - 2) + ',177',
+      soleL: (xl - 4) + ',181 58,181 58,185 ' + (xl - 5) + ',185',
+      shoeR: '62,170 ' + (xr - 6) + ',170 ' + (xr + 2) + ',177 ' + (xr + 4) + ',183 62,183',
+      soleR: '62,181 ' + (xr + 4) + ',181 ' + (xr + 5) + ',185 62,185',
+      laceL: (xl + 8) + ',174 57,174',
+      laceR: '63,174 ' + (xr - 8) + ',174',
+      shoeBase: s.base,
+      shoeShade: shade(s.base, 0.88),
+      shoeSole: s.sole,
+      shoeLace: s.lace,
+      capIsCap: c.type === 'cap',
+      capIsHat: c.type === 'hat',
+      capIsHelmet: c.type === 'helmet',
+      capBase: c.base,
+      capShade: shade(c.base, 0.82),
+      capTrim: c.trim,
+      capBadge: !!c.badge
+    };
+  }
+}
+</script>
+</body>
+</html>

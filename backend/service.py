@@ -10,6 +10,7 @@ Agents never call each other. They subscribe to events on the bus:
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 from . import events, guardrails
@@ -27,10 +28,10 @@ NO_HINT_BONUS = 10
 
 _PRIVATE_FIELDS = {"answer_spec", "reference_solution", "hints", "required_all", "required_any"}
 
-BODY_TYPES = ["lean", "medium", "stocky"]
-SKIN_TONES = ["light", "medium_light", "medium", "medium_dark", "dark"]
-HAIR_STYLES = ["short", "medium", "long", "bald", "spiky"]
-HAIR_COLOURS = ["black", "brown", "blonde", "red", "grey", "white"]
+BODY_TYPES = ["slim", "regular", "broad"]
+HAIR_STYLES = ["short", "curly", "long", "bun", "none"]
+# Skin and hair colour are stored as hex strings from the character creator.
+_HEX_RE = re.compile(r"^#[0-9A-Fa-f]{6}$")
 MAX_NAME_LEN = 30
 
 
@@ -354,12 +355,12 @@ class GameService:
                 raise ValueError(f"display_name rejected: {guard.reason}")
         if body_type not in BODY_TYPES:
             raise ValueError(f"body_type must be one of {BODY_TYPES}")
-        if skin_tone not in SKIN_TONES:
-            raise ValueError(f"skin_tone must be one of {SKIN_TONES}")
+        if not _HEX_RE.match(skin_tone):
+            raise ValueError("skin_tone must be a hex colour like #C68A5E")
         if hair_style not in HAIR_STYLES:
             raise ValueError(f"hair_style must be one of {HAIR_STYLES}")
-        if hair_colour not in HAIR_COLOURS:
-            raise ValueError(f"hair_colour must be one of {HAIR_COLOURS}")
+        if not _HEX_RE.match(hair_colour):
+            raise ValueError("hair_colour must be a hex colour like #1B1410")
         self.state.ensure_player(player_id)
         self.state.set_appearance(player_id, display_name, body_type, skin_tone, hair_style, hair_colour)
         return self.state.get_appearance(player_id)

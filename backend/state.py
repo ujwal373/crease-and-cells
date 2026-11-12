@@ -370,10 +370,10 @@ class GameState:
                 return dict(row)
             return {
                 "display_name": "",
-                "body_type": "medium",
-                "skin_tone": "medium",
+                "body_type": "regular",
+                "skin_tone": "#C68A5E",
                 "hair_style": "short",
-                "hair_colour": "black",
+                "hair_colour": "#1B1410",
             }
 
     def set_appearance(

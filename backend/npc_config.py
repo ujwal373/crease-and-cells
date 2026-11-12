@@ -1,74 +1,113 @@
-"""NPC ID to role/family/session configuration.
+"""NPC configuration — maps every NPC ID from cc-world.js to its role, family,
+session, and tier so encounter_service can dispatch correctly.
 
-Keys are the NPC IDs sent by the frontend (from cc-world.js). Values are dicts
-describing how the backend should handle an encounter with that NPC.
-
-Roles:
-  friend      - asks a formula question from their family
-  practice    - same as friend, first question each day pays double coins
-  store       - returns item catalogue
-  staff       - returns a rotating tip (chat encounter)
-  lesson      - offers lesson topic choices then teaches steps
-  checkpoint  - asks a checkpoint question for a tier
-  recruit     - shows club lobby for an enrolment session
-  match       - shows club lobby for a repeat match session
+Roles mirror cc-engine.js MockAdapter:
+  friend      — question encounter (fixed or adaptive family)
+  store       — store encounter
+  staff/work  — chat encounter with a rotating tip
+  practice    — question encounter with daily double-coin bonus
+  lesson/quest— lesson topic picker (requires tier)
+  recruit     — lobby encounter to enrol in a session
+  match       — lobby encounter for a timed match session
+  checkpoint  — gated passage encounter
 """
 from __future__ import annotations
 
 NPC_CONFIG: dict[str, dict] = {
-    # Coaches — one per family
-    "coach0": {"role": "friend",      "family": "maths",  "name": "Coach Rao"},
-    "coach1": {"role": "friend",      "family": "text",   "name": "Coach Singh"},
-    "coach2": {"role": "friend",      "family": "logic",  "name": "Coach Mehta"},
-    "coach3": {"role": "friend",      "family": "date",   "name": "Coach Joshi"},
-    "coach4": {"role": "friend",      "family": "lookup", "name": "Coach Pillai"},
-    "coach5": {"role": "friend",      "family": "stats",  "name": "Coach Das"},
-    "coach6": {"role": "friend",      "family": "arrays", "name": "Coach Bose"},
+    # ------------------------------------------------------------------ #
+    # Coaches — fixed family, one per skill family
+    # ------------------------------------------------------------------ #
+    "mukesh": {"role": "friend", "family": "maths",  "name": "Coach Mukesh"},
+    "viral":  {"role": "friend", "family": "text",   "name": "Coach Viral"},
+    "asst2":  {"role": "friend", "family": "logic",  "name": "Assistant Coach"},
+    "asst3":  {"role": "friend", "family": "date",   "name": "Assistant Coach"},
+    "asst4":  {"role": "friend", "family": "lookup", "name": "Assistant Coach"},
+    "asst5":  {"role": "friend", "family": "stats",  "name": "Assistant Coach"},
+    "asst6":  {"role": "friend", "family": "arrays", "name": "Assistant Coach"},
 
-    # Friends (ask questions from various families)
-    "parth":  {"role": "friend",      "family": "maths",  "name": "Parth"},
-    "sahil":  {"role": "friend",      "family": "logic",  "name": "Sahil"},
-    "nikhil": {"role": "friend",      "family": "stats",  "name": "Nikhil"},
-    "rahul":  {"role": "friend",      "family": "text",   "name": "Rahul"},
-    "nawaz":  {"role": "friend",      "family": "lookup", "name": "Nawaz"},
-    "jinal":  {"role": "friend",      "family": "arrays", "name": "Jinal"},
-    "mo":     {"role": "friend",      "family": "date",   "name": "Mo"},
+    # ------------------------------------------------------------------ #
+    # Store
+    # ------------------------------------------------------------------ #
+    "akshita": {"role": "store", "name": "Akshita"},
 
-    # Stores
-    "akshita": {"role": "store",                          "name": "Akshita"},
-    "kit":     {"role": "store",                          "name": "Kit Room"},
+    # ------------------------------------------------------------------ #
+    # Friends — give question encounters, family adapts to player skill
+    # ------------------------------------------------------------------ #
+    "parth":  {"role": "friend", "family": "maths",  "name": "Parth"},
+    "sahil":  {"role": "friend", "family": "logic",  "name": "Sahil"},
+    "nikhil": {"role": "friend", "family": "maths",  "name": "Nikhil"},
+    "rahul":  {"role": "friend", "family": "logic",  "name": "Rahul"},
+    "nawaz":  {"role": "friend", "family": "maths",  "name": "Nawaz"},
+    "jinal":  {"role": "friend", "family": "text",   "name": "Jinal"},
+    "mo":     {"role": "friend", "family": "logic",  "name": "Mo"},
 
-    # Staff (tips only)
-    "tea":     {"role": "staff",                          "name": "Tea Stall"},
+    # National squad friends (tier 7 required)
+    "p1": {"role": "friend", "family": "arrays", "tier": 7, "name": "Squad member"},
+    "p2": {"role": "friend", "family": "stats",  "tier": 7, "name": "Squad member"},
+    "p3": {"role": "friend", "family": "lookup", "tier": 7, "name": "Squad member"},
+    "p4": {"role": "friend", "family": "maths",  "tier": 7, "name": "Squad member"},
+    "p5": {"role": "friend", "family": "logic",  "tier": 7, "name": "Squad member"},
+    "p6": {"role": "friend", "family": "text",   "tier": 7, "name": "Squad member"},
+    "p7": {"role": "friend", "family": "date",   "tier": 7, "name": "Squad member"},
+    "p8": {"role": "friend", "family": "arrays", "tier": 7, "name": "Squad member"},
 
-    # Practice (same as friend but daily bonus)
-    "pav":     {"role": "practice",   "family": "maths",  "name": "Pav"},
+    # ------------------------------------------------------------------ #
+    # Staff / workers — chat / tips only
+    # ------------------------------------------------------------------ #
+    "maya":       {"role": "staff", "name": "Maya"},
+    "bholu":      {"role": "staff", "name": "Bholu"},
+    "nandini":    {"role": "staff", "name": "Nandini"},
+    "gill":       {"role": "staff", "name": "Gill"},
+    "curator":    {"role": "staff", "name": "Curator"},
+    "groundsman": {"role": "staff", "name": "Groundsman"},
+    "fIcon":      {"role": "staff", "name": "Franchise Icon"},
+    "fMgr":       {"role": "staff", "name": "Franchise Manager"},
+    "fData":      {"role": "staff", "name": "Data Analyst"},
+    "fMed":       {"role": "staff", "name": "Medical Staff"},
+    "fSC":        {"role": "staff", "name": "Strength Coach"},
+    "fPhys":      {"role": "staff", "name": "Physio"},
 
-    # Lesson mentors — lesson key maps to LESSON_TOPICS in game_config
-    "sana":    {"role": "lesson",     "lesson": "bowling", "tier": 1, "name": "Sana"},
-    "fBat":    {"role": "lesson",     "lesson": "batting", "tier": 1, "name": "Farhan"},
-    "fFld":    {"role": "lesson",     "lesson": "fielding","tier": 2, "name": "Fiona"},
+    # ------------------------------------------------------------------ #
+    # Practice — question encounter, daily double-coin bonus
+    # ------------------------------------------------------------------ #
+    "practice": {"role": "practice", "family": "maths", "tier": 1, "name": "Practice Nets"},
 
-    # Recruiters — enrolment sessions (one per club tier 1-7)
-    "rec1":    {"role": "recruit",    "tier": 1, "session": "univ_exam",    "name": "Dean Joshi"},
-    "rec2":    {"role": "recruit",    "tier": 2, "session": "shield",       "name": "Coach Waugh"},
-    "rec3":    {"role": "recruit",    "tier": 3, "session": "intra_final",  "name": "Selector Nair"},
-    "rec4":    {"role": "recruit",    "tier": 4, "session": "inter",        "name": "Manager Das"},
-    "rec5":    {"role": "recruit",    "tier": 5, "session": "state_exam",   "name": "Selector Bose"},
-    "rec6":    {"role": "recruit",    "tier": 6, "session": "league_exam",  "name": "Agent Kapoor"},
-    "rec7":    {"role": "recruit",    "tier": 7, "session": "national_exam","name": "Chief Selector"},
+    # ------------------------------------------------------------------ #
+    # Lesson / quest — topic picker, requires tier
+    # ------------------------------------------------------------------ #
+    "sana":   {"role": "lesson", "lesson": "bowling",  "tier": 1, "name": "Sana"},
+    "fDev":   {"role": "lesson", "lesson": "bowling",  "tier": 6, "name": "Developer Coach"},
+    "fBat":   {"role": "lesson", "lesson": "batting",  "tier": 6, "name": "Batting Coach"},
+    "fBowl":  {"role": "lesson", "lesson": "bowling",  "tier": 6, "name": "Bowling Coach"},
+    "fField": {"role": "lesson", "lesson": "fielding", "tier": 6, "name": "Fielding Coach"},
+    "nBat":   {"role": "lesson", "lesson": "batting",  "tier": 7, "name": "Academy Batting Coach"},
+    "nBowl":  {"role": "lesson", "lesson": "bowling",  "tier": 7, "name": "Academy Bowling Coach"},
+    "nField": {"role": "lesson", "lesson": "fielding", "tier": 7, "name": "Academy Fielding Coach"},
 
-    # Match officials — repeat matches (after enrolment)
-    "w0":      {"role": "match",      "tier": 2, "session": "shield",       "name": "Umpire Kapoor"},
-    "w1":      {"role": "match",      "tier": 4, "session": "inter",        "name": "Umpire Rao"},
-    "w2":      {"role": "match",      "tier": 6, "session": "leagueA",      "name": "Umpire Singh"},
-    "w3":      {"role": "match",      "tier": 6, "session": "leagueB",      "name": "Umpire Mehta"},
-    "w4":      {"role": "match",      "tier": 7, "session": "national",     "name": "Umpire Khan"},
+    # ------------------------------------------------------------------ #
+    # Recruit — enrol in a session (exam or trial)
+    # ------------------------------------------------------------------ #
+    "dean":  {"role": "recruit", "tier": 1, "session": "univ_exam",    "name": "Dean Joshi"},
+    "arjun": {"role": "recruit", "tier": 3, "session": "intra_final",  "name": "Selector Arjun"},
+    "lad":   {"role": "recruit", "tier": 5, "session": "state_exam",   "name": "Selector Lad"},
+    "fDir":  {"role": "recruit", "tier": 6, "session": "league_exam",  "name": "Franchise Director"},
+    "nCap":  {"role": "recruit", "tier": 7, "session": "national_exam","name": "National Captain"},
 
-    # Checkpoints (tier, step)
-    "w5":      {"role": "checkpoint", "tier": 3, "step": 1,                 "name": "Captain Patel"},
-    "cp32":    {"role": "checkpoint", "tier": 3, "step": 2,                 "name": "Captain Sharma"},
-    "cp71":    {"role": "checkpoint", "tier": 7, "step": 1,                 "name": "National Coach"},
-    "cp72":    {"role": "checkpoint", "tier": 7, "step": 2,                 "name": "National Selector"},
-    "cp73":    {"role": "checkpoint", "tier": 7, "step": 3,                 "name": "Board Director"},
+    # ------------------------------------------------------------------ #
+    # Match — timed multi-round match session
+    # ------------------------------------------------------------------ #
+    "shieldSel": {"role": "match", "tier": 2, "session": "shield",   "name": "Shield Selector"},
+    "mishra":    {"role": "match", "tier": 4, "session": "inter",    "name": "Manager Mishra"},
+    "fHead":     {"role": "match", "tier": 6, "session": "leagueA",  "name": "Head Coach"},
+    "fPerf":     {"role": "match", "tier": 6, "session": "leagueB",  "name": "Performance Coach"},
+    "nCoach":    {"role": "match", "tier": 7, "session": "national", "name": "National Coach"},
+
+    # ------------------------------------------------------------------ #
+    # Checkpoint — gated passage, requires steps cleared
+    # ------------------------------------------------------------------ #
+    "steward":   {"role": "checkpoint", "tier": 3, "step": 1, "name": "Steward"},
+    "secretary": {"role": "checkpoint", "tier": 3, "step": 2, "name": "Secretary"},
+    "nFit":      {"role": "checkpoint", "tier": 7, "step": 1, "name": "Fitness Tester"},
+    "nSel":      {"role": "checkpoint", "tier": 7, "step": 2, "name": "National Selector"},
+    "nMgr":      {"role": "checkpoint", "tier": 7, "step": 3, "name": "National Manager"},
 }

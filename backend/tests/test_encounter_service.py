@@ -33,7 +33,7 @@ def _setup(svc, n: int = 1) -> str:
 
 def test_friend_npc_returns_question(svc, enc_svc):
     pid = _setup(svc)
-    enc = enc_svc.create_encounter(pid, "coach0")
+    enc = enc_svc.create_encounter(pid, "mukesh")
     assert enc["kind"] == "question"
     assert "question" in enc
     assert enc["question"]["type"] == "formula"
@@ -51,7 +51,7 @@ def test_store_npc_returns_store(svc, enc_svc):
 
 def test_staff_npc_returns_chat(svc, enc_svc):
     pid = _setup(svc)
-    enc = enc_svc.create_encounter(pid, "tea")
+    enc = enc_svc.create_encounter(pid, "maya")
     assert enc["kind"] == "chat"
     assert isinstance(enc["say"], str) and len(enc["say"]) > 5
 
@@ -73,7 +73,7 @@ def test_unknown_npc_raises_not_found(svc, enc_svc):
 
 def test_recruit_npc_returns_lobby(svc, enc_svc):
     pid = _setup(svc)
-    enc = enc_svc.create_encounter(pid, "rec1")
+    enc = enc_svc.create_encounter(pid, "dean")
     assert enc["kind"] == "lobby"
     assert "session" in enc
     assert enc["session"]["id"] == "univ_exam"
@@ -81,7 +81,7 @@ def test_recruit_npc_returns_lobby(svc, enc_svc):
 
 def test_practice_npc_returns_question(svc, enc_svc):
     pid = _setup(svc)
-    enc = enc_svc.create_encounter(pid, "pav")
+    enc = enc_svc.create_encounter(pid, "practice")
     assert enc["kind"] == "question"
     # Practice coins are doubled (difficulty 1 → 12+6+seed_extra * 2)
     assert enc["reward"]["coins"] > 0
@@ -90,7 +90,7 @@ def test_practice_npc_returns_question(svc, enc_svc):
 def test_all_coaches_cover_different_families(svc, enc_svc):
     pid = _setup(svc)
     families = set()
-    for coach_id in [f"coach{i}" for i in range(7)]:
+    for coach_id in ["mukesh", "viral", "asst2", "asst3", "asst4", "asst5", "asst6"]:
         enc = enc_svc.create_encounter(pid, coach_id)
         assert enc["kind"] == "question"
         families.add(enc["family"])
@@ -103,7 +103,7 @@ def test_all_coaches_cover_different_families(svc, enc_svc):
 # answer_encounter
 # ---------------------------------------------------------------------------
 
-def _get_question(enc_svc, pid, npc_id="coach0"):
+def _get_question(enc_svc, pid, npc_id="mukesh"):
     return enc_svc.create_encounter(pid, npc_id)
 
 
@@ -264,30 +264,28 @@ def test_visit_unknown_facility_raises(svc, enc_svc):
 
 def test_markers_friend_npc_returns_new(svc, enc_svc):
     pid = _setup(svc)
-    markers = enc_svc.compute_markers(pid, ["coach0", "parth"])
-    assert markers["coach0"] == "new"
+    markers = enc_svc.compute_markers(pid, ["mukesh", "parth"])
+    assert markers["mukesh"] == "new"
     assert markers["parth"] == "new"
 
 
 def test_markers_store_npc_returns_store(svc, enc_svc):
     pid = _setup(svc)
-    markers = enc_svc.compute_markers(pid, ["akshita", "kit"])
+    markers = enc_svc.compute_markers(pid, ["akshita"])
     assert markers["akshita"] == "store"
-    assert markers["kit"] == "store"
 
 
 def test_markers_staff_npc_returns_talk(svc, enc_svc):
     pid = _setup(svc)
-    markers = enc_svc.compute_markers(pid, ["tea"])
-    assert markers["tea"] == "talk"
+    markers = enc_svc.compute_markers(pid, ["maya"])
+    assert markers["maya"] == "talk"
 
 
 def test_markers_recruit_npc_locked_when_tier_too_low(svc, enc_svc):
     pid = _setup(svc)
-    # rec1 requires tier 0→1 transition; player is at tier 0 so eligible check
-    markers = enc_svc.compute_markers(pid, ["rec1"])
-    # rec1 is for univ_exam (enrol tier 1); player at tier 0 is eligible to try
-    assert markers["rec1"] in ("match", "locked")
+    # dean requires tier 1; player at tier 0 is eligible to try
+    markers = enc_svc.compute_markers(pid, ["dean"])
+    assert markers["dean"] in ("match", "locked")
 
 
 def test_markers_unknown_npc_returns_locked(svc, enc_svc):

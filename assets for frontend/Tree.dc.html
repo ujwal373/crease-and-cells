@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tree sprite</title>
+<script src="./vendor/react.js"></script>
+<script src="./vendor/react-dom.js"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="display: block; width: {{wpx}}px; height: {{hpx}}px">
+<svg viewBox="0 0 80 120" width="100%" height="100%" aria-hidden="true" style="display: block; overflow: visible">
+<ellipse cx="40" cy="116" rx="20" ry="4" fill="#1F2A24" fill-opacity="0.18"></ellipse>
+<sc-if value="{{isPalm}}" hint-placeholder-val="{{ false }}">
+<path d="M36 118 Q34 90 38 58 L44 58 Q46 90 44 118 Z" fill="#8A6A48"></path>
+<path d="M38 70 Q41 66 44 70 M37 84 Q41 80 45 84 M37 98 Q41 94 45 98" fill="none" stroke="#6B4F34" stroke-width="2" stroke-linecap="round"></path>
+<path d="M41 58 Q18 36 4 50 Q22 46 41 60 Z" fill="#2E6A3B"></path>
+<path d="M41 58 Q64 36 78 50 Q60 46 41 60 Z" fill="#4E8F3C"></path>
+<path d="M41 58 Q14 40 10 22 Q30 28 41 56 Z" fill="#4E8F3C"></path>
+<path d="M41 58 Q68 40 72 22 Q52 28 41 56 Z" fill="#2E6A3B"></path>
+<path d="M41 58 Q28 30 38 8 Q52 30 41 58 Z" fill="#6FB04C"></path>
+<circle cx="41" cy="60" r="5" fill="#7A5638"></circle>
+</sc-if>
+<sc-if value="{{isRound}}" hint-placeholder-val="{{ true }}">
+<path d="M36 118 Q38 96 37 72 L44 72 Q43 96 45 118 Z" fill="#7A5638"></path>
+<path d="M40 88 Q30 80 24 70" fill="none" stroke="#7A5638" stroke-width="4" stroke-linecap="round"></path>
+<circle cx="24" cy="54" r="19" fill="{{dark}}"></circle>
+<circle cx="57" cy="54" r="19" fill="{{dark}}"></circle>
+<circle cx="40" cy="62" r="22" fill="{{dark}}"></circle>
+<circle cx="40" cy="30" r="25" fill="{{dark}}"></circle>
+<circle cx="35" cy="26" r="21" fill="{{light}}"></circle>
+<circle cx="21" cy="50" r="14" fill="{{light}}"></circle>
+<circle cx="37" cy="56" r="15" fill="{{light}}" fill-opacity="0.85"></circle>
+<circle cx="28" cy="18" r="7" fill="#FFFFFF" fill-opacity="0.22"></circle>
+</sc-if>
+</svg>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"variant":{"editor":"enum","options":["a","b","palm"],"default":"a"},"size":{"editor":"int","default":240,"min":60,"max":600,"unit":"px"},"$preview":{"width":160,"height":240}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const v = this.props.variant || 'a';
+    const hpx = this.props.size ? Number(this.props.size) : 240;
+    const wpx = Math.round((hpx * 80) / 120);
+    return {
+      hpx: hpx,
+      wpx: wpx,
+      isPalm: v === 'palm',
+      isRound: v !== 'palm',
+      light: v === 'b' ? '#4E9A5E' : '#6FB04C',
+      dark: v === 'b' ? '#2E6A3B' : '#3F7A33'
+    };
+  }
+}
+</script>
+</body>
+</html>

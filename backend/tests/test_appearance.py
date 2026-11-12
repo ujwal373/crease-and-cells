@@ -44,10 +44,10 @@ def _valid_body(pid: str, **overrides) -> dict:
     base = {
         "player_id": pid,
         "display_name": "Test Player",
-        "body_type": "medium",
-        "skin_tone": "medium",
+        "body_type": "regular",
+        "skin_tone": "#C68A5E",
         "hair_style": "short",
-        "hair_colour": "black",
+        "hair_colour": "#1B1410",
     }
     base.update(overrides)
     return base
@@ -60,21 +60,21 @@ def test_get_appearance_defaults_for_new_player(client):
     r = client.get(f"/api/appearance?player_id={_new_pid()}")
     assert r.status_code == 200
     body = r.json()
-    assert body["body_type"] == "medium"
-    assert body["skin_tone"] == "medium"
+    assert body["body_type"] == "regular"
+    assert body["skin_tone"] == "#C68A5E"
     assert body["hair_style"] == "short"
-    assert body["hair_colour"] == "black"
+    assert body["hair_colour"] == "#1B1410"
     assert body["display_name"] == ""
 
 
 def test_get_appearance_after_save(client):
     pid = _new_pid()
-    client.post("/api/appearance", json=_valid_body(pid, display_name="Ujwal", body_type="lean"))
+    client.post("/api/appearance", json=_valid_body(pid, display_name="Ujwal", body_type="slim"))
     r = client.get(f"/api/appearance?player_id={pid}")
     assert r.status_code == 200
     body = r.json()
     assert body["display_name"] == "Ujwal"
-    assert body["body_type"] == "lean"
+    assert body["body_type"] == "slim"
 
 
 def test_get_appearance_rejects_invalid_player_id(client):
@@ -91,32 +91,32 @@ def test_save_appearance_valid(client):
     assert r.status_code == 200
     body = r.json()
     assert body["display_name"] == "Test Player"
-    assert body["body_type"] == "medium"
-    assert body["skin_tone"] == "medium"
+    assert body["body_type"] == "regular"
+    assert body["skin_tone"] == "#C68A5E"
     assert body["hair_style"] == "short"
-    assert body["hair_colour"] == "black"
+    assert body["hair_colour"] == "#1B1410"
 
 
 def test_save_appearance_all_valid_body_types(client):
-    for bt in ("lean", "medium", "stocky"):
+    for bt in ("slim", "regular", "broad"):
         r = client.post("/api/appearance", json=_valid_body(_new_pid(), body_type=bt))
         assert r.status_code == 200, bt
 
 
 def test_save_appearance_all_valid_skin_tones(client):
-    for st in ("light", "medium_light", "medium", "medium_dark", "dark"):
+    for st in ("#E8B98F", "#D9A577", "#C68A5E", "#A66B43", "#8D5A3B", "#7A4A2E"):
         r = client.post("/api/appearance", json=_valid_body(_new_pid(), skin_tone=st))
         assert r.status_code == 200, st
 
 
 def test_save_appearance_all_valid_hair_styles(client):
-    for hs in ("short", "medium", "long", "bald", "spiky"):
+    for hs in ("short", "curly", "long", "bun", "none"):
         r = client.post("/api/appearance", json=_valid_body(_new_pid(), hair_style=hs))
         assert r.status_code == 200, hs
 
 
 def test_save_appearance_all_valid_hair_colours(client):
-    for hc in ("black", "brown", "blonde", "red", "grey", "white"):
+    for hc in ("#1B1410", "#4A2E1E", "#B9B5AA", "#7A3B1D", "#2B2B33"):
         r = client.post("/api/appearance", json=_valid_body(_new_pid(), hair_colour=hc))
         assert r.status_code == 200, hc
 
@@ -184,22 +184,22 @@ def test_save_appearance_rejects_invalid_player_id(client):
 def test_no_cross_player_access(client):
     pid_a = _new_pid()
     pid_b = _new_pid()
-    client.post("/api/appearance", json=_valid_body(pid_a, display_name="PlayerA", body_type="lean"))
+    client.post("/api/appearance", json=_valid_body(pid_a, display_name="PlayerA", body_type="slim"))
     r = client.get(f"/api/appearance?player_id={pid_b}")
     assert r.status_code == 200
     body = r.json()
     assert body["display_name"] != "PlayerA"
-    assert body["body_type"] != "lean"
+    assert body["body_type"] != "slim"
 
 
 def test_player_b_save_does_not_affect_player_a(client):
     pid_a = _new_pid()
     pid_b = _new_pid()
     client.post("/api/appearance", json=_valid_body(pid_a, display_name="PlayerA"))
-    client.post("/api/appearance", json=_valid_body(pid_b, display_name="PlayerB", body_type="stocky"))
+    client.post("/api/appearance", json=_valid_body(pid_b, display_name="PlayerB", body_type="broad"))
     r = client.get(f"/api/appearance?player_id={pid_a}")
     assert r.json()["display_name"] == "PlayerA"
-    assert r.json()["body_type"] == "medium"
+    assert r.json()["body_type"] == "regular"
 
 
 # ── Wallet includes appearance ─────────────────────────────────────────────
@@ -217,25 +217,22 @@ def test_wallet_includes_appearance(client):
 
 def test_wallet_appearance_reflects_saved_values(client):
     pid = _new_pid()
-    client.post("/api/appearance", json=_valid_body(pid, skin_tone="dark", hair_style="spiky"))
+    client.post("/api/appearance", json=_valid_body(pid, skin_tone="#7A4A2E", hair_style="curly"))
     wallet = client.get(f"/api/wallet?player_id={pid}").json()
-    assert wallet["appearance"]["skin_tone"] == "dark"
-    assert wallet["appearance"]["hair_style"] == "spiky"
+    assert wallet["appearance"]["skin_tone"] == "#7A4A2E"
+    assert wallet["appearance"]["hair_style"] == "curly"
 
 
 # ── Fix 1: ValueError handler returns safe messages only ──────────────────
 
 
 def test_value_error_response_does_not_leak_internals(client):
-    """The response detail must be a safe fixed string, not the raw ValueError."""
     pid = _new_pid()
     r = client.post("/api/appearance", json=_valid_body(pid, body_type="giant"))
     assert r.status_code == 400
     body = r.json()
-    # Safe mapped message present
     assert body.get("detail") == "invalid body_type"
-    # Raw internal enum list must not be in the response body
-    assert "lean" not in str(body)
+    assert "slim" not in str(body)
     assert "must be" not in str(body)
 
 
@@ -258,12 +255,9 @@ def test_whitespace_only_name_stored_as_empty(client):
 
 def test_whitespace_only_name_does_not_update_wallet_name(client):
     pid = _new_pid()
-    # First set a real name
     client.post("/api/appearance", json=_valid_body(pid, display_name="Ujwal"))
-    # Then submit whitespace-only name
     client.post("/api/appearance", json=_valid_body(pid, display_name="   "))
     wallet = client.get(f"/api/wallet?player_id={pid}").json()
-    # Wallet name must stay as the previous real name
     assert wallet["name"] == "Ujwal"
 
 
@@ -271,14 +265,12 @@ def test_whitespace_only_name_does_not_update_wallet_name(client):
 
 
 def test_new_player_wallet_appearance_display_name_is_empty(client):
-    """An empty display_name signals the client to show the character creator."""
     pid = _new_pid()
     wallet = client.get(f"/api/wallet?player_id={pid}").json()
     assert wallet["appearance"]["display_name"] == ""
 
 
 def test_saved_name_wallet_appearance_display_name_nonempty(client):
-    """A non-empty display_name signals the client that setup is done."""
     pid = _new_pid()
     client.post("/api/appearance", json=_valid_body(pid, display_name="Ujwal"))
     wallet = client.get(f"/api/wallet?player_id={pid}").json()

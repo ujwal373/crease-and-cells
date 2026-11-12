@@ -1,0 +1,1180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Crease and Cells full world</title>
+<script src="./vendor/react.js"></script>
+<script src="./vendor/react-dom.js"></script>
+<script src="./support.js"></script>
+<script src="./assets/5dfdd23fba95e7baf90a4c3db5a17854.js"></script>
+<script src="./assets/969a345dc3273deac6b918496c993af9.js"></script>
+<script src="./assets/0973df3abba64705a996f4579a92a14d.js"></script>
+<script src="./assets/f1395e74f1fee6c8469877415befc531.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&amp;family=Baloo+2:wght@600;700&amp;family=IBM+Plex+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+button{font-family:inherit}
+button:focus-visible,input:focus-visible{outline:3px solid #F2B632;outline-offset:2px;box-shadow:0 0 0 6px #1F2A24}
+.wv:focus-visible{box-shadow:inset 0 0 0 5px #F2B632;outline:none}
+.stage{position:absolute;left:50%;width:0;height:0;transform-style:preserve-3d}
+.world{position:absolute;width:1500px;height:900px;transform-style:preserve-3d}
+.abs{position:absolute}
+.z1{transform:translateZ(1px)}
+.z2{transform:translateZ(2px)}
+.bx{position:absolute;transform-style:preserve-3d}
+.fs{position:absolute;transform-origin:0 0}
+.bb{position:absolute;width:0;height:0;transform-style:preserve-3d}
+.bbi{position:absolute;left:-70px;bottom:0;width:140px;display:flex;flex-direction:column;align-items:center;transform-origin:50% 100%;transform:rotateZ(-45deg) rotateX(-58deg)}
+.sh{position:absolute;left:-30px;top:-12px;width:60px;height:24px;border-radius:50%;background:#4B5A8A;opacity:0.35;transform:translateZ(2px)}
+.chip{padding:2px 8px;border-radius:8px;border:2px solid #1F2A24;font-size:15px;font-weight:700;line-height:1.3;white-space:nowrap;color:#1F2A24}
+.npcb{background:none;border:0;padding:0;margin:0;cursor:pointer;display:block;border-radius:12px}
+.mesh{background:repeating-linear-gradient(0deg,rgba(255,255,255,0.75) 0 2px,transparent 2px 12px),repeating-linear-gradient(90deg,rgba(255,255,255,0.75) 0 2px,transparent 2px 12px),rgba(255,255,255,0.14)}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes stride{0%{transform:rotate(-3.5deg) translateY(0) scale(1.02,0.98)}25%{transform:rotate(0deg) translateY(-3px) scale(0.99,1.01)}50%{transform:rotate(3.5deg) translateY(0) scale(1.02,0.98)}75%{transform:rotate(0deg) translateY(-3px) scale(0.99,1.01)}100%{transform:rotate(-3.5deg) translateY(0) scale(1.02,0.98)}}
+.mv{transition:transform 80ms linear}
+.cam{transition:transform 80ms linear}
+.lean{transform-origin:50% 100%}
+.bob{animation:bob 1.2s ease-in-out infinite}
+.walk{animation:stride 0.56s linear infinite;transform-origin:50% 100%}
+@media (prefers-reduced-motion: reduce){.bob,.walk{animation:none}.mv,.cam{transition:none}.panel{transition:none !important}}
+@keyframes ld{0%{margin-left:-40%}100%{margin-left:100%}}
+.load{animation:ld 1.2s linear infinite}
+@media (prefers-reduced-motion: reduce){.load{animation:none;margin-left:30%}}
+</style>
+</helmet>
+
+
+<div style="position: relative; width: 100%; height: 100vh; min-height: 560px; overflow: hidden; background: #2E4A36; color: #1F2A24; font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; font-size: 17px; line-height: 1.4">
+
+<div id="cc-world" class="wv" tabindex="0" role="application" aria-label="Game world. Move with W A S D or the arrow keys. Press E near a character to talk. Press M for the map and C for your career. Press Tab to jump between characters and the menu buttons." onKeyDown="{{onKeyDown}}" onKeyUp="{{onKeyUp}}" onBlur="{{onBlur}}" onPointerDown="{{focusWorld}}" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; overflow: hidden">
+<div class="stage" style="top: 58%; transform: {{stageT}}">
+<div class="world cam" style="left: 0; top: 0; transform: translate3d({{wl}}px, {{wt}}px, 0)">
+
+<div class="abs" style="left: -900px; top: -900px; width: 4200px; height: 3200px; background: #3F7A33; transform: translateZ(-1px)"></div>
+<sc-for list="{{floors}}" as="f" hint-placeholder-count="10">
+<div class="abs" style="{{f.s}}"></div>
+</sc-for>
+
+<sc-for list="{{boxes}}" as="b" hint-placeholder-count="8">
+<div class="bx" style="{{b.box}}">
+<div class="abs" style="{{b.shade}}; background: #4B5A8A; opacity: 0.3"></div>
+<div class="fs" style="{{b.top}}"></div>
+<div class="fs" style="{{b.south}}">
+<div class="abs" style="{{b.win}}"></div>
+<div class="abs" style="{{b.awning}}"></div>
+<div class="abs" style="{{b.door}}"></div>
+<div style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; align-items: center; justify-content: center; color: #F2B632; font-weight: 700; font-size: 22px; {{b.label}}">{{b.text}}</div>
+</div>
+<div class="fs" style="{{b.east}}"></div>
+</div>
+</sc-for>
+
+<sc-for list="{{signs}}" as="s" hint-placeholder-count="4">
+<div class="bb" style="left: {{s.x}}px; top: {{s.y}}px"><div class="bbi" style="left: -110px; width: 220px">
+<sc-if value="{{s.notLamp}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; gap: 22px; margin-bottom: -2px"><div style="width: 16px; height: 9px; border-radius: 8px 8px 3px 3px; background: #FFF3B0; box-shadow: 0 0 12px 4px rgba(255,243,176,0.7)"></div><div style="width: 16px; height: 9px; border-radius: 8px 8px 3px 3px; background: #FFF3B0; box-shadow: 0 0 12px 4px rgba(255,243,176,0.7)"></div><div style="width: 16px; height: 9px; border-radius: 8px 8px 3px 3px; background: #FFF3B0; box-shadow: 0 0 12px 4px rgba(255,243,176,0.7)"></div></div>
+<div style="width: {{s.boardW}}px; box-sizing: border-box; padding: 6px; background: #26382F; border-radius: 14px; box-shadow: 0 3px 0 #141E1A">
+<div style="padding: 6px 10px 7px; background: {{s.bg}}; border: 2px solid rgba(31,42,36,0.55); border-radius: 9px; text-align: center; color: {{s.fg}}">
+<div style="font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 700; font-size: 20px; line-height: 1.1">{{s.t}}</div>
+<sc-if value="{{s.hasSub}}" hint-placeholder-val="{{ false }}"><div style="font-size: 13px; line-height: 1.2; margin-top: 2px; opacity: 0.9">{{s.sub}}</div></sc-if>
+</div></div>
+<div style="width: 70%; height: 7px; margin-top: 2px; border-radius: 4px; background: #4F5B66; box-shadow: 0 2px 0 #26382F"></div>
+<sc-if value="{{s.isFlag}}" hint-placeholder-val="{{ false }}">
+<div style="width: 64px; height: 42px; border: 2px solid #1F2A24; box-sizing: border-box; display: flex; flex-direction: column; margin-left: 66px"><div style="flex: 1; background: #E8872B"></div><div style="flex: 1; background: #FFFFFF; display: flex; align-items: center; justify-content: center"><div style="width: 14px; height: 14px; border-radius: 50%; border: 2px solid #1F3A8A; box-sizing: border-box"></div></div><div style="flex: 1; background: #2E8B3B"></div></div>
+</sc-if>
+</sc-if>
+<sc-if value="{{s.isLamp}}" hint-placeholder-val="{{ false }}">
+<div style="width: 96px; height: 70px; box-sizing: border-box; border: 4px solid #1F2A24; border-radius: 10px; background: radial-gradient(circle,#FFF7C2 0 5px,transparent 6px) 0 0/28px 28px, #26382F; box-shadow: 0 0 26px 8px rgba(255,243,176,0.5)"></div>
+</sc-if>
+<div style="width: 10px; height: {{s.poleH}}px; border-radius: 4px; background: linear-gradient(90deg,#B4BCC6,#7B848E 55%,#4F5B66)"></div>
+<div style="width: 34px; height: 8px; margin-top: -3px; border-radius: 50%; background: #4F5B66"></div>
+</div></div>
+</sc-for>
+
+<sc-for list="{{trees}}" as="t" hint-placeholder-count="10">
+<div class="bb" style="left: {{t.x}}px; top: {{t.y}}px">
+<div class="sh" style="width: 70px; left: -35px"></div>
+<div class="bbi"><dc-import name="Tree" variant="{{t.variant}}" size="{{t.size}}" hint-size="100px,150px"></dc-import></div>
+</div>
+</sc-for>
+
+<sc-for list="{{npcs}}" as="n" hint-placeholder-count="6">
+<div class="bb mv" style="left: 0; top: 0; display: {{n.disp}}; transform: translate3d({{n.x}}px, {{n.y}}px, 0)">
+<div class="sh"></div>
+<div class="bbi">
+<sc-if value="{{n.isNew}}" hint-placeholder-val="{{ true }}">
+<div class="bob"><svg width="40" height="46" viewBox="0 0 40 46" role="img" aria-label="New question"><polygon points="20,3 37,20 20,37 3,20" fill="#F2B632" stroke="#1F2A24" stroke-width="3" stroke-linejoin="round"></polygon><text x="20" y="28" text-anchor="middle" font-size="22" font-weight="700" fill="#1F2A24" font-family="Baloo 2, sans-serif">!</text><polygon points="14,38 26,38 20,45" fill="#1F2A24"></polygon></svg></div>
+</sc-if>
+<sc-if value="{{n.isStore}}" hint-placeholder-val="{{ false }}">
+<div class="bob"><svg width="40" height="46" viewBox="0 0 40 46" role="img" aria-label="Store"><rect x="4" y="4" width="32" height="30" rx="8" fill="#1F7A7A" stroke="#1F2A24" stroke-width="3"></rect><path d="M13 16h14l-1 11H14z M16 16v-2a4 4 0 0 1 8 0v2" fill="none" stroke="#FBF6E9" stroke-width="2.4" stroke-linejoin="round"></path><polygon points="14,36 26,36 20,43" fill="#1F2A24"></polygon></svg></div>
+</sc-if>
+<sc-if value="{{n.isMatch}}" hint-placeholder-val="{{ false }}">
+<div class="bob"><svg width="40" height="46" viewBox="0 0 40 46" role="img" aria-label="Match"><circle cx="20" cy="19" r="16" fill="#F2B632" stroke="#1F2A24" stroke-width="3"></circle><circle cx="20" cy="19" r="8" fill="#B8312F" stroke="#1F2A24" stroke-width="2.5"></circle><path d="M13 19 a7 7 0 0 0 14 0" fill="none" stroke="#FBF6E9" stroke-width="2"></path><polygon points="14,36 26,36 20,43" fill="#1F2A24"></polygon></svg></div>
+</sc-if>
+<sc-if value="{{n.isLearn}}" hint-placeholder-val="{{ false }}">
+<div class="bob"><svg width="40" height="46" viewBox="0 0 40 46" role="img" aria-label="Lesson"><rect x="3" y="4" width="34" height="30" rx="8" fill="#2E6A3B" stroke="#1F2A24" stroke-width="3"></rect><path d="M20 11 V28 M20 11 C15 9 11 10 9 11 V27 C11 26 15 25 20 28 C25 25 29 26 31 27 V11 C29 10 25 9 20 11 Z" fill="#FBF6E9" stroke="#1F2A24" stroke-width="2" stroke-linejoin="round"></path><polygon points="14,36 26,36 20,43" fill="#1F2A24"></polygon></svg></div>
+</sc-if>
+<sc-if value="{{n.isTalk}}" hint-placeholder-val="{{ false }}">
+<div><svg width="40" height="46" viewBox="0 0 40 46" role="img" aria-label="Chat"><rect x="3" y="5" width="34" height="26" rx="10" fill="#FBF6E9" stroke="#1F2A24" stroke-width="3"></rect><circle cx="12" cy="18" r="2.5" fill="#1F2A24"></circle><circle cx="20" cy="18" r="2.5" fill="#1F2A24"></circle><circle cx="28" cy="18" r="2.5" fill="#1F2A24"></circle><polygon points="14,33 26,33 20,42" fill="#1F2A24"></polygon></svg></div>
+</sc-if>
+<sc-if value="{{n.isDone}}" hint-placeholder-val="{{ false }}">
+<div><svg width="40" height="46" viewBox="0 0 40 46" role="img" aria-label="Done for now"><circle cx="20" cy="19" r="15" fill="#F3E6C8" stroke="#1F2A24" stroke-width="3"></circle><path d="M12 19 L18 25 L28 12" fill="none" stroke="#1F2A24" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path><polygon points="14,36 26,36 20,43" fill="#1F2A24"></polygon></svg></div>
+</sc-if>
+<sc-if value="{{n.isLocked}}" hint-placeholder-val="{{ false }}">
+<div><svg width="40" height="46" viewBox="0 0 40 46" role="img" aria-label="Not ready yet"><rect x="5" y="4" width="30" height="30" rx="8" fill="#4F5B66" stroke="#1F2A24" stroke-width="3"></rect><rect x="12" y="17" width="16" height="12" rx="2" fill="#F3E6C8"></rect><path d="M15 17 V14 A5 5 0 0 1 25 14 V17" fill="none" stroke="#F3E6C8" stroke-width="3"></path><polygon points="14,36 26,36 20,43" fill="#1F2A24"></polygon></svg></div>
+</sc-if>
+<div class="chip" style="background: {{n.chipBg}}">{{n.name}}</div>
+<button type="button" class="npcb" aria-label="{{n.aria}}" onClick="{{n.tap}}"><div class="{{n.walkClass}}" style="transform: scaleX({{n.flip}})"><dc-import name="Hero" body="{{n.body}}" skin="{{n.skin}}" hair-style="{{n.hairStyle}}" hair-color="{{n.hairColor}}" jersey="{{n.jersey}}" cap="{{n.cap}}" shoes="{{n.shoes}}" sleeve="{{n.sleeve}}" size="100" hint-size="63px,100px"></dc-import></div></button>
+</div>
+</div>
+</sc-for>
+
+<div class="bb mv" style="left: 0; top: 0; transform: translate3d({{px}}px, {{py}}px, 0)">
+<div class="sh"></div>
+<div class="bbi">
+<div class="chip" style="background: #FBF6E9">{{playerName}}</div>
+<div style="transform: scaleX({{flip}})"><div class="{{walkClass}}"><dc-import name="Hero" body="{{heroBody}}" skin="{{heroSkin}}" hair-style="{{heroHairStyle}}" hair-color="{{heroHairColor}}" jersey="{{eqJersey}}" cap="{{eqCap}}" shoes="{{eqShoes}}" sleeve="{{eqSleeve}}" size="100" hint-size="63px,100px"></dc-import></div></div>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+
+<div style="position: absolute; left: 0; right: 0; top: 0; padding: 12px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 10px; pointer-events: none; z-index: 10">
+<div style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 16px; background: rgba(31,42,36,0.92); color: #FBF6E9">
+<div style="width: 56px; height: 56px; border-radius: 14px; background: #F2B632; color: #1F2A24; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1"><span style="font-size: 14px; font-weight: 700; letter-spacing: 0.06em">LV</span><span style="font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 700; font-size: 28px">{{level}}</span></div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<b style="font-size: 17px">{{playerName}}, bowler</b>
+<div role="progressbar" aria-label="Experience" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{xpPct}}" style="width: 120px; height: 12px; border-radius: 6px; background: #3A4A41; overflow: hidden"><div style="height: 100%; background: #F2B632; width: {{xpPct}}%"></div></div>
+<span style="font-size: 15px">{{xpText}}</span>
+</div>
+</div>
+<div role="status" aria-label="Coins" style="display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: 16px; background: rgba(31,42,36,0.92); color: #FBF6E9">
+<svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="13" fill="#F2B632" stroke="#FBF6E9" stroke-width="2"></circle><circle cx="15" cy="15" r="8" fill="none" stroke="#1F2A24" stroke-width="2.5"></circle></svg>
+<span style="font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 700; font-size: 28px; line-height: 1">{{coins}}</span>
+</div>
+<div style="flex: 0 0 100%; max-width: 300px; order: 3; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; margin-top: -2px">
+<div style="padding: 4px 14px; border-radius: 999px; border: 2px solid #1F2A24; font-weight: 700; font-size: 16px; background: {{zoneBg}}; color: {{zoneFg}}">{{zoneName}}</div>
+<sc-if value="{{hasFac}}" hint-placeholder-val="{{ false }}"><div role="status" style="max-width: 300px; padding: 5px 12px; border-radius: 12px; background: rgba(46,106,59,0.92); color: #FBF6E9; border: 2px solid #FBF6E9; font-size: 14px; line-height: 1.3"><b>{{facName}}.</b> {{facNote}}</div></sc-if>
+<div style="max-width: 300px; padding: 5px 12px; border-radius: 12px; background: rgba(31,42,36,0.78); color: #FBF6E9; font-size: 14px; line-height: 1.3"><b>Next goal.</b> {{goalText}}</div>
+<sc-if value="{{hasHint}}" hint-placeholder-val="{{ true }}">
+<div style="max-width: 300px; padding: 6px 12px; border-radius: 12px; background: rgba(251,246,233,0.94); border: 2px solid #1F2A24; font-size: 14px; line-height: 1.3">Move with W A S D, the arrow keys or the joystick. Press E or tap a character to talk. M opens the map.</div>
+</sc-if>
+<div role="status" aria-live="polite" style="min-height: 0">
+<sc-if value="{{hasToast}}" hint-placeholder-val="{{ false }}">
+<div style="max-width: 300px; padding: 7px 12px; border-radius: 12px; background: #1F2A24; color: #FBF6E9; border: 2px solid #F2B632; font-weight: 700; font-size: 15px; line-height: 1.3">{{toast}}</div>
+</sc-if>
+</div>
+</div>
+</div>
+
+<div style="position: absolute; left: 12px; right: 12px; bottom: 12px; display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; pointer-events: none; z-index: 10">
+<div aria-hidden="true" onPointerDown="{{joyDown}}" onPointerMove="{{joyMove}}" onPointerUp="{{joyUp}}" onPointerCancel="{{joyUp}}" style="position: relative; width: 136px; height: 136px; border-radius: 50%; background: rgba(31,42,36,0.6); border: 3px solid #FBF6E9; touch-action: none; pointer-events: auto; display: {{joyDisplay}}">
+<svg width="130" height="130" viewBox="0 0 130 130" style="position: absolute; left: 0; top: 0" aria-hidden="true"><polygon points="65,10 75,24 55,24" fill="#FBF6E9"></polygon><polygon points="65,120 75,106 55,106" fill="#FBF6E9"></polygon><polygon points="10,65 24,55 24,75" fill="#FBF6E9"></polygon><polygon points="120,65 106,55 106,75" fill="#FBF6E9"></polygon></svg>
+<div style="position: absolute; left: 36px; top: 36px; width: 58px; height: 58px; border-radius: 50%; background: #F2B632; border: 3px solid #1F2A24; transform: translate({{knobX}}px, {{knobY}}px)"></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px; pointer-events: auto; margin-left: auto">
+<button type="button" onClick="{{openMap}}" style="min-height: 52px; min-width: 160px; padding: 0 18px; border-radius: 16px; border: 3px solid #1F2A24; background: #F2B632; color: #1F2A24; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 10px; cursor: pointer">
+<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z M9 4v14 M15 6v14" fill="none" stroke="#1F2A24" stroke-width="2" stroke-linejoin="round"></path></svg>
+<span>Map</span><span style="margin-left: auto; padding: 1px 7px; border-radius: 6px; background: #1F2A24; color: #FBF6E9; font-family: 'IBM Plex Mono', monospace; font-size: 14px">M</span>
+</button>
+<button type="button" onClick="{{openCareer}}" style="min-height: 52px; min-width: 160px; padding: 0 18px; border-radius: 16px; border: 3px solid #1F2A24; background: #FBF6E9; color: #1F2A24; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 10px; cursor: pointer">
+<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V10 M12 20V4 M19 20v-7" fill="none" stroke="#1F2A24" stroke-width="3" stroke-linecap="round"></path></svg>
+<span>Career</span><span style="margin-left: auto; padding: 1px 7px; border-radius: 6px; background: #1F2A24; color: #FBF6E9; font-family: 'IBM Plex Mono', monospace; font-size: 14px">C</span>
+</button>
+<button type="button" onClick="{{openCustomise}}" style="min-height: 52px; min-width: 160px; padding: 0 18px; border-radius: 16px; border: 3px solid #1F2A24; background: #FBF6E9; color: #1F2A24; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 10px; cursor: pointer">
+<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4l-5 3 2 4 3-1v10h8V10l3 1 2-4-5-3a4 4 0 0 1-8 0z" fill="none" stroke="#1F2A24" stroke-width="2.2" stroke-linejoin="round"></path></svg>
+<span>Customise</span>
+</button>
+</div>
+</div>
+
+<sc-if value="{{showPrompt}}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; left: 0; right: 0; bottom: 170px; display: flex; justify-content: center; z-index: 10; pointer-events: none">
+<button type="button" onClick="{{interact}}" style="pointer-events: auto; min-height: 60px; padding: 0 22px; border-radius: 16px; border: 3px solid #1F2A24; background: #FBF6E9; color: #1F2A24; font-size: 19px; font-weight: 700; display: flex; align-items: center; gap: 12px; cursor: pointer">
+<span style="min-width: 34px; height: 34px; border-radius: 8px; background: #1F2A24; color: #FBF6E9; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 19px">E</span>
+<span>Talk to {{nearName}}</span>
+</button>
+</div>
+</sc-if>
+
+<div aria-hidden="true" onClick="{{closePanel}}" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: 20; background: rgba(31,42,36,0.5); transition: opacity 0.25s ease; opacity: {{scrimO}}; pointer-events: {{scrimP}}"></div>
+
+<sc-if value="{{sheetWin}}" hint-placeholder-val="{{ false }}">
+<div role="dialog" aria-modal="true" aria-label="Spreadsheet window" onKeyDown="{{onSheetKey}}" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: 40; background: rgba(31,42,36,0.78); display: flex; align-items: center; justify-content: center; padding: 14px; box-sizing: border-box">
+<div style="width: min(1100px, 100%); max-height: 100%; display: flex; flex-direction: column; border-radius: 18px; border: 3px solid #1F2A24; background: #FBF6E9; overflow: hidden">
+<div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #2E6A3B; color: #FBF6E9">
+<b style="font-family: 'Baloo 2', system-ui, sans-serif; font-size: 22px; flex: 1">Spreadsheet window</b>
+<button type="button" id="cc-swclose" onClick="{{closeSheet}}" style="min-height: 46px; padding: 0 16px; border-radius: 12px; border: 2px solid #FBF6E9; background: transparent; color: #FBF6E9; font-size: 17px; font-weight: 700; cursor: pointer">Close <span style="margin-left: 8px; padding: 1px 7px; border-radius: 6px; background: #FBF6E9; color: #1F2A24; font-family: 'IBM Plex Mono', monospace; font-size: 14px">Esc</span></button>
+</div>
+<div style="padding: 10px 16px; display: flex; flex-direction: column; gap: 4px; background: #F6E7B8; border-bottom: 3px solid #1F2A24"><span style="font-size: 17px"><b>Your task.</b> {{qTask}}</span><span style="font-size: 15px; color: #5A5648">Answer cell: <b>{{qRef}}</b>. Your formula so far: <span style="font-family: 'IBM Plex Mono', monospace; font-weight: 700">{{formulaShown}}</span></span></div>
+<div style="flex: 1 1 auto; min-height: 0; overflow: auto; background: #FFFFFF" tabindex="0" role="region" aria-label="Full spreadsheet, scrollable">
+<div style="display: grid; grid-template-columns: {{gridColsBig}}; width: max-content; min-width: 100%" role="table" aria-label="Full spreadsheet">
+<sc-for list="{{cellsBig}}" as="c" hint-placeholder-count="40">
+<div style="min-height: 44px; padding: 0 12px; display: flex; align-items: center; justify-content: {{c.just}}; font-family: 'IBM Plex Mono', monospace; font-size: 16px; font-weight: {{c.fw}}; white-space: nowrap; border-right: 1px solid #CFC6AE; border-bottom: 1px solid #CFC6AE; background: {{c.bg}}; outline: {{c.ol}}; outline-offset: -3px">{{c.text}}</div>
+</sc-for>
+</div>
+</div>
+<div style="padding: 10px 16px; font-size: 15px; color: #5A5648; border-top: 2px solid #CFC6AE">Scroll sideways and down to see every cell. Type your formula in the panel after you close this window.</div>
+</div>
+</div>
+</sc-if>
+
+<aside class="panel" role="dialog" aria-modal="true" aria-labelledby="cc-ptitle" onKeyDown="{{onPanelKey}}" style="position: absolute; top: 0; right: 0; bottom: 0; width: min(500px, 100%); z-index: 30; display: flex; flex-direction: column; background: #FBF6E9; box-shadow: -12px 0 32px rgba(31,42,36,0.35); transform: {{panelT}}; visibility: {{panelV}}; transition: {{panelTr}}">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; background: #2E6A3B; color: #FBF6E9">
+<h2 id="cc-ptitle" style="margin: 0; font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 700; font-size: 28px; line-height: 1.1">{{panelTitle}}</h2>
+<button type="button" onClick="{{closePanel}}" style="min-height: 48px; padding: 0 16px; border-radius: 12px; border: 2px solid #FBF6E9; background: transparent; color: #FBF6E9; font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 10px; cursor: pointer"><span>Close</span><span style="padding: 2px 8px; border-radius: 6px; background: #FBF6E9; color: #1F2A24; font-family: 'IBM Plex Mono', monospace; font-size: 14px">Esc</span></button>
+</div>
+
+<div id="cc-pbody" style="flex: 1; overflow-y: auto; padding: 18px 18px 32px; display: flex; flex-direction: column; gap: 16px">
+
+<sc-if value="{{pLoading}}" hint-placeholder-val="{{ false }}">
+<div role="status" style="display: flex; flex-direction: column; gap: 12px; padding: 18px; border-radius: 14px; border: 3px dashed #1F2A24; background: #F6E7B8">
+<b style="font-size: 20px">{{loadTitle}}</b>
+<span style="font-size: 17px">The agent behind this character is writing a question just for you. No two are the same.</span>
+<div style="height: 10px; border-radius: 5px; background: #E6DFC9; overflow: hidden"><div class="load" style="height: 100%; width: 40%; background: #1F2A24"></div></div>
+</div>
+</sc-if>
+
+<sc-if value="{{pError}}" hint-placeholder-val="{{ false }}">
+<div role="alert" style="display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 14px; border: 3px solid #1F2A24; background: #F9DDD2">
+<b style="font-size: 19px">Something went wrong</b>
+<span style="font-size: 17px">{{errMsg}}</span>
+<div style="display: flex; gap: 10px; flex-wrap: wrap">
+<button type="button" onClick="{{retry}}" style="min-height: 52px; padding: 0 20px; border-radius: 14px; border: 3px solid #1F2A24; background: #1F2A24; color: #FBF6E9; font-size: 18px; font-weight: 700; cursor: pointer">Try again</button>
+<button type="button" onClick="{{closePanel}}" style="min-height: 52px; padding: 0 20px; border-radius: 14px; border: 3px solid #1F2A24; background: #FBF6E9; color: #1F2A24; font-size: 18px; font-weight: 700; cursor: pointer">Back to the world</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isQuestion}}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{hasSession}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; padding: 10px 14px; border-radius: 12px; background: #1F2A24; color: #FBF6E9; font-size: 16px">
+<span><b>{{sName}}.</b> Over {{sRound}} of {{sRounds}}</span>
+<span>Need {{sPass}} right. {{sCorrect}} so far.</span>
+<sc-if value="{{hasTimer}}" hint-placeholder-val="{{ false }}"><span role="timer" style="font-family: 'IBM Plex Mono', monospace; font-weight: 500; padding: 0 8px; border-radius: 6px; background: {{timerBg}}; color: #1F2A24">Time left {{timeLeft}}</span></sc-if>
+</div>
+</sc-if>
+<sc-if value="{{hasCp}}" hint-placeholder-val="{{ false }}">
+<div style="padding: 10px 14px; border-radius: 12px; background: #1F2A24; color: #FBF6E9; font-size: 16px"><b>Checkpoint {{cpStep}} of {{cpOf}}.</b> Answer to pass through.</div>
+</sc-if>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 15px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #2E6A3B">{{qWho}}</span>
+<p style="margin: 0; font-size: 18px; text-wrap: pretty">{{qStory}}</p>
+</div>
+<div style="padding: 12px 14px; border-radius: 12px; border: 3px solid #1F2A24; background: #F6E7B8; display: flex; flex-direction: column; gap: 2px">
+<b style="font-size: 17px">Your task</b>
+<span style="font-size: 17px">{{qTask}}</span>
+</div>
+<div style="flex: 0 0 auto; max-height: 300px; overflow: auto; border: 2px solid #1F2A24; border-radius: 10px; background: #FFFFFF" tabindex="0" role="region" aria-label="Spreadsheet for the question, scrollable">
+<div style="display: grid; grid-template-columns: {{gridCols}}; min-width: 100%; width: max-content" role="table" aria-label="Spreadsheet for the question">
+<sc-for list="{{cells}}" as="c" hint-placeholder-count="40">
+<div style="min-height: 34px; padding: 0 8px; display: flex; align-items: center; justify-content: {{c.just}}; font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: {{c.fw}}; white-space: nowrap; border-right: 1px solid #CFC6AE; border-bottom: 1px solid #CFC6AE; background: {{c.bg}}; outline: {{c.ol}}; outline-offset: -3px">{{c.text}}</div>
+</sc-for>
+</div>
+</div>
+<button type="button" onClick="{{openSheet}}" style="flex: 0 0 auto; align-self: flex-start; min-height: 48px; padding: 0 18px; border-radius: 12px; border: 3px solid #1F2A24; background: #FBF6E9; color: #1F2A24; font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 10px; cursor: pointer"><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect x="2" y="3" width="18" height="16" rx="3" fill="none" stroke="#1F2A24" stroke-width="2"></rect><path d="M2 9h18 M2 14h18 M9 3v16 M15 3v16" stroke="#1F2A24" stroke-width="1.6"></path></svg>Open the sheet in a window</button>
+<span style="font-size: 15px; color: #5A5648">The cell with the thick border is {{qRef}}. That is the answer cell.</span>
+
+<sc-if value="{{canAnswer}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<label for="cc-fx" style="font-weight: 700; font-size: 17px">{{inputLabel}}</label>
+<div style="display: flex; gap: 8px; align-items: stretch">
+<span aria-hidden="true" style="flex: none; width: 48px; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: #E6DFC9; font-family: 'IBM Plex Mono', monospace; font-size: 17px; font-weight: 700">fx</span>
+<input id="cc-fx" type="text" value="{{formula}}" onChange="{{onFormula}}" onInput="{{onFormula}}" onKeyDown="{{onFormulaKey}}" autocomplete="off" autocapitalize="off" spellcheck="false" style="flex: 1; min-width: 0; min-height: 52px; box-sizing: border-box; padding: 0 12px; border-radius: 10px; border: 3px solid #1F2A24; background: #FFFFFF; color: #1F2A24; font-family: 'IBM Plex Mono', monospace; font-size: 17px">
+</div>
+</div>
+<div style="display: flex; gap: 10px; flex-wrap: wrap">
+<button type="button" onClick="{{check}}" disabled="{{checking}}" style="min-height: 52px; padding: 0 22px; border-radius: 14px; border: 3px solid #1F2A24; background: #1F2A24; color: #FBF6E9; font-size: 18px; font-weight: 700; cursor: pointer">{{checkLabel}}</button>
+<button type="button" onClick="{{toggleHint}}" aria-pressed="{{hint}}" style="min-height: 52px; padding: 0 20px; border-radius: 14px; border: 3px solid #1F2A24; background: #FBF6E9; color: #1F2A24; font-size: 18px; font-weight: 700; cursor: pointer">Hint</button>
+</div>
+<sc-if value="{{hint}}" hint-placeholder-val="{{ false }}">
+<div style="padding: 12px 14px; border-radius: 12px; border: 2px dashed #1F2A24; font-size: 17px"><b>Hint.</b> {{qHint}}</div>
+</sc-if>
+</sc-if>
+
+<div role="status" aria-live="polite">
+<sc-if value="{{hasResult}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 12px; border: 3px solid #1F2A24; background: {{resBg}}">
+<sc-if value="{{resOk}}" hint-placeholder-val="{{ false }}"><svg style="flex: none" width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="13" fill="#1F2A24"></circle><path d="M8 15.5 L13 20.5 L22 9.5" fill="none" stroke="#FBF6E9" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></sc-if>
+<sc-if value="{{resBad}}" hint-placeholder-val="{{ false }}"><svg style="flex: none" width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><polygon points="15,2 28,26 2,26" fill="#1F2A24"></polygon><path d="M15 10 V18 M15 21.5 V22.5" stroke="#FBF6E9" stroke-width="3" stroke-linecap="round"></path></svg></sc-if>
+<div style="display: flex; flex-direction: column; gap: 4px"><b style="font-size: 18px">{{resTitle}}</b><span style="font-size: 17px">{{resMsg}}</span><sc-if value="{{hasExplain}}" hint-placeholder-val="{{ false }}"><span style="font-size: 16px"><b>Why it works.</b> {{explainText}}</span></sc-if></div>
+</div>
+</sc-if>
+</div>
+
+<sc-if value="{{showAnother}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; gap: 10px; flex-wrap: wrap">
+<button type="button" onClick="{{askAnother}}" style="min-height: 52px; padding: 0 22px; border-radius: 14px; border: 3px solid #1F2A24; background: #F2B632; color: #1F2A24; font-size: 18px; font-weight: 700; cursor: pointer">Ask another question</button>
+<button type="button" onClick="{{closePanel}}" style="min-height: 52px; padding: 0 22px; border-radius: 14px; border: 3px solid #1F2A24; background: #FBF6E9; color: #1F2A24; font-size: 18px; font-weight: 700; cursor: pointer">Back to the world</button>
+</div>
+</sc-if>
+<sc-if value="{{showNext}}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{nextOver}}" style="align-self: flex-start; min-height: 56px; padding: 0 24px; border-radius: 14px; border: 3px solid #1F2A24; background: #F2B632; color: #1F2A24; font-size: 19px; font-weight: 700; cursor: pointer">Next over</button>
+</sc-if>
+<sc-if value="{{hasSessionResult}}" hint-placeholder-val="{{ false }}">
+<div role="status" style="display: flex; flex-direction: column; gap: 8px; padding: 16px; border-radius: 14px; border: 3px solid #1F2A24; background: {{srBg}}">
+<b style="font-family: 'Baloo 2', system-ui, sans-serif; font-size: 26px">{{srTitle}}</b>
+<span style="font-size: 17px">{{srMsg}}</span>
+<span style="font-size: 17px"><b>{{srScore}}</b> {{srBonus}}</span>
+<button type="button" onClick="{{closePanel}}" style="align-self: flex-start; min-height: 52px; padding: 0 22px; border-radius: 14px; border: 3px solid #1F2A24; background: #1F2A24; color: #FBF6E9; font-size: 18px; font-weight: 700; cursor: pointer">Back to the world</button>
+</div>
+</sc-if>
+<div style="display: flex; align-items: center; gap: 10px; font-size: 17px">
+<svg width="26" height="26" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="13" fill="#F2B632" stroke="#1F2A24" stroke-width="2"></circle><circle cx="15" cy="15" r="8" fill="none" stroke="#1F2A24" stroke-width="2.5"></circle></svg>
+<span><b>Reward:</b> {{qCoins}} coins and {{qXp}} XP. {{qSkill}}</span>
+</div>
+<span style="font-size: 15px; color: #5A5648">The server wrote this question, checks your answer and pays the reward. The world only shows it.</span>
+</sc-if>
+
+<sc-if value="{{isLobby}}" hint-placeholder-val="{{ false }}">
+<p style="margin: 0; font-size: 18px; text-wrap: pretty">{{lSay}}</p>
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 16px; padding: 12px 14px; border-radius: 12px; border: 2px solid #1F2A24; background: #FFFFFF; font-size: 16px">
+<b style="grid-column: 1 / -1; font-size: 18px">{{lName}}</b>
+<span>Questions</span><b>{{lRounds}}</b>
+<span>Right answers needed</span><b>{{lPass}}</b>
+<span>Time per question</span><b>{{lSecs}}</b>
+<span>How often</span><b>{{lCool}}</b>
+</div>
+<sc-if value="{{lWait}}" hint-placeholder-val="{{ false }}"><div role="timer" style="padding: 12px 14px; border-radius: 12px; border: 3px solid #1F2A24; background: #F9DDD2; font-size: 18px"><b>Next attempt in {{lWaitText}}</b></div></sc-if>
+<sc-if value="{{lHasReqs}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<b style="font-size: 17px">To join {{lClub}}</b>
+<sc-for list="{{reqs}}" as="q" hint-placeholder-count="5">
+<div style="display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 12px; border: 3px solid {{q.bd}}; background: {{q.bg}}">
+<sc-if value="{{q.ok}}" hint-placeholder-val="{{ true }}"><svg style="flex: none" width="26" height="26" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="13" fill="#1F2A24"></circle><path d="M8 15.5 L13 20.5 L22 9.5" fill="none" stroke="#FBF6E9" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></sc-if>
+<sc-if value="{{q.no}}" hint-placeholder-val="{{ false }}"><svg style="flex: none" width="26" height="26" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="12" fill="none" stroke="#1F2A24" stroke-width="3" stroke-dasharray="5 4"></circle></svg></sc-if>
+<span style="flex: 1; font-size: 17px">{{q.text}}</span>
+<b style="font-size: 15px">{{q.word}}</b>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{lTimed}}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{toggleRelaxed}}" aria-pressed="{{relaxed}}" style="align-self: flex-start; min-height: 52px; padding: 0 18px; border-radius: 14px; border: 3px solid {{relaxBd}}; background: {{relaxBg}}; color: #1F2A24; font-size: 17px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 10px"><sc-if value="{{relaxed}}" hint-placeholder-val="{{ false }}"><svg width="22" height="22" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="13" fill="#1F2A24"></circle><path d="M8 15.5 L13 20.5 L22 9.5" fill="none" stroke="#FBF6E9" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></sc-if><span>Relaxed timing, double time</span></button>
+</sc-if>
+<sc-if value="{{lCanBegin}}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{beginSession}}" disabled="{{checking}}" style="min-height: 56px; padding: 0 22px; border-radius: 14px; border: 3px solid #1F2A24; background: #F2B632; color: #1F2A24; font-size: 19px; font-weight: 700; cursor: pointer">{{beginLabel}}</button>
+</sc-if>
+<span style="font-size: 15px; color: #5A5648">The server decides who may enter, how often, and what a pass is worth.</span>
+</sc-if>
+
+<sc-if value="{{isChat}}" hint-placeholder-val="{{ false }}">
+<p style="margin: 0; font-size: 18px; text-wrap: pretty">{{cSay}}</p>
+<button type="button" onClick="{{closePanel}}" style="align-self: flex-start; min-height: 52px; padding: 0 22px; border-radius: 14px; border: 3px solid #1F2A24; background: #FBF6E9; color: #1F2A24; font-size: 18px; font-weight: 700; cursor: pointer">Back to the world</button>
+</sc-if>
+
+<sc-if value="{{isLesson}}" hint-placeholder-val="{{ false }}">
+<p style="margin: 0; font-size: 18px; text-wrap: pretty">{{cSay}}</p>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{topics}}" as="t" hint-placeholder-count="3">
+<button type="button" onClick="{{t.pick}}" disabled="{{checking}}" style="min-height: 56px; padding: 8px 14px; border-radius: 12px; border: 3px solid #1F2A24; background: #FBF6E9; color: #1F2A24; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 2px"><b style="font-size: 18px">{{t.name}}</b><span style="font-size: 15px">{{t.blurb}}</span></button>
+</sc-for>
+</div>
+<sc-if value="{{hasLesson}}" hint-placeholder-val="{{ false }}">
+<div role="status" style="display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: 12px; border: 3px solid #1F2A24; background: #E4F0D2">
+<b style="font-size: 20px">{{lsTitle}}</b>
+<sc-for list="{{lsSteps}}" as="x" hint-placeholder-count="3"><span style="font-size: 17px">{{x.text}}</span></sc-for>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 16px; padding: 8px 10px; border-radius: 8px; background: #FFFFFF; border: 2px solid #1F2A24">Try: {{lsExample}}</span>
+<span style="font-size: 16px"><b>+8 XP</b> for learning this.</span>
+</div>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{isCreate}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; align-items: center; justify-content: center; padding: 8px 0; border-radius: 16px; background: #F6E7B8; border: 2px solid #1F2A24">
+<dc-import name="Hero" body="{{cr.body}}" skin="{{cr.skin}}" hair-style="{{cr.hairStyle}}" hair-color="{{cr.hairColor}}" jersey="j_white" cap="c_white" shoes="s_white" sleeve="a_white" size="200" hint-size="126px,200px"></dc-import>
+</div>
+<span style="font-size: 16px">You start in the plain white kit. Win gear in the store later.</span>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="cc-name" style="font-weight: 700; font-size: 17px">Name</label>
+<input id="cc-name" type="text" maxlength="14" value="{{cr.name}}" onChange="{{onName}}" onInput="{{onName}}" autocomplete="off" style="min-height: 52px; box-sizing: border-box; padding: 0 12px; border-radius: 10px; border: 3px solid #1F2A24; background: #FFFFFF; color: #1F2A24; font-size: 18px">
+</div>
+<sc-for list="{{cgroups}}" as="g" hint-placeholder-count="5">
+<div role="group" aria-label="{{g.name}}" style="display: flex; flex-direction: column; gap: 8px">
+<b style="font-size: 17px">{{g.name}}</b>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{g.items}}" as="i" hint-placeholder-count="4">
+<button type="button" onClick="{{i.pick}}" aria-pressed="{{i.on}}" aria-label="{{i.aria}}" style="min-height: 48px; min-width: 48px; padding: 0 14px; border-radius: 12px; border: {{i.bw}} solid #1F2A24; background: {{i.bg}}; color: {{i.fg}}; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px">
+<sc-if value="{{i.on}}" hint-placeholder-val="{{ false }}"><svg width="20" height="20" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="13" fill="#1F2A24"></circle><path d="M8 15.5 L13 20.5 L22 9.5" fill="none" stroke="#FBF6E9" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></sc-if>
+<span>{{i.label}}</span>
+</button>
+</sc-for>
+</div>
+</div>
+</sc-for>
+<button type="button" onClick="{{finishCreate}}" disabled="{{checking}}" style="min-height: 56px; padding: 0 22px; border-radius: 14px; border: 3px solid #1F2A24; background: #F2B632; color: #1F2A24; font-size: 19px; font-weight: 700; cursor: pointer">Start playing</button>
+</sc-if>
+
+<sc-if value="{{isCareer}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<b style="font-size: 18px">Skills</b>
+<sc-for list="{{skills}}" as="k" hint-placeholder-count="7">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<div style="display: flex; justify-content: space-between; font-size: 16px"><b>{{k.name}}</b><span>Level {{k.level}} of 4</span></div>
+<div role="progressbar" aria-label="{{k.name}} skill" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{k.pct}}" style="height: 12px; border-radius: 6px; background: #E6DFC9; overflow: hidden; border: 2px solid #1F2A24"><div style="height: 100%; background: #2E6A3B; width: {{k.pct}}%"></div></div>
+</div>
+</sc-for>
+</div>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<b style="font-size: 18px">Club ladder</b>
+<sc-for list="{{ladder}}" as="c" hint-placeholder-count="7">
+<div style="display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 12px; border: 3px solid {{c.bd}}; background: {{c.bg}}">
+<span style="flex: none; width: 30px; height: 30px; border-radius: 8px; background: #1F2A24; color: #FBF6E9; display: flex; align-items: center; justify-content: center; font-weight: 700">{{c.tier}}</span>
+<span style="flex: 1; font-size: 17px; font-weight: 700">{{c.name}}</span>
+<b style="font-size: 15px">{{c.word}}</b>
+</div>
+</sc-for>
+</div>
+<div style="padding: 12px 14px; border-radius: 12px; border: 2px dashed #1F2A24; display: flex; flex-direction: column; gap: 8px">
+<b>Prototype only</b>
+<span style="font-size: 16px">Your real server will not have this button. It adds coins, XP and skill so you can test the whole ladder quickly.</span>
+<button type="button" onClick="{{skipCooldowns}}" style="align-self: flex-start; min-height: 48px; padding: 0 18px; border-radius: 12px; border: 3px solid #1F2A24; background: #FBF6E9; color: #1F2A24; font-size: 17px; font-weight: 700; cursor: pointer">Clear match cooldowns</button>
+<button type="button" onClick="{{jumpTier}}" style="align-self: flex-start; min-height: 48px; padding: 0 18px; border-radius: 12px; border: 3px solid #1F2A24; background: #FBF6E9; color: #1F2A24; font-size: 17px; font-weight: 700; cursor: pointer">Jump to the next club</button>
+<button type="button" onClick="{{boost}}" style="align-self: flex-start; min-height: 48px; padding: 0 18px; border-radius: 12px; border: 3px solid #1F2A24; background: #FBF6E9; color: #1F2A24; font-size: 17px; font-weight: 700; cursor: pointer">Skip ahead</button>
+</div>
+</sc-if>
+
+<sc-if value="{{isMap}}" hint-placeholder-val="{{ false }}">
+<div style="position: relative; width: 100%; height: 0; padding-bottom: 100%; box-sizing: border-box; flex: 0 0 auto; border-radius: 12px; border: 3px solid #1F2A24; overflow: hidden; background: #7CB950" role="img" aria-label="Map of the whole world. Use the list below to walk to a place.">
+<sc-for list="{{mapRects}}" as="r" hint-placeholder-count="30">
+<div style="position: absolute; left: {{r.l}}%; top: {{r.t}}%; width: {{r.w}}%; height: {{r.h}}%; background: {{r.bg}}; border-radius: {{r.rad}}"></div>
+</sc-for>
+<div style="position: absolute; left: {{youL}}%; top: {{youT}}%; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; background: #F2B632; border: 3px solid #1F2A24"></div>
+</div>
+<span style="font-size: 15px; color: #5A5648">The gold dot is you. Pick a place and you walk there along the paths.</span>
+<sc-for list="{{destGroups}}" as="g" hint-placeholder-count="4">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 15px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #2E6A3B">{{g.name}}</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{g.items}}" as="d" hint-placeholder-count="3">
+<button type="button" onClick="{{d.go}}" style="min-height: 48px; padding: 0 14px; border-radius: 12px; border: 3px solid #1F2A24; background: #FBF6E9; color: #1F2A24; font-size: 16px; font-weight: 700; cursor: pointer">{{d.name}}</button>
+</sc-for>
+</div>
+</div>
+</sc-for>
+</sc-if>
+
+<sc-if value="{{isWardrobe}}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{shopOpen}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; gap: 10px">
+<button type="button" onClick="{{tabStore}}" aria-pressed="{{tabIsStore}}" style="flex: 1; min-height: 52px; border-radius: 12px; font-size: 18px; font-weight: 700; color: #1F2A24; cursor: pointer; border: 3px solid {{tabStoreBd}}; background: {{tabStoreBg}}">Buy</button>
+<button type="button" onClick="{{tabCustomise}}" aria-pressed="{{tabIsCustomise}}" style="flex: 1; min-height: 52px; border-radius: 12px; font-size: 18px; font-weight: 700; color: #1F2A24; cursor: pointer; border: 3px solid {{tabCustBd}}; background: {{tabCustBg}}">Wear</button>
+</div>
+</sc-if>
+<div style="display: flex; align-items: center; justify-content: center; padding: 8px 0; border-radius: 16px; background: #F6E7B8; border: 2px solid #1F2A24">
+<dc-import name="Hero" body="{{heroBody}}" skin="{{heroSkin}}" hair-style="{{heroHairStyle}}" hair-color="{{heroHairColor}}" jersey="{{eqJersey}}" cap="{{eqCap}}" shoes="{{eqShoes}}" sleeve="{{eqSleeve}}" size="200" hint-size="126px,200px"></dc-import>
+</div>
+<div style="font-size: 17px"><b>{{wardNote}}</b></div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{rows}}" as="r" hint-placeholder-count="8">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<sc-if value="{{r.header}}" hint-placeholder-val="{{ false }}"><div style="margin-top: 10px; font-size: 15px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #2E6A3B">{{r.text}}</div></sc-if>
+<sc-if value="{{r.isItem}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 12px; border: 2px solid #8D887A; background: #FFFFFF">
+<span style="flex: none; width: 26px; height: 26px; border-radius: 6px; border: 2px solid #1F2A24; background: {{r.hex}}"></span>
+<span style="flex: 1; display: flex; flex-direction: column; line-height: 1.2"><b style="font-size: 17px">{{r.name}}</b><span style="font-size: 15px">{{r.priceText}}</span></span>
+<button type="button" onClick="{{r.act}}" disabled="{{r.disabled}}" aria-label="{{r.aria}}" style="min-height: 48px; min-width: 96px; padding: 0 14px; border-radius: 12px; border: 3px solid #1F2A24; background: {{r.btnBg}}; color: #1F2A24; font-size: 17px; font-weight: 700; cursor: pointer">{{r.action}}</button>
+</div>
+</sc-if>
+</div>
+</sc-for>
+</div>
+<sc-if value="{{rowsEmpty}}" hint-placeholder-val="{{ false }}"><p style="margin: 0; font-size: 17px">{{emptyText}}</p></sc-if>
+</sc-if>
+
+</div>
+</aside>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"showJoystick":{"editor":"boolean","default":true},"$preview":{"width":1280,"height":820}}'>
+class Component extends DCLogic {
+  S() {
+    return Object.assign({
+      scale: 1, px: 1250, py: 4700, camX: 1250, camY: 4700, flip: 1, moving: false, near: '', frame: 0, intro: true,
+      knobX: 0, knobY: 0, toast: '',
+      player: { coins: 20, xp: 0, level: 1, skills: {}, skillXp: {}, owned: { c_white: 1, j_white: 1, s_white: 1, a_white: 1 }, eq: { cap: 'c_white', jersey: 'j_white', shoes: 's_white', sleeve: 'a_white' }, tier: 0, cp: {}, look: null, created: true },
+      cfg: null, markers: {}, clubs: [],
+      panel: '', sheetWin: false, npcId: '', enc: null, loading: false, err: '', formula: '', result: null, checking: false, hint: false, solved: false,
+      shopOpen: false, tab: 'customise',
+      deadline: 0, clockT: 0, pendingNext: null, sr: null, relaxed: false, lesson: null,
+      facId: '', facName: '', facNote: '',
+      cr: { name: 'Ujwal', gender: 'Male', body: 'regular', skin: '#C68A5E', hairStyle: 'short', hairColor: '#1B1410' }
+    }, this.state || {});
+  }
+
+  componentDidMount() {
+    this.keys = {};
+    this.joy = { x: 0, y: 0 };
+    this.joyActive = false;
+    this.p = { x: window.CCWorld.START.x, y: window.CCWorld.START.y };
+    this.cam = { x: window.CCWorld.START.x, y: window.CCWorld.START.y };
+    this.last = Date.now();
+    this.flipDir = 1;
+    this.path = null;
+    this.walkNpc = '';
+    this.stuck = 0;
+    this.req = 0;
+    this.tickN = 0;
+    this.pos = {};
+    this.wan = {};
+    this.reduce = false;
+    this.facId = '';
+    this.facLast = 0;
+    this.createShown = false;
+    try { this.reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { this.reduce = false; }
+    const W = window.CCWorld;
+    W.NPCS.forEach((n) => { this.pos[n.id] = { x: n.x, y: n.y }; this.wan[n.id] = { tx: n.x, ty: n.y, wait: Math.random() * 3 }; });
+    this.measure = () => {
+      const el = document.getElementById('cc-world');
+      if (!el) return;
+      const s = Math.max(0.62, Math.min(1.1, el.clientWidth / 760));
+      if (Math.abs(s - this.S().scale) > 0.01) this.setState({ scale: s });
+    };
+    this.measure();
+    try { window.addEventListener('resize', this.measure); } catch (e) { }
+    this.timer = setInterval(() => this.tick(), 40);
+    this.clock = setInterval(() => this.clockTick(), 1000);
+    this.refresh();
+    try { const w = document.getElementById('cc-world'); if (w) w.focus(); } catch (e) { }
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.timer);
+    clearInterval(this.clock);
+    clearTimeout(this.toastTimer);
+    try { window.removeEventListener('resize', this.measure); } catch (e) { }
+  }
+
+  say(msg) {
+    this.setState({ toast: msg });
+    clearTimeout(this.toastTimer);
+    this.toastTimer = setTimeout(() => this.setState({ toast: '' }), 4600);
+  }
+
+  apiNpc(id) {
+    const n = window.CCWorld.NPCS.find((x) => x.id === id);
+    return { id: n.id, name: n.name, role: n.role, family: n.family || '', tier: n.tier || 0, session: n.session || '', step: n.step || 0, lesson: n.lesson || '' };
+  }
+
+  refresh() {
+    const api = window.CCApi;
+    api.world(window.CCWorld.NPCS.map((n) => this.apiNpc(n.id))).then((w) => {
+      this.setState({ player: w.player, markers: w.markers || {}, cfg: w.config || this.S().cfg });
+      if (w.player && !w.player.created && !this.createShown) { this.createShown = true; this.openCreate(); }
+    }).catch(() => { });
+    api.clubs().then((c) => { if (Array.isArray(c)) this.setState({ clubs: c }); }).catch(() => { });
+  }
+
+  gateOn(g) { return (this.S().player.tier || 0) < g.tier; }
+
+  hit(x, y, R) {
+    const W = window.CCWorld;
+    const bl = W.BLOCKS;
+    for (let i = 0; i < bl.length; i++) {
+      const r = bl[i];
+      if (x > r[0] - R && x < r[0] + r[2] + R && y > r[1] - R && y < r[1] + r[3] + R) return true;
+    }
+    const gs = W.GATES || [];
+    for (let j = 0; j < gs.length; j++) {
+      const g = gs[j];
+      if (this.gateOn(g) && x > g.x - R && x < g.x + g.w + R && y > g.y - R && y < g.y + g.d + R) return true;
+    }
+    return false;
+  }
+
+  clockTick() {
+    const st = this.S();
+    const now = Date.now();
+    const lobbyWait = st.enc && st.enc.kind === 'lobby' && st.enc.session && st.enc.session.nextAt > now;
+    if (st.deadline || lobbyWait) this.setState({ clockT: now });
+    if (st.deadline && now >= st.deadline && !st.solved && !st.checking && st.enc && st.enc.kind === 'question') this.expire();
+  }
+
+  facilityStep(st, now) {
+    const W = window.CCWorld;
+    const fac = W.facilityAt(this.p.x, this.p.y);
+    const id = fac ? fac.id : '';
+    if (id !== this.facId) {
+      this.facId = id;
+      this.facLast = 0;
+      this.setState({ facId: id, facName: fac ? fac.name : '', facNote: fac ? 'Stay here to train.' : '' });
+    }
+    if (fac && !st.panel && now - this.facLast > 9000) {
+      this.facLast = now;
+      window.CCApi.facility(fac.id).then((r) => {
+        if (!r || this.facId !== fac.id) return;
+        if (r.locked) { this.setState({ facNote: r.message || 'Members only.' }); return; }
+        if (r.tooSoon) return;
+        this.setState({ player: r.player || this.S().player, facNote: (r.message || 'Training.') + ' Keep going.' });
+        this.say(fac.name + ': ' + (r.message || 'points earned'));
+        if (r.levelUp) this.say('Level ' + r.levelUp + '. New clubs may be open to you.');
+      }).catch(() => { });
+    }
+  }
+
+  tick() {
+    const W = window.CCWorld;
+    const st = this.S();
+    const now = Date.now();
+    const dt = Math.min(0.08, (now - this.last) / 1000);
+    this.last = now;
+    this.tickN++;
+    let wx = 0;
+    let wy = 0;
+    let sxOut = 0;
+    if (!st.panel) {
+      const k = this.keys;
+      let sx = 0;
+      let sy = 0;
+      if (k['a'] || k['arrowleft']) sx -= 1;
+      if (k['d'] || k['arrowright']) sx += 1;
+      if (k['w'] || k['arrowup']) sy -= 1;
+      if (k['s'] || k['arrowdown']) sy += 1;
+      sx += this.joy.x;
+      sy += this.joy.y;
+      const len = Math.hypot(sx, sy);
+      if (len > 0.05) {
+        if (len > 1) { sx /= len; sy /= len; }
+        this.path = null;
+        wx = (sx + sy) * 0.7071;
+        wy = (sy - sx) * 0.7071;
+        sxOut = sx;
+      } else if (this.path && this.path.length) {
+        const wp = this.path[0];
+        const ddx = wp[0] - this.p.x;
+        const ddy = wp[1] - this.p.y;
+        const dist = Math.hypot(ddx, ddy) || 1;
+        const last = this.path.length === 1;
+        if (last && this.walkNpc) {
+          const np = this.pos[this.walkNpc];
+          if (Math.hypot(np.x - this.p.x, np.y - this.p.y) < 80) { const id = this.walkNpc; this.path = null; this.walkNpc = ''; this.openEncounter(id); }
+        }
+        if (this.path) {
+          if (dist < (last ? 12 : 24)) { this.path.shift(); if (!this.path.length) { this.path = null; this.walkNpc = ''; } }
+          else { wx = ddx / dist; wy = ddy / dist; sxOut = (wx - wy) * 0.7071; }
+        }
+      }
+    }
+    let moved = false;
+    if (wx !== 0 || wy !== 0) {
+      const sp = 235 * dt;
+      const nx = this.p.x + wx * sp;
+      const ny = this.p.y + wy * sp;
+      if (!this.hit(nx, this.p.y, 14)) { this.p.x = nx; moved = true; }
+      if (!this.hit(this.p.x, ny, 14)) { this.p.y = ny; moved = true; }
+      this.p.x = Math.max(24, Math.min(W.W - 24, this.p.x));
+      this.p.y = Math.max(24, Math.min(W.H - 24, this.p.y));
+      if (Math.abs(sxOut) > 0.25) this.flipDir = sxOut < 0 ? -1 : 1;
+      if (!moved && this.path) { this.stuck++; if (this.stuck > 14) { this.path = null; this.walkNpc = ''; this.stuck = 0; } } else this.stuck = 0;
+    }
+    let npcMoved = false;
+    for (let i = 0; i < W.NPCS.length; i++) {
+      const n = W.NPCS[i];
+      if (!n.rect) continue;
+      const ps = this.pos[n.id];
+      if (Math.abs(ps.x - this.p.x) > 1000 || Math.abs(ps.y - this.p.y) > 1000) continue;
+      if (st.panel && this.S().npcId === n.id) continue;
+      const w = this.wan[n.id];
+      if (Math.hypot(ps.x - this.p.x, ps.y - this.p.y) < 150) continue;
+      if (w.wait > 0) { w.wait -= dt; continue; }
+      const d = Math.hypot(w.tx - ps.x, w.ty - ps.y);
+      if (d < 6) { w.wait = 1.5 + Math.random() * 4; w.tx = n.rect.x + Math.random() * n.rect.w; w.ty = n.rect.y + Math.random() * n.rect.h; continue; }
+      const nx = ps.x + (w.tx - ps.x) / d * 46 * dt;
+      const ny = ps.y + (w.ty - ps.y) / d * 46 * dt;
+      if (this.hit(nx, ny, 62)) { w.tx = ps.x; w.ty = ps.y; w.wait = 2.5; continue; }
+      if (Math.abs(nx - ps.x) > 0.05) ps.dir = nx > ps.x ? 1 : -1;
+      ps.x = nx; ps.y = ny; ps.mvT = Date.now(); npcMoved = true;
+    }
+    if (this.tickN % 5 === 0) this.facilityStep(st, now);
+    const f = this.reduce ? 1 : 0.2;
+    this.cam.x += (this.p.x - this.cam.x) * f;
+    this.cam.y += (this.p.y - this.cam.y) * f;
+    let near = '';
+    let best = 110;
+    for (let i = 0; i < W.NPCS.length; i++) {
+      const n = W.NPCS[i];
+      const ps = this.pos[n.id];
+      const d = Math.hypot(ps.x - this.p.x, ps.y - this.p.y);
+      if (d < best) { best = d; near = n.id; }
+    }
+    const px = Math.round(this.p.x * 2) / 2;
+    const py = Math.round(this.p.y * 2) / 2;
+    const cx = Math.round(this.cam.x * 2) / 2;
+    const cy = Math.round(this.cam.y * 2) / 2;
+    const fr = npcMoved && this.tickN % 3 === 0 ? st.frame + 1 : st.frame;
+    if (px !== st.px || py !== st.py || cx !== st.camX || cy !== st.camY || near !== st.near || moved !== st.moving || this.flipDir !== st.flip || fr !== st.frame) {
+      const patch = { px: px, py: py, camX: cx, camY: cy, near: near, moving: moved, flip: this.flipDir, frame: fr };
+      if ((moved || this.path) && st.intro) patch.intro = false;
+      this.setState(patch);
+    }
+  }
+
+  onKeyDown(e) {
+    const kl = String(e.key).toLowerCase();
+    if (kl === 'arrowup' || kl === 'arrowdown' || kl === 'arrowleft' || kl === 'arrowright') e.preventDefault();
+    if (kl === 'e') { this.interact(); return; }
+    if (kl === 'm') { this.openMap(); return; }
+    if (kl === 'c') { this.openCareer(); return; }
+    if ((kl === 'enter' || kl === ' ') && e.target === e.currentTarget) { e.preventDefault(); this.interact(); return; }
+    this.keys[kl] = true;
+  }
+  onKeyUp(e) { this.keys[String(e.key).toLowerCase()] = false; }
+  onBlur() { this.keys = {}; }
+  focusWorld() { try { const w = document.getElementById('cc-world'); if (w) w.focus(); } catch (e) { } }
+
+  joyDown(e) { try { e.currentTarget.setPointerCapture(e.pointerId); } catch (err) { } this.joyActive = true; this.joyMove(e); }
+  joyMove(e) {
+    if (!this.joyActive) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    let dx = e.clientX - (r.left + r.width / 2);
+    let dy = e.clientY - (r.top + r.height / 2);
+    const max = 44;
+    const len = Math.hypot(dx, dy);
+    const m = Math.min(1, len / max);
+    if (len > 0) { dx /= len; dy /= len; }
+    this.joy = m < 0.15 ? { x: 0, y: 0 } : { x: dx * m, y: dy * m };
+    this.setState({ knobX: Math.round(dx * m * max), knobY: Math.round(dy * m * max) });
+  }
+  joyUp() { this.joyActive = false; this.joy = { x: 0, y: 0 }; this.setState({ knobX: 0, knobY: 0 }); }
+
+  interact() { const st = this.S(); if (st.panel) return; if (st.near) this.openEncounter(st.near); }
+
+  tapNpc(id) {
+    const st = this.S();
+    if (st.panel) return;
+    const ps = this.pos[id];
+    if (Math.hypot(ps.x - this.p.x, ps.y - this.p.y) < 110) { this.openEncounter(id); return; }
+    this.path = window.CCWorld.route(this.p.x, this.p.y, ps.x, ps.y);
+    this.walkNpc = id;
+    this.stuck = 0;
+    this.setState({ intro: false });
+  }
+
+  walkToDest(d) {
+    this.path = window.CCWorld.route(this.p.x, this.p.y, d.x, d.y);
+    this.walkNpc = '';
+    this.stuck = 0;
+    this.closePanel();
+  }
+
+  stopInput() { this.keys = {}; this.joy = { x: 0, y: 0 }; this.path = null; this.walkNpc = ''; }
+
+  resetQ() { return { formula: '', result: null, checking: false, hint: false, solved: false, deadline: 0, pendingNext: null, sr: null, lesson: null }; }
+
+  showQuestion(e) {
+    const lim = e.question && e.question.timeLimit ? e.question.timeLimit : 0;
+    this.setState(Object.assign(this.resetQ(), { enc: e, loading: false, player: e.player || this.S().player, deadline: lim ? Date.now() + lim * 1000 : 0, clockT: Date.now() }));
+    setTimeout(() => { try { const el = document.getElementById('cc-fx'); if (el) el.focus(); } catch (er) { } }, 340);
+  }
+
+  openEncounter(id) {
+    this.stopInput();
+    const my = ++this.req;
+    this.setState(Object.assign(this.resetQ(), { panel: 'enc', npcId: id, enc: null, loading: true, err: '', intro: false, knobX: 0, knobY: 0, relaxed: false }));
+    window.CCApi.encounter(this.apiNpc(id)).then((e) => {
+      if (my !== this.req) return;
+      if (e.kind === 'question') { this.showQuestion(e); return; }
+      const patch = { enc: e, loading: false, player: e.player || this.S().player, clockT: Date.now() };
+      if (e.kind === 'store') { patch.shopOpen = true; patch.tab = 'store'; patch.panel = 'wardrobe'; }
+      this.setState(patch);
+    }).catch((er) => {
+      if (my !== this.req) return;
+      this.setState({ loading: false, err: (er && er.message) || 'The agent did not answer.' });
+    });
+  }
+
+  retry() { const id = this.S().npcId; if (id) this.openEncounter(id); }
+  askAnother() { this.retry(); }
+
+  openMap() { if (this.S().panel) return; this.stopInput(); this.setState({ panel: 'map', loading: false, err: '', intro: false }); }
+  openCareer() { if (this.S().panel) return; this.stopInput(); this.refresh(); this.setState({ panel: 'career', loading: false, err: '', intro: false }); }
+  openCustomise() { if (this.S().panel) return; this.stopInput(); this.setState({ panel: 'wardrobe', shopOpen: false, tab: 'customise', loading: false, err: '', intro: false, enc: null }); }
+  openCreate() { this.stopInput(); const l = this.S().player.look; this.setState({ panel: 'create', loading: false, err: '', intro: false, cr: l ? Object.assign({}, this.S().cr, l) : this.S().cr }); }
+
+  closePanel() {
+    if (this.S().panel === 'create' && !this.S().player.created) { this.finishCreate(); return; }
+    this.req++;
+    this.setState({ panel: '', sheetWin: false, loading: false, err: '', deadline: 0 });
+    this.refresh();
+    setTimeout(() => this.focusWorld(), 50);
+  }
+  openSheet() { this.setState({ sheetWin: true }); setTimeout(() => { const b = document.getElementById('cc-swclose'); if (b) b.focus(); }, 60); }
+  closeSheet() { this.setState({ sheetWin: false }); setTimeout(() => { const b = document.getElementById('cc-fx'); if (b) b.focus(); }, 60); }
+  onSheetKey(e) { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); this.closeSheet(); } }
+  onPanelKey(e) { if (e.key === 'Escape') { e.preventDefault(); this.closePanel(); } }
+  onFormula(e) { this.setState({ formula: e.target.value }); }
+  onFormulaKey(e) { if (e.key === 'Enter') { e.preventDefault(); this.check(); } }
+  toggleHint() { this.setState({ hint: !this.S().hint }); }
+  toggleRelaxed() { this.setState({ relaxed: !this.S().relaxed }); }
+
+  /* character creator */
+  pickCr(key, val) {
+    const cr = Object.assign({}, this.S().cr);
+    cr[key] = val;
+    if (key === 'gender') { cr.hairStyle = val === 'Female' ? 'long' : 'short'; cr.body = val === 'Female' ? 'slim' : 'regular'; }
+    this.setState({ cr: cr });
+  }
+  onName(e) { this.setState({ cr: Object.assign({}, this.S().cr, { name: String(e.target.value).slice(0, 14) }) }); }
+  finishCreate() {
+    const cr = this.S().cr;
+    this.setState({ checking: true });
+    window.CCApi.createPlayer({ name: String(cr.name).trim() || 'Player', gender: cr.gender, body: cr.body, skin: cr.skin, hairStyle: cr.hairStyle, hairColor: cr.hairColor }).then((r) => {
+      this.req++;
+      this.setState({ checking: false, player: r.player || this.S().player, panel: '', intro: true });
+      this.refresh();
+      setTimeout(() => this.focusWorld(), 50);
+    }).catch((er) => { this.setState({ checking: false }); this.say((er && er.message) || 'Could not save your player.'); });
+  }
+
+  /* sessions */
+  beginSession() {
+    const st = this.S();
+    if (!st.enc || st.enc.kind !== 'lobby' || st.checking) return;
+    this.setState({ checking: true });
+    window.CCApi.sessionBegin(st.enc.encounterId, { relaxed: st.relaxed }).then((e) => {
+      this.showQuestion(e);
+    }).catch((er) => { this.setState({ checking: false }); this.say((er && er.message) || 'Could not start.'); });
+  }
+
+  nextOver() {
+    const st = this.S();
+    if (!st.pendingNext) return;
+    this.showQuestion(st.pendingNext);
+  }
+
+  pickLesson(fam) {
+    const st = this.S();
+    if (!st.enc || st.checking) return;
+    this.setState({ checking: true });
+    window.CCApi.lessonTopic(st.enc.encounterId, fam).then((r) => {
+      this.setState({ checking: false, lesson: { title: r.title, steps: r.steps || [], example: r.example || '' }, player: r.player || this.S().player });
+      if (r.levelUp) this.say('Level ' + r.levelUp + '. New clubs may be open to you.');
+      this.refresh();
+    }).catch((er) => { this.setState({ checking: false }); this.say((er && er.message) || 'Could not load the lesson.'); });
+  }
+
+  applyRewards(r) {
+    if (r.levelUp) this.say('Level ' + r.levelUp + '. New clubs may be open to you.');
+    else if (r.rewards && r.rewards.skill && r.rewards.skill.up) this.say('Skill up. Check your Career.');
+  }
+
+  expire() {
+    const st = this.S();
+    if (!st.enc || st.solved || st.checking) return;
+    this.setState({ checking: true, deadline: 0 });
+    const id = st.enc.encounterId;
+    window.CCApi.answer(id, null).then((r) => this.handleAnswer(r, id)).catch((er) => { this.setState({ checking: false, result: { ok: false, msg: (er && er.message) || 'The server did not answer.' } }); });
+  }
+
+  check() {
+    const st = this.S();
+    if (!st.enc || st.enc.kind !== 'question' || st.checking || st.solved) return;
+    if (!String(st.formula).trim()) { this.setState({ result: { ok: false, msg: st.enc.question.type === 'value' ? 'Type a value first.' : 'Type a formula first. It starts with an equals sign.' } }); return; }
+    this.setState({ checking: true, result: null });
+    const id = st.enc.encounterId;
+    window.CCApi.answer(id, st.formula).then((r) => this.handleAnswer(r, id)).catch((er) => { this.setState({ checking: false, result: { ok: false, msg: (er && er.message) || 'The server did not answer. Try again.' } }); });
+  }
+
+  handleAnswer(r, id) {
+    const cur = this.S();
+    if (!cur.enc || cur.enc.encounterId !== id) return;
+    const player = r.player || cur.player;
+    if (!r.correct && !r.roundOver) { this.setState({ checking: false, player: player, result: { ok: false, msg: r.feedback || 'Not yet.' } }); return; }
+    const rw = r.rewards || {};
+    let msg = r.correct ? 'You earned ' + (rw.coins || 0) + ' coins and ' + (rw.xp || 0) + ' XP.' : (r.feedback || 'That over is lost.');
+    if (r.checkpointCleared) msg += ' Checkpoint ' + r.checkpointCleared.step + ' of ' + r.checkpointCleared.of + ' cleared.';
+    this.setState({ checking: false, solved: true, deadline: 0, player: player, pendingNext: r.next || null, sr: r.sessionResult || null, result: { ok: !!r.correct, msg: msg, explain: r.explanation || '' } });
+    this.applyRewards(r);
+    if (r.sessionResult) {
+      const sr = r.sessionResult;
+      this.say(sr.enrolledTier ? 'Selected. New facilities and grounds may be open.' : sr.passed ? 'Session passed.' : 'Session over.');
+    }
+    this.refresh();
+  }
+
+  buy(id) {
+    window.CCApi.buy(id).then((r) => {
+      this.setState({ player: r.player });
+      const it = this.items().find((x) => x.id === id);
+      this.say('Bought ' + (it ? it.name : 'item') + '. You are wearing it.');
+      this.refresh();
+    }).catch((er) => this.say((er && er.message) || 'Could not buy that.'));
+  }
+  wear(id) { window.CCApi.equip(id).then((r) => { this.setState({ player: r.player }); this.refresh(); }).catch((er) => this.say((er && er.message) || 'Could not wear that.')); }
+  boost() { window.CCApi.debugBoost().then((r) => { this.setState({ player: r.player }); this.say('Skipped ahead. Try the club recruiters.'); this.refresh(); }).catch(() => { }); }
+  skipCooldowns() { window.CCApi.debugCooldowns().then((r) => { this.setState({ player: r.player }); this.say('Cooldowns cleared.'); this.refresh(); }).catch(() => { }); }
+  jumpTier() { const t = Math.min(7, (this.S().player.tier || 0) + 1); window.CCApi.debugTier(t).then((r) => { this.setState({ player: r.player }); this.say('Jumped to tier ' + t + '.'); this.refresh(); }).catch(() => { }); }
+
+  items() { const c = this.S().cfg; return c && c.items ? c.items : []; }
+
+  goalText(st) {
+    const clubs = st.clubs || [];
+    const p = st.player;
+    if (!p.created) return 'Create your player to begin.';
+    if (!clubs.length) return 'Talk to a coach at the Nets to earn coins and XP.';
+    const next = clubs.find((c) => c.tier === (p.tier || 0) + 1);
+    if (!next) return 'You wear the National colours. Play the stadium match for big rewards.';
+    const miss = (next.requirements || []).find((r) => !r.ok);
+    if (!miss) return 'You are ready. Go to ' + (next.venue || next.name) + ' and speak to the ' + (next.mode === 'match' ? 'selector' : next.mode === 'checkpoints' ? 'steward' : 'recruiter') + '.';
+    return 'Join ' + next.name + ' at ' + (next.venue || 'the club') + '. Next step: ' + miss.text + '.';
+  }
+
+  fmtTime(ms) {
+    const s = Math.max(0, Math.ceil(ms / 1000));
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const ss = s % 60;
+    const two = (n) => (n < 10 ? '0' : '') + n;
+    return h > 0 ? h + ':' + two(m) + ':' + two(ss) : m + ':' + two(ss);
+  }
+
+  renderVals() {
+    const W = window.CCWorld;
+    const st = this.S();
+    const p = st.player;
+    const cfg = st.cfg;
+    const eq = p.eq || {};
+    const look = p.look || { body: 'regular', skin: '#C68A5E', hairStyle: 'short', hairColor: '#1B1410' };
+    const open = st.panel !== '';
+    const enc = st.enc;
+    const camX = st.camX;
+    const camY = st.camY;
+    const nowT = Math.max(st.clockT || 0, Date.now() - 1500);
+    const near = (x, y, r) => Math.abs(x - camX) < r && Math.abs(y - camY) < r;
+
+    const floors = [];
+    W.FLOORS.forEach((f) => {
+      if (!(f.x < camX + 1100 && f.x + f.w > camX - 1100 && f.y < camY + 1100 && f.y + f.h > camY - 1100)) return;
+      floors.push({ s: 'left:' + f.x + 'px;top:' + f.y + 'px;width:' + f.w + 'px;height:' + f.h + 'px;background:' + f.bg + ';border-radius:' + f.r + 'px;transform:translateZ(' + f.z + 'px)' + (f.css ? ';' + f.css : '') });
+    });
+    const toBox = (b) => ({ box: b.v.box, shade: b.v.shade, top: b.v.top, south: b.v.south, east: b.v.east, win: b.v.win, door: b.v.door, awning: b.v.awning, label: b.v.label, text: b.text || '' });
+    const boxes = W.BOXES.filter((b) => near(b.cx, b.cy, 900)).map(toBox);
+    (W.GATES || []).forEach((g) => { if (this.gateOn(g) && near(g.b.cx, g.b.cy, 1000)) boxes.push(toBox(g.b)); });
+    const signs = W.SIGNS.filter((s) => near(s.x, s.y, 950)).map((s) => ({ x: s.x, y: s.y, w: s.w, bg: s.bg, fg: s.fg, t: s.t, isFlag: !!s.flag, isLamp: !!s.lamp, notLamp: !s.lamp, poleH: s.poleH || 44, sub: s.sub || '', hasSub: !!s.sub, boardW: Math.max(s.w, 150) }));
+    const trees = W.TREES.filter((t) => near(t.x, t.y, 950));
+
+    const npcs = [];
+    W.NPCS.forEach((n) => {
+      const ps = this.pos[n.id];
+      const vis = near(ps.x, ps.y, 880);
+      const m = st.markers[n.id] || 'new';
+      const isNear = st.near === n.id;
+      const meaning = m === 'done' ? 'done for now' : m === 'locked' ? 'not ready yet' : m === 'store' ? 'store' : m === 'match' ? 'match available' : m === 'learn' ? 'lessons' : m === 'talk' ? 'chat' : 'new question';
+      npcs.push({
+        x: Math.round(ps.x), y: Math.round(ps.y), disp: vis ? 'block' : 'none', name: n.name,
+        isNew: m === 'new', isDone: m === 'done', isLocked: m === 'locked', isStore: m === 'store', isMatch: m === 'match', isLearn: m === 'learn', isTalk: m === 'talk',
+        chipBg: isNear ? '#F2B632' : '#FBF6E9',
+        walkClass: ps.mvT && Date.now() - ps.mvT < 600 ? 'walk' : '', flip: ps.dir || 1,
+        aria: 'Talk to ' + n.name + ', ' + n.tag + ', ' + meaning,
+        tap: () => this.tapNpc(n.id),
+        body: n.hero.body, skin: n.hero.skin, hairStyle: n.hero.hairStyle, hairColor: n.hero.hairColor, jersey: n.hero.jersey, cap: n.hero.cap, shoes: n.hero.shoes, sleeve: n.hero.sleeve
+      });
+    });
+    const nearNpc = W.NPCS.find((n) => n.id === st.near);
+
+    const th = cfg ? cfg.levelXp : [0, 100, 250, 450, 700, 1000, 1400, 1900, 2500, 3200];
+    const lvl = p.level || 1;
+    const base = th[lvl - 1];
+    const next = th[lvl] != null ? th[lvl] : base + 600;
+    const xpPct = Math.max(0, Math.min(100, Math.round((((p.xp || 0) - base) / (next - base)) * 100)));
+    const zone = W.zoneAt(st.px, st.py);
+
+    /* question view */
+    const q = enc && enc.kind === 'question' ? enc.question : null;
+    const cells = [];
+    const cellsBig = [];
+    let gridColsBig = '56px repeat(6, minmax(150px, 1fr))';
+    let gridCols = '36px repeat(3, minmax(90px, 1fr))';
+    let qRef = '';
+    if (q) {
+      const nc = Math.max.apply(null, q.sheet.rows.map((r) => r.length));
+      gridCols = '36px repeat(' + nc + ', minmax(90px, 1fr))';
+      cells.push({ text: '', bg: '#E6DFC9', fw: 700, just: 'center', ol: 'none' });
+      for (let c = 0; c < nc; c++) cells.push({ text: 'ABCDEF'.charAt(c), bg: '#E6DFC9', fw: 700, just: 'center', ol: 'none' });
+      q.sheet.rows.forEach((row, r) => {
+        cells.push({ text: String(r + 1), bg: '#E6DFC9', fw: 700, just: 'center', ol: 'none' });
+        for (let c = 0; c < nc; c++) {
+          const v = row[c] == null ? '' : row[c];
+          const target = r === q.sheet.target.r && c === q.sheet.target.c;
+          cells.push({ text: target ? st.formula : String(v), bg: target ? '#F6E7B8' : r === 0 ? '#F3EEDD' : '#FFFFFF', fw: target || r === 0 ? 700 : 500, just: 'flex-start', ol: target ? '3px solid #1F2A24' : 'none' });
+        }
+      });
+      qRef = 'ABCDEF'.charAt(q.sheet.target.c) + (q.sheet.target.r + 1);
+      const ncB = Math.max(nc, 6), nrB = Math.max(q.sheet.rows.length + 4, 16);
+      gridColsBig = '56px repeat(' + ncB + ', minmax(150px, 1fr))';
+      cellsBig.push({ text: '', bg: '#E6DFC9', fw: 700, just: 'center', ol: 'none' });
+      for (let c = 0; c < ncB; c++) cellsBig.push({ text: 'ABCDEFGH'.charAt(c), bg: '#E6DFC9', fw: 700, just: 'center', ol: 'none' });
+      for (let r = 0; r < nrB; r++) {
+        cellsBig.push({ text: String(r + 1), bg: '#E6DFC9', fw: 700, just: 'center', ol: 'none' });
+        for (let c = 0; c < ncB; c++) {
+          const row = q.sheet.rows[r];
+          const v = row && row[c] != null ? row[c] : '';
+          const target = r === q.sheet.target.r && c === q.sheet.target.c;
+          cellsBig.push({ text: target ? st.formula : String(v), bg: target ? '#F6E7B8' : r === 0 && row ? '#F3EEDD' : '#FFFFFF', fw: target || (r === 0 && row) ? 700 : 500, just: 'flex-start', ol: target ? '3px solid #1F2A24' : 'none' });
+        }
+      }
+    }
+    const ses = q && enc.session ? enc.session : null;
+    const cp = q && enc.checkpoint ? enc.checkpoint : null;
+    const msLeft = st.deadline ? st.deadline - nowT : 0;
+    const sr = st.sr;
+
+    /* lobby view */
+    const lob = enc && enc.kind === 'lobby' ? enc : null;
+    const ls = lob ? lob.session : null;
+    const club = lob && lob.club ? lob.club : null;
+    const lWait = !!(ls && ls.nextAt && ls.nextAt > nowT);
+    const showReqs = !!(club && ls && ls.purpose !== 'joined' && !club.enrolled);
+    const reqs = showReqs ? club.requirements.map((r) => ({ text: r.text, ok: r.ok, no: !r.ok, word: r.ok ? 'Done' : 'Missing', bd: r.ok ? '#1F2A24' : '#8D887A', bg: r.ok ? '#E4F0D2' : '#FFFFFF' })) : [];
+
+    /* lesson */
+    const les = enc && enc.kind === 'lesson' ? enc : null;
+    const topics = les ? les.topics.map((t) => ({ id: t.id, name: t.name, blurb: t.blurb, pick: () => this.pickLesson(t.id) })) : [];
+
+    /* creator */
+    const cr = st.cr;
+    const fgFor = (hex) => { const n = parseInt(hex.slice(1), 16); const l = 0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255); return l > 140 ? '#1F2A24' : '#FBF6E9'; };
+    const mk = (key, val, label, extra) => {
+      const on = cr[key] === val;
+      const sw = extra && extra.hex;
+      return { label: label, on: on, bw: on ? '5px' : '3px', bg: sw || (on ? '#F6E7B8' : '#FBF6E9'), fg: sw ? fgFor(sw) : '#1F2A24', aria: (key === 'skin' ? 'Face colour ' : key === 'hairColor' ? 'Hair colour ' : '') + label + (on ? ', selected' : ''), pick: () => this.pickCr(key, val) };
+    };
+    const cgroups = [
+      { name: 'Gender', items: [mk('gender', 'Male', 'Male'), mk('gender', 'Female', 'Female')] },
+      { name: 'Body', items: [mk('body', 'slim', 'Slim'), mk('body', 'regular', 'Regular'), mk('body', 'broad', 'Broad')] },
+      { name: 'Face colour', items: ['#E8B98F', '#D9A577', '#C68A5E', '#A66B43', '#8D5A3B', '#7A4A2E'].map((h, i) => mk('skin', h, 'Tone ' + (i + 1), { hex: h })) },
+      { name: 'Hair style', items: [mk('hairStyle', 'short', 'Short'), mk('hairStyle', 'curly', 'Curly'), mk('hairStyle', 'long', 'Long'), mk('hairStyle', 'bun', 'Bun'), mk('hairStyle', 'none', 'None')] },
+      { name: 'Hair colour', items: [['#1B1410', 'Black'], ['#4A2E1E', 'Brown'], ['#B9B5AA', 'Grey'], ['#7A3B1D', 'Auburn'], ['#2B2B33', 'Charcoal']].map((a) => mk('hairColor', a[0], a[1], { hex: a[0] })) }
+    ];
+
+    /* career view */
+    const fams = cfg ? cfg.families : [];
+    const skills = fams.map((f) => {
+      const lv = (p.skills || {})[f.id] || 0;
+      const sx = (p.skillXp || {})[f.id] || 0;
+      const sth = cfg.skillXp;
+      const lo = sth[Math.min(lv, 4)];
+      const hi = lv >= 4 ? lo : sth[lv + 1];
+      return { name: f.name, level: lv, pct: lv >= 4 ? 100 : Math.round(((sx - lo) / (hi - lo)) * 100) };
+    });
+    const modeWord = (m) => (m === 'match' ? 'Timed match' : m === 'checkpoints' ? 'Checkpoints' : 'Entrance exam');
+    const ladder = (st.clubs || []).map((c) => ({ tier: c.tier, name: c.name + ' · ' + (c.venue || '') + ' · ' + modeWord(c.mode), word: c.enrolled ? 'Joined' : c.reason === 'ready' ? 'Ready' : c.reason === 'previous' ? 'Locked' : 'In progress', bd: c.enrolled ? '#1F2A24' : '#8D887A', bg: c.enrolled ? '#E4F0D2' : c.reason === 'ready' ? '#F6E7B8' : '#FFFFFF' }));
+
+    /* map view */
+    const mapRects = [];
+    const mpx = (v) => Math.round((v / W.W) * 1000) / 10;
+    const mpy = (v) => Math.round((v / W.H) * 1000) / 10;
+    if (st.panel === 'map') {
+      W.FLOORS.forEach((f) => f.deco || (f.w === 800 && f.h === 800) ? 0 : mapRects.push({ l: mpx(f.x), t: mpy(f.y), w: mpx(f.w), h: mpy(f.h), bg: f.bg.indexOf('gradient') >= 0 ? '#7CB950' : f.bg, rad: f.r >= f.w / 2 - 1 && f.w === f.h ? '50%' : f.r > 20 ? '12px' : '0' }));
+      W.BOXES.forEach((b) => b.kind === 'hedge' ? 0 : mapRects.push({ l: mpx(b.x), t: mpy(b.y), w: mpx(b.w), h: mpy(b.d), bg: b.kind === 'cage' ? '#FBF6E9' : typeof b.south === 'string' && b.south.indexOf('#') === 0 ? b.south : '#B86A4C', rad: '0' }));
+    }
+    const groups = {};
+    W.DESTS.forEach((d) => { (groups[d.area] = groups[d.area] || []).push({ name: d.name, go: () => this.walkToDest(d) }); });
+    const destGroups = Object.keys(groups).map((k) => ({ name: k, items: groups[k] }));
+
+    /* wardrobe view */
+    const items = cfg ? cfg.items : [];
+    const slots = [{ id: 'cap', n: 1, name: 'Cap' }, { id: 'jersey', n: 2, name: 'Jersey' }, { id: 'shoes', n: 3, name: 'Shoes' }, { id: 'sleeve', n: 4, name: 'Arm sleeve' }];
+    const owned = p.owned || {};
+    const tab = st.shopOpen ? st.tab : 'customise';
+    const rows = [];
+    if (st.panel === 'wardrobe') {
+      slots.forEach((sl) => {
+        const list = items.filter((x) => x.slot === sl.id && (tab === 'store' ? !owned[x.id] : !!owned[x.id]));
+        if (!list.length) return;
+        rows.push({ header: true, isItem: false, text: 'Slot ' + sl.n + ' · ' + sl.name });
+        list.forEach((it) => {
+          const worn = eq[it.slot] === it.id;
+          if (tab === 'store') {
+            const can = p.coins >= it.price;
+            rows.push({ header: false, isItem: true, name: it.name, priceText: it.price + ' coins', hex: it.hex, action: can ? 'Buy' : 'Need ' + (it.price - p.coins), disabled: !can, btnBg: can ? '#F2B632' : '#E6DFC9', aria: can ? 'Buy ' + it.name + ' for ' + it.price + ' coins' : it.name + ' costs ' + it.price + ' coins. You need ' + (it.price - p.coins) + ' more.', act: () => this.buy(it.id) });
+          } else {
+            rows.push({ header: false, isItem: true, name: it.name, priceText: it.price === 0 ? 'Free' : 'Owned', hex: it.hex, action: worn ? 'Worn' : 'Wear', disabled: worn, btnBg: worn ? '#E6DFC9' : '#F2B632', aria: (worn ? 'Currently wearing ' : 'Wear ') + it.name, act: () => this.wear(it.id) });
+          }
+        });
+      });
+    }
+
+    const ok = st.panel === 'enc' && !st.loading && !st.err && !!enc;
+    const isQuestion = ok && !!q;
+    const resOk = !!(st.result && st.result.ok);
+    const resBad = !!(st.result && !st.result.ok);
+    const title = st.panel === 'map' ? 'World map' : st.panel === 'career' ? 'Career' : st.panel === 'create' ? 'Create your player' : st.panel === 'wardrobe' ? (st.shopOpen ? 'Akshita’s Store' : 'Customise') : lob ? ls.name : les ? les.npc : q ? (enc.npc || 'Question') : st.loading ? 'Talking' : (enc && enc.npc) || 'Conversation';
+
+    return {
+      stageT: 'scale(' + st.scale + ') rotateX(58deg) rotateZ(45deg)',
+      wl: -st.camX, wt: -st.camY, px: st.px, py: st.py, flip: st.flip,
+      walkClass: st.moving ? 'walk' : '',
+      floors: floors, boxes: boxes, signs: signs, trees: trees, npcs: npcs,
+      eqCap: eq.cap, eqJersey: eq.jersey, eqShoes: eq.shoes, eqSleeve: eq.sleeve,
+      playerName: look.name || 'Player', heroBody: look.body, heroSkin: look.skin, heroHairStyle: look.hairStyle, heroHairColor: look.hairColor,
+      level: lvl, coins: p.coins, xpPct: xpPct, xpText: (p.xp || 0) + ' / ' + next + ' XP',
+      zoneName: zone.name, zoneBg: zone.bg, zoneFg: zone.fg,
+      hasFac: st.facId !== '', facName: st.facName, facNote: st.facNote,
+      goalText: this.goalText(st),
+      hasHint: st.intro && !!p.created, hasToast: st.toast !== '', toast: st.toast,
+      joyDisplay: this.props.showJoystick === false ? 'none' : 'block', knobX: st.knobX, knobY: st.knobY,
+      showPrompt: !open && !!nearNpc, nearName: nearNpc ? nearNpc.name : '',
+      onKeyDown: (e) => this.onKeyDown(e), onKeyUp: (e) => this.onKeyUp(e), onBlur: () => this.onBlur(), focusWorld: () => this.focusWorld(),
+      joyDown: (e) => this.joyDown(e), joyMove: (e) => this.joyMove(e), joyUp: () => this.joyUp(),
+      interact: () => this.interact(), openMap: () => this.openMap(), openCareer: () => this.openCareer(), openCustomise: () => this.openCustomise(),
+      closePanel: () => this.closePanel(), onPanelKey: (e) => this.onPanelKey(e),
+      openSheet: () => this.openSheet(), closeSheet: () => this.closeSheet(), onSheetKey: (e) => this.onSheetKey(e), sheetWin: !!st.sheetWin && !!q, cellsBig: cellsBig, gridColsBig: gridColsBig, formulaShown: st.formula || '(empty)',
+      scrimO: open ? 1 : 0, scrimP: open ? 'auto' : 'none',
+      panelT: open ? 'translateX(0)' : 'translateX(105%)', panelV: open ? 'visible' : 'hidden',
+      panelTr: open ? 'transform 0.3s ease, visibility 0s linear 0s' : 'transform 0.3s ease, visibility 0s linear 0.3s',
+      panelTitle: title,
+      pLoading: st.panel === 'enc' && st.loading, loadTitle: 'Waiting for ' + ((W.NPCS.find((n) => n.id === st.npcId) || {}).name || 'them'),
+      pError: st.panel === 'enc' && !!st.err, errMsg: st.err, retry: () => this.retry(),
+      isQuestion: isQuestion, isLobby: ok && !!lob, isChat: ok && enc.kind === 'chat', isLesson: ok && !!les, isCreate: st.panel === 'create',
+      isCareer: st.panel === 'career', isMap: st.panel === 'map', isWardrobe: st.panel === 'wardrobe',
+      qWho: enc && q ? (enc.npc || '') + (enc.family ? ' · ' + (cfg ? (cfg.families.find((f) => f.id === enc.family) || {}).name : '') + ' · level ' + enc.difficulty : '') : '',
+      qStory: q ? q.prompt : '', qTask: q ? q.task : '', qHint: q ? q.hint : '', qRef: qRef,
+      qCoins: enc && enc.reward ? enc.reward.coins : 0, qXp: enc && enc.reward ? enc.reward.xp : 0, qSkill: enc && enc.family ? 'Trains ' + (cfg ? (cfg.families.find((f) => f.id === enc.family) || {}).name : '') + '.' : '',
+      cells: cells, gridCols: gridCols,
+      hasSession: !!ses, sName: ses ? ses.name : '', sRound: ses ? ses.round : 0, sRounds: ses ? ses.rounds : 0, sPass: ses ? ses.passMark : 0, sCorrect: ses ? ses.correct : 0,
+      hasTimer: !!st.deadline && !st.solved, timeLeft: this.fmtTime(msLeft), timerBg: msLeft < 10000 ? '#F2B7A0' : '#F6E7B8',
+      hasCp: !!cp, cpStep: cp ? cp.step : 0, cpOf: cp ? cp.of : 0,
+      canAnswer: !st.solved, inputLabel: q && q.type === 'value' ? 'Type the value for ' + qRef : 'Formula bar for ' + qRef,
+      formula: st.formula, onFormula: (e) => this.onFormula(e), onFormulaKey: (e) => this.onFormulaKey(e),
+      check: () => this.check(), checking: st.checking, checkLabel: st.checking ? 'Checking with server' : 'Check with server',
+      toggleHint: () => this.toggleHint(), hint: st.hint,
+      hasResult: !!st.result, resOk: resOk, resBad: resBad, resBg: resOk ? '#E4F0D2' : '#F9DDD2', resTitle: resOk ? 'Correct' : st.solved ? 'Over lost' : 'Not yet', resMsg: st.result ? st.result.msg : '',
+      hasExplain: !!(st.result && st.result.explain), explainText: st.result && st.result.explain ? st.result.explain : '',
+      solved: st.solved, askAnother: () => this.askAnother(),
+      showAnother: st.solved && !ses && !cp, showNext: st.solved && !!st.pendingNext, nextOver: () => this.nextOver(),
+      hasSessionResult: !!sr, srBg: sr && sr.passed ? '#E4F0D2' : '#F9DDD2', srTitle: sr ? (sr.passed ? 'Passed' : 'Not this time') : '', srMsg: sr ? sr.message : '',
+      srScore: sr ? sr.correct + ' of ' + sr.rounds + ' right.' : '', srBonus: sr && sr.passed && sr.bonus ? 'Bonus: ' + sr.bonus.coins + ' coins and ' + sr.bonus.xp + ' XP.' : '',
+      lSay: lob ? lob.say : '', lName: ls ? ls.name : '', lRounds: ls ? ls.rounds : 0, lPass: ls ? ls.passMark : 0,
+      lSecs: ls && ls.secondsPerRound ? ls.secondsPerRound + ' seconds' : 'No limit',
+      lCool: ls && ls.cooldownHours ? 'Once every ' + ls.cooldownHours + ' hours' : 'Any time',
+      lWait: lWait, lWaitText: lWait ? this.fmtTime(ls.nextAt - nowT) : '',
+      lHasReqs: showReqs, lClub: club ? club.name : '', reqs: reqs,
+      lTimed: !!(ls && ls.secondsPerRound), relaxed: st.relaxed, relaxBd: st.relaxed ? '#1F2A24' : '#8D887A', relaxBg: st.relaxed ? '#F6E7B8' : '#FBF6E9', toggleRelaxed: () => this.toggleRelaxed(),
+      lCanBegin: !!(lob && lob.canBegin && !lWait), beginSession: () => this.beginSession(), beginLabel: st.checking ? 'Starting' : 'Begin',
+      cSay: enc ? enc.say : '',
+      topics: topics, hasLesson: !!st.lesson, lsTitle: st.lesson ? st.lesson.title : '', lsSteps: st.lesson ? st.lesson.steps.map((t) => ({ text: t })) : [], lsExample: st.lesson ? st.lesson.example : '',
+      cr: cr, cgroups: cgroups, onName: (e) => this.onName(e), finishCreate: () => this.finishCreate(),
+      skills: skills, ladder: ladder, boost: () => this.boost(), skipCooldowns: () => this.skipCooldowns(), jumpTier: () => this.jumpTier(),
+      mapRects: mapRects, youL: mpx(st.px), youT: mpy(st.py), destGroups: destGroups,
+      shopOpen: st.shopOpen,
+      tabStore: () => this.setState({ tab: 'store' }), tabCustomise: () => this.setState({ tab: 'customise' }),
+      tabIsStore: tab === 'store', tabIsCustomise: tab === 'customise',
+      tabStoreBd: tab === 'store' ? '#1F2A24' : '#8D887A', tabStoreBg: tab === 'store' ? '#F6E7B8' : '#FBF6E9',
+      tabCustBd: tab === 'customise' ? '#1F2A24' : '#8D887A', tabCustBg: tab === 'customise' ? '#F6E7B8' : '#FBF6E9',
+      wardNote: tab === 'store' ? (enc && enc.say ? enc.say + ' ' : '') + 'You have ' + p.coins + ' coins.' : st.shopOpen ? 'Pick what to wear.' : 'Pick what to wear. New gear is sold at the Kit Store in Town Square.',
+      rows: rows, rowsEmpty: rows.length === 0, emptyText: tab === 'store' ? 'You own everything on sale. Nice wardrobe.' : 'You own nothing yet.'
+    };
+  }
+}
+</script>
+</body>
+</html>

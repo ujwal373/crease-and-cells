@@ -775,3 +775,4 @@ if _FRONTEND_DIR.exists():
         StaticFiles(directory=str(_FRONTEND_DIR), html=True),
         name="game_new",
     )
+

@@ -77,11 +77,11 @@ def test_world_markers_cover_all_npcs(client):
     r = client.get("/api/world", headers=_auth(pid))
     assert r.status_code == 200
     markers = r.json()["markers"]
-    assert "coach0" in markers
+    assert "mukesh" in markers
     assert "akshita" in markers
-    assert "tea" in markers
+    assert "maya" in markers
     assert markers["akshita"] == "store"
-    assert markers["tea"] == "talk"
+    assert markers["maya"] == "talk"
 
 
 # ---------------------------------------------------------------------------
@@ -91,8 +91,8 @@ def test_world_markers_cover_all_npcs(client):
 def test_create_player_saves_appearance(client):
     pid = _pid()
     r = client.post("/api/player", json={
-        "name": "Ujwal", "gender": "male", "body": "medium",
-        "skin": "medium", "hairStyle": "short", "hairColor": "black",
+        "name": "Ujwal", "gender": "Male", "body": "regular",
+        "skin": "#C68A5E", "hairStyle": "short", "hairColor": "#1B1410",
     }, headers=_auth(pid))
     assert r.status_code == 200
     snap = r.json()
@@ -107,7 +107,7 @@ def test_create_player_saves_appearance(client):
 
 def test_encounter_coach_returns_question(client):
     pid = _pid()
-    r = client.post("/api/npcs/coach0/encounter", headers=_auth(pid))
+    r = client.post("/api/npcs/mukesh/encounter", headers=_auth(pid))
     assert r.status_code == 200
     enc = r.json()
     assert enc["kind"] == "question"
@@ -137,7 +137,7 @@ def test_encounter_unknown_npc_returns_400(client):
 
 def test_answer_correct_returns_rewards(client):
     pid = _pid()
-    enc_r = client.post("/api/npcs/coach0/encounter", headers=_auth(pid))
+    enc_r = client.post("/api/npcs/mukesh/encounter", headers=_auth(pid))
     enc_id = enc_r.json()["encounterId"]
 
     svc = app.state.svc
@@ -153,7 +153,7 @@ def test_answer_correct_returns_rewards(client):
 
 def test_answer_wrong_no_coins(client):
     pid = _pid()
-    enc_r = client.post("/api/npcs/coach0/encounter", headers=_auth(pid))
+    enc_r = client.post("/api/npcs/mukesh/encounter", headers=_auth(pid))
     enc_id = enc_r.json()["encounterId"]
 
     r = client.post(f"/api/encounters/{enc_id}/answer",
@@ -279,7 +279,7 @@ def test_all_bearer_endpoints_require_auth(client):
     endpoints = [
         ("GET",  "/api/world"),
         ("POST", "/api/player"),
-        ("POST", "/api/npcs/coach0/encounter"),
+        ("POST", "/api/npcs/mukesh/encounter"),
         ("POST", "/api/encounters/enc_x/answer"),
         ("POST", "/api/encounters/enc_x/begin"),
         ("POST", "/api/encounters/enc_x/lesson"),
