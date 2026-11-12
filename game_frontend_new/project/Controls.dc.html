@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Camera and controls</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Baloo+2:wght@600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+kbd{display:inline-flex;align-items:center;justify-content:center;min-width:46px;height:46px;box-sizing:border-box;padding:0 10px;border-radius:8px;border:2px solid #1F2A24;border-bottom-width:5px;background:#FFFFFF;color:#1F2A24;font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:18px}
+</style>
+</helmet>
+<div style="width: 1280px; box-sizing: border-box; padding: 56px 64px 72px; display: flex; flex-direction: column; gap: 40px; background: #FBF6E9; color: #1F2A24; font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; font-size: 17px; line-height: 1.5">
+
+<div style="display: flex; flex-direction: column; gap: 12px">
+<div style="font-size: 15px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #2E6A3B">Camera and controls</div>
+<h1 style="margin: 0; font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 700; font-size: 56px; line-height: 1">Third person, three quarter view</h1>
+<p style="margin: 0; max-width: 840px; font-size: 20px; text-wrap: pretty">A fixed angle camera follows the player from behind and above. It never rotates, so the same controls work on a keyboard and on a thumb, and nobody gets lost.</p>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 32px; align-items: start">
+
+<div style="display: flex; flex-direction: column; gap: 20px; padding: 28px; border-radius: 20px; background: #F6E7B8; border: 2px solid #1F2A24">
+<h2 style="margin: 0; font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 700; font-size: 28px">The camera</h2>
+<div style="position: relative; width: 560px; height: 300px; max-width: 100%">
+<svg width="560" height="300" viewBox="0 0 560 300" aria-hidden="true" style="position: absolute; left: 0; top: 0">
+<line x1="20" y1="252" x2="540" y2="252" stroke="#1F2A24" stroke-width="3"/>
+<polygon points="20,252 540,252 540,270 20,270" fill="#7CB950"/>
+<ellipse cx="150" cy="254" rx="34" ry="6" fill="#4B5A8A" fill-opacity="0.3"/>
+<polygon points="138,196 162,196 158,252 142,252" fill="#F4F1E8" stroke="#1F2A24" stroke-width="2.5" stroke-linejoin="round"/>
+<circle cx="150" cy="180" r="14" fill="#C68A5E" stroke="#1F2A24" stroke-width="2.5"/>
+<line x1="150" y1="200" x2="270" y2="30" stroke="#1F2A24" stroke-width="3" stroke-dasharray="8 7"/>
+<line x1="150" y1="215" x2="330" y2="215" stroke="#1F2A24" stroke-width="2" stroke-dasharray="3 6"/>
+<path d="M 214 215 A 64 64 0 0 0 187 163" fill="none" stroke="#1F2A24" stroke-width="3"/>
+<g transform="translate(270 30) rotate(32)">
+<polygon points="-6,-16 30,-16 30,16 -6,16" fill="#1F2A24"/>
+<polygon points="-6,-8 -22,-14 -22,14 -6,8" fill="#4F5B66" stroke="#1F2A24" stroke-width="2"/>
+<circle cx="-14" cy="0" r="4" fill="#F2B632"/>
+</g>
+</svg>
+<div style="position: absolute; left: 226px; top: 176px; font-weight: 700; font-size: 20px">58°</div>
+<div style="position: absolute; left: 292px; top: 8px; width: 240px; font-size: 16px; line-height: 1.35"><b>Camera</b><br>Looks down 58 degrees</div>
+<div style="position: absolute; left: 340px; top: 196px; width: 200px; font-size: 16px; line-height: 1.35">Level with the ground</div>
+<div style="position: absolute; left: 52px; top: 128px; width: 110px; font-size: 16px; line-height: 1.35; text-align: center"><b>Player</b></div>
+</div>
+<div style="display: grid; grid-template-columns: 138px minmax(0, 1fr); gap: 20px; align-items: center">
+<div style="position: relative; width: 138px; height: 138px">
+<svg width="138" height="138" viewBox="0 0 138 138" aria-hidden="true" style="position: absolute; left: 0; top: 0">
+<circle cx="69" cy="69" r="62" fill="#FBF6E9" stroke="#1F2A24" stroke-width="3"/>
+<polygon points="69,12 77,28 61,28" fill="#1F2A24"/>
+<circle cx="69" cy="69" r="8" fill="#C68A5E" stroke="#1F2A24" stroke-width="2.5"/>
+<line x1="108" y1="108" x2="80" y2="80" stroke="#1F2A24" stroke-width="3" stroke-dasharray="6 5"/>
+<polygon points="76,76 90,80 80,90" fill="#1F2A24"/>
+<g transform="translate(112 112) rotate(-135)"><polygon points="-10,-8 10,-8 10,8 -10,8" fill="#1F2A24"/><circle cx="-13" cy="0" r="4" fill="#F2B632" stroke="#1F2A24" stroke-width="1.5"/></g>
+</svg>
+<div style="position: absolute; left: 62px; top: 0; font-weight: 700; font-size: 16px; transform: translateY(-2px)"></div>
+</div>
+<div style="font-size: 16px; line-height: 1.45"><b>Seen from above.</b> The camera stands south east of the player and looks north west, a turn of 45 degrees. That is why the south and east faces of buildings are the ones you see, and why screen up means north west.</div>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 18px; padding: 28px; border-radius: 20px; background: #FFFFFF; border: 2px solid #1F2A24">
+<h2 style="margin: 0; font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 700; font-size: 28px">Keyboard</h2>
+<div style="display: flex; gap: 28px; align-items: flex-end; flex-wrap: wrap">
+<div style="display: grid; grid-template-columns: repeat(3, 46px); grid-template-rows: repeat(2, 46px); gap: 6px">
+<span></span><kbd>W</kbd><span></span>
+<kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
+</div>
+<span style="font-size: 17px; font-weight: 700">or</span>
+<div style="display: grid; grid-template-columns: repeat(3, 46px); grid-template-rows: repeat(2, 46px); gap: 6px">
+<span></span><kbd aria-label="Up arrow">↑</kbd><span></span>
+<kbd aria-label="Left arrow">←</kbd><kbd aria-label="Down arrow">↓</kbd><kbd aria-label="Right arrow">→</kbd>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: 124px minmax(0, 1fr); gap: 14px 16px; align-items: center; font-size: 16px; line-height: 1.4">
+<span><kbd>E</kbd></span><span><b>Talk.</b> Opens the mission panel for the nearest character. Enter and Space also work.</span>
+<span><kbd>M</kbd> <kbd>C</kbd></span><span><b>Map and Career.</b> M opens the full map where you pick a place to walk to. C opens your skills and club ladder.</span>
+<span><kbd>Esc</kbd></span><span><b>Close.</b> Slides the panel away and returns you to the world.</span>
+<span><kbd>Tab</kbd></span><span><b>Jump.</b> Moves between nearby characters and the Map, Career and Customise buttons. Enter on a character walks you there.</span>
+</div>
+<p style="margin: 0; font-size: 15px; color: #5A5648">Every action in the game can be done from the keyboard alone.</p>
+</div>
+
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; align-items: start">
+
+<div style="display: flex; flex-direction: column; gap: 18px; padding: 28px; border-radius: 20px; background: #FFFFFF; border: 2px solid #1F2A24">
+<h2 style="margin: 0; font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 700; font-size: 28px">Phone</h2>
+<div style="display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 22px; align-items: center">
+<svg width="150" height="150" viewBox="0 0 150 150" role="img" aria-label="Virtual joystick: a round base with a gold knob">
+<circle cx="75" cy="75" r="70" fill="#1F2A24" fill-opacity="0.65" stroke="#FBF6E9" stroke-width="4"/>
+<circle cx="75" cy="75" r="70" fill="none" stroke="#1F2A24" stroke-width="1.5"/>
+<polygon points="75,12 85,28 65,28" fill="#FBF6E9"/><polygon points="75,138 85,122 65,122" fill="#FBF6E9"/><polygon points="12,75 28,65 28,85" fill="#FBF6E9"/><polygon points="138,75 122,65 122,85" fill="#FBF6E9"/>
+<circle cx="75" cy="75" r="30" fill="#F2B632" stroke="#1F2A24" stroke-width="3.5"/>
+</svg>
+<div style="display: flex; flex-direction: column; gap: 8px; font-size: 16px; line-height: 1.45">
+<span><b>Joystick, bottom left.</b> Under the left thumb. It is 136 px across, so it fits a small hand and never hides the player.</span>
+<span><b>Buttons, bottom right.</b> Map, Career and Customise, each with an icon and a word.</span>
+<span><b>Talk button.</b> Appears above the joystick when a character is close.</span>
+<span><b>Tap a character.</b> The hero walks over and opens the mission.</span>
+</div>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 14px; padding: 28px; border-radius: 20px; background: #FFFFFF; border: 2px solid #1F2A24">
+<h2 style="margin: 0; font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 700; font-size: 28px">The numbers</h2>
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 20px; font-size: 16px">
+<span>Walk speed</span><b>235 units a second</b>
+<span>World size</span><b>2400 by 1400 units</b>
+<span>Talk range</span><b>110 units</b>
+<span>Auto walk stops at</span><b>80 units from the character</b>
+<span>Joystick dead zone</span><b>15 percent of travel</b>
+<span>Camera follow</span><b>smooths 20 percent a frame</b>
+<span>Zoom</span><b>0.62 to 1.1, from screen width</b>
+<span>Shortest tap target</span><b>48 px</b>
+</div>
+<p style="margin: 0; font-size: 15px; color: #5A5648">With reduced motion switched on, the camera snaps to the player and the marker bounce and walk bob are turned off.</p>
+</div>
+
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

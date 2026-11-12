@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Levels, skills and clubs</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Baloo+2:wght@600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+table{border-collapse:collapse;width:100%}
+th{text-align:left;font-size:15px;letter-spacing:0.06em;text-transform:uppercase;padding:10px 12px;border-bottom:3px solid #1F2A24;background:#F3E6C8}
+td{vertical-align:top;font-size:16px;line-height:1.45;padding:10px 12px;border-bottom:1px solid #CFC6AE}
+code{font-family:'IBM Plex Mono',monospace;font-size:14px;background:#F3E6C8;padding:1px 6px;border-radius:5px}
+</style>
+</helmet>
+<div style="width: 1280px; box-sizing: border-box; padding: 56px 64px 72px; display: flex; flex-direction: column; gap: 40px; background: #FBF6E9; color: #1F2A24; font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; font-size: 17px; line-height: 1.5">
+
+<div style="display: flex; flex-direction: column; gap: 12px">
+<div style="font-size: 15px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #2E6A3B">Progression</div>
+<h1 style="margin: 0; font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 700; font-size: 56px; line-height: 1">Levels, skills, gear and clubs</h1>
+<p style="margin: 0; max-width: 900px; font-size: 20px; text-wrap: pretty">Three things gate a club: your level, your skills and the kit you wear. Level comes from XP. Skills come from the seven formula families at the Nets. Kit comes from coins, spent at Maya's Store. Every number here is data the server sends, so you can tune it without touching the world.</p>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px">
+<div style="padding: 18px; border-radius: 14px; background: #F2B632; border: 3px solid #1F2A24; display: flex; flex-direction: column; gap: 6px"><b style="font-family: 'Baloo 2', system-ui, sans-serif; font-size: 24px">1 Play</b><span style="font-size: 16px">Talk to coaches, workers and wanderers. Each visit is a new question. Right answers pay coins, XP and skill XP.</span></div>
+<div style="padding: 18px; border-radius: 14px; background: #F6E7B8; border: 3px solid #1F2A24; display: flex; flex-direction: column; gap: 6px"><b style="font-family: 'Baloo 2', system-ui, sans-serif; font-size: 24px">2 Prepare</b><span style="font-size: 16px">Open Career to see what is missing. Buy and wear the required kit at Maya's. Raise the listed skills.</span></div>
+<div style="padding: 18px; border-radius: 14px; background: #E4F0D2; border: 3px solid #1F2A24; display: flex; flex-direction: column; gap: 6px"><b style="font-family: 'Baloo 2', system-ui, sans-serif; font-size: 24px">3 Enrol</b><span style="font-size: 16px">Visit the club recruiter. When every line is ticked, start the selection trial. The server enrols you and pays a bonus.</span></div>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 40px; align-items: start">
+<div style="display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 700; font-size: 32px; padding-bottom: 8px; border-bottom: 3px solid #F2B632">Levels</h2>
+<table><thead><tr><th>Level</th><th>XP</th><th>What changes</th></tr></thead><tbody><tr><td><b>1</b></td><td>0</td><td>Start. The Nets, the Kit Store and the square</td></tr><tr><td><b>2</b></td><td>100</td><td>Opens University of Mumbai</td></tr><tr><td><b>3</b></td><td>250</td><td>Opens Shield Cup</td></tr><tr><td><b>4</b></td><td>450</td><td>Opens Suburban Association</td></tr><tr><td><b>5</b></td><td>700</td><td>Opens Inter Divisions</td></tr><tr><td><b>6</b></td><td>1000</td><td>Opens State Trophy</td></tr><tr><td><b>7</b></td><td>1400</td><td>Opens Harbour Blues</td></tr><tr><td><b>8</b></td><td>1900</td><td>Opens National XI</td></tr><tr><td><b>9</b></td><td>2500</td><td>More questions at the Nets</td></tr><tr><td><b>10</b></td><td>3200</td><td>More questions at the Nets</td></tr></tbody></table>
+</div>
+<div style="display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 700; font-size: 32px; padding-bottom: 8px; border-bottom: 3px solid #1F7A7A">Seven skills, all at the Nets</h2>
+<table><thead><tr><th>Skill</th><th>Functions practised</th><th>Where</th></tr></thead><tbody><tr><td><b>1 Maths</b></td><td><code>SUM, AVERAGE, MIN, MAX, ROUND, ABS, INT</code></td><td>Lane 1 at the Nets, Coach Mukesh</td></tr><tr><td><b>2 Text</b></td><td><code>LEFT, RIGHT, MID, UPPER, LOWER, PROPER, TRIM, LEN, CONCAT, TEXTJOIN</code></td><td>Lane 2 at the Nets, Coach Viral</td></tr><tr><td><b>3 Logic</b></td><td><code>IF, AND, OR, NOT, COUNTIF, SUMIF</code></td><td>Lane 3 at the Nets, Coach Imran</td></tr><tr><td><b>4 Dates</b></td><td><code>DATE, YEAR, MONTH, DAY, DAYS</code></td><td>Lane 4 at the Nets, Coach Leela</td></tr><tr><td><b>5 Lookup</b></td><td><code>VLOOKUP, INDEX, MATCH, XLOOKUP</code></td><td>Lane 5 at the Nets, Coach Mohan</td></tr><tr><td><b>6 Stats</b></td><td><code>MEDIAN, LARGE, SMALL, RANK, COUNT, COUNTA</code></td><td>Lane 6 at the Nets, Coach Sarita</td></tr><tr><td><b>7 Arrays</b></td><td><code>SUMPRODUCT, COUNTUNIQUE, TEXTJOIN</code></td><td>Lane 7 at the Nets, Coach Dhruv</td></tr></tbody></table>
+<p style="margin: 0; font-size: 16px; color: #5A5648">Skill level 1 to 4 arrives at 60, 180, 360 and 600 skill XP. The Nets teach every function used in a spreadsheet, so the lanes can grow as you add more functions.</p>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 700; font-size: 32px; padding-bottom: 8px; border-bottom: 3px solid #D9805F">The club ladder, tier by tier</h2>
+<table><thead><tr><th>Tier</th><th>Club</th><th>Level</th><th>Skills needed</th><th>Gear needed</th></tr></thead><tbody><tr><td><b>1</b></td><td><b>University of Mumbai</b><br>University of Mumbai. Entrance exam</td><td>2</td><td>Maths 1</td><td>None</td></tr><tr><td><b>2</b></td><td><b>Shield Cup</b><br>University Ground. Timed match</td><td>3</td><td>Maths 2, Logic 1</td><td>Upgraded jersey</td></tr><tr><td><b>3</b></td><td><b>Suburban Association</b><br>Borivali District Club. Checkpoints</td><td>4</td><td>Logic 2, Text 1</td><td>Upgraded jersey, Upgraded cap</td></tr><tr><td><b>4</b></td><td><b>Inter Divisions</b><br>Borivali District Club ground. Timed match</td><td>5</td><td>Lookup 1, Dates 1</td><td>Upgraded jersey, Upgraded shoes</td></tr><tr><td><b>5</b></td><td><b>State Trophy</b><br>State Cricket Ground. Entrance exam</td><td>6</td><td>Lookup 2, Stats 1</td><td>Upgraded jersey, Upgraded cap, Upgraded shoes</td></tr><tr><td><b>6</b></td><td><b>Harbour Blues</b><br>Harbour Blues Town. Entrance exam</td><td>7</td><td>Stats 2, Arrays 1</td><td>Upgraded jersey, Upgraded cap, Upgraded shoes, Upgraded sleeve</td></tr><tr><td><b>7</b></td><td><b>National XI</b><br>National Stadium. Checkpoints</td><td>8</td><td>All seven skills at level 2</td><td>Wear Training Helmet, Wear Terracotta Stripe, Wear Night Spikes, Upgraded sleeve</td></tr></tbody></table>
+<p style="margin: 0; font-size: 16px; color: #5A5648">Each division accepts you only if the tier before is done. How you get in depends on the division: an entrance exam, a timed match with a cooldown, or checkpoints. The names are neutral on purpose. They are data fields, so you can rename them to match your own setting.</p>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 700; font-size: 32px; padding-bottom: 8px; border-bottom: 3px solid #4B5A8A">Gear in the Kit Store</h2>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; align-items: start"><div style="display:flex;flex-direction:column;gap:8px;padding:16px;border-radius:14px;background:#FFFFFF;border:2px solid #1F2A24"><b style="font-family:'Baloo 2',system-ui,sans-serif;font-size:22px;text-transform:capitalize">cap</b><div style="display:flex;align-items:center;gap:10px;font-size:15px"><span style="flex:none;width:22px;height:22px;border-radius:5px;border:2px solid #1F2A24;background:#F4F1E8"></span><span style="flex:1">Basic White Cap</span><b>Free</b></div><div style="display:flex;align-items:center;gap:10px;font-size:15px"><span style="flex:none;width:22px;height:22px;border-radius:5px;border:2px solid #1F2A24;background:#F2B632"></span><span style="flex:1">Sunrise Cap</span><b>70</b></div><div style="display:flex;align-items:center;gap:10px;font-size:15px"><span style="flex:none;width:22px;height:22px;border-radius:5px;border:2px solid #1F2A24;background:#E9D8A6"></span><span style="flex:1">Wide Sunhat</span><b>90</b></div><div style="display:flex;align-items:center;gap:10px;font-size:15px"><span style="flex:none;width:22px;height:22px;border-radius:5px;border:2px solid #1F2A24;background:#2C3E6B"></span><span style="flex:1">Training Helmet</span><b>180</b></div></div><div style="display:flex;flex-direction:column;gap:8px;padding:16px;border-radius:14px;background:#FFFFFF;border:2px solid #1F2A24"><b style="font-family:'Baloo 2',system-ui,sans-serif;font-size:22px;text-transform:capitalize">jersey</b><div style="display:flex;align-items:center;gap:10px;font-size:15px"><span style="flex:none;width:22px;height:22px;border-radius:5px;border:2px solid #1F2A24;background:#F4F1E8"></span><span style="flex:1">Basic White Jersey</span><b>Free</b></div><div style="display:flex;align-items:center;gap:10px;font-size:15px"><span style="flex:none;width:22px;height:22px;border-radius:5px;border:2px solid #1F2A24;background:#F2B632"></span><span style="flex:1">Sunrise Gold Jersey</span><b>100</b></div><div style="display:flex;align-items:center;gap:10px;font-size:15px"><span style="flex:none;width:22px;height:22px;border-radius:5px;border:2px solid #1F2A24;background:#1F7A7A"></span><span style="flex:1">Club Teal Stripe</span><b>120</b></div><div style="display:flex;align-items:center;gap:10px;font-size:15px"><span style="flex:none;width:22px;height:22px;border-radius:5px;border:2px solid #1F2A24;background:#D9805F"></span><span style="flex:1">Terracotta Stripe</span><b>140</b></div></div><div style="display:flex;flex-direction:column;gap:8px;padding:16px;border-radius:14px;background:#FFFFFF;border:2px solid #1F2A24"><b style="font-family:'Baloo 2',system-ui,sans-serif;font-size:22px;text-transform:capitalize">shoes</b><div style="display:flex;align-items:center;gap:10px;font-size:15px"><span style="flex:none;width:22px;height:22px;border-radius:5px;border:2px solid #1F2A24;background:#F4F1E8"></span><span style="flex:1">Basic White Shoes</span><b>Free</b></div><div style="display:flex;align-items:center;gap:10px;font-size:15px"><span style="flex:none;width:22px;height:22px;border-radius:5px;border:2px solid #1F2A24;background:#F2B632"></span><span style="flex:1">Sunrise Gold Shoes</span><b>80</b></div><div style="display:flex;align-items:center;gap:10px;font-size:15px"><span style="flex:none;width:22px;height:22px;border-radius:5px;border:2px solid #1F2A24;background:#1F7A7A"></span><span style="flex:1">Club Teal Shoes</span><b>90</b></div><div style="display:flex;align-items:center;gap:10px;font-size:15px"><span style="flex:none;width:22px;height:22px;border-radius:5px;border:2px solid #1F2A24;background:#26262B"></span><span style="flex:1">Night Spikes</span><b>130</b></div></div><div style="display:flex;flex-direction:column;gap:8px;padding:16px;border-radius:14px;background:#FFFFFF;border:2px solid #1F2A24"><b style="font-family:'Baloo 2',system-ui,sans-serif;font-size:22px;text-transform:capitalize">Arm sleeve</b><div style="display:flex;align-items:center;gap:10px;font-size:15px"><span style="flex:none;width:22px;height:22px;border-radius:5px;border:2px solid #1F2A24;background:#F4F1E8"></span><span style="flex:1">Basic White Sleeve</span><b>Free</b></div><div style="display:flex;align-items:center;gap:10px;font-size:15px"><span style="flex:none;width:22px;height:22px;border-radius:5px;border:2px solid #1F2A24;background:#1F7A7A"></span><span style="flex:1">Club Teal Sleeve</span><b>50</b></div><div style="display:flex;align-items:center;gap:10px;font-size:15px"><span style="flex:none;width:22px;height:22px;border-radius:5px;border:2px solid #1F2A24;background:#F2B632"></span><span style="flex:1">Sunrise Gold Sleeve</span><b>50</b></div><div style="display:flex;align-items:center;gap:10px;font-size:15px"><span style="flex:none;width:22px;height:22px;border-radius:5px;border:2px solid #1F2A24;background:#D9805F"></span><span style="flex:1">Terracotta Sleeve</span><b>60</b></div></div></div>
+<p style="margin: 0; font-size: 16px; color: #5A5648">Prices are in coins. "Upgraded" means any item that is not the free basic white one. The National XI asks for three exact pieces to be worn, so the top tier looks like an achievement.</p>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px; align-items: start">
+<div style="display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 700; font-size: 32px; padding-bottom: 8px; border-bottom: 3px solid #2E6A3B">Side quests</h2>
+<div style="display: flex; flex-direction: column; gap: 8px; font-size: 16px">
+<span><b>Selector Sana.</b> The notice board in Town Square hands out quests across every skill.</span>
+<span><b>Workers.</b> The tea stall, kit repair and pavilion each ask about real jobs they do.</span>
+<span><b>Wanderers.</b> Six people walk the Maidan, the park and the club road. Catch them and talk.</span>
+<span><b>Timed matches.</b> Shield Cup every 6 hours, Inter Divisions every 12, the server owns the clock. Relaxed timing doubles the seconds.</span>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 700; font-size: 32px; padding-bottom: 8px; border-bottom: 3px solid #F2B632">Pacing, as the mock plays it</h2>
+<div style="display: flex; flex-direction: column; gap: 8px; font-size: 16px">
+<span>A question pays roughly 18 to 36 coins and 30 to 50 XP, rising with difficulty.</span>
+<span>Level 2 needs about 3 answers. Level 8 needs about 60.</span>
+<span>The cheapest upgraded kit costs 50 coins. A full upgrade of all four slots is about 300 coins.</span>
+<span>The server owns all of these numbers. The mock only imitates them.</span>
+</div>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

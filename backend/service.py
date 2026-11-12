@@ -283,6 +283,54 @@ class GameService:
         self.state.ensure_player(player_id)
         return self.store_agent.buy(player_id, item_id)
 
+    # ----- player snapshot (new frontend shape) -----
+    def player_snap(self, player_id: str) -> dict:
+        """Return the full player snapshot the new frontend expects."""
+        from .game_config import FAMILY_IDS, DEFAULT_EQ, skill_level_for_xp, level_for_xp
+
+        self.state.ensure_player(player_id)
+        wallet   = self.state.wallet(player_id)
+        sxp_map  = self.state.skill_xp(player_id)
+        inv      = self.state.inventory(player_id)
+        eq_map   = self.state.equipped(player_id)
+        app      = self.state.get_appearance(player_id)
+        tier     = self.state.player_tier(player_id)
+
+        with self.state._lock:
+            created_row = self.state.db.execute(
+                "SELECT created FROM players WHERE id=?", (player_id,)
+            ).fetchone()
+            created = bool(created_row["created"]) if created_row else False
+
+        skills   = {f: skill_level_for_xp(sxp_map.get(f, 0)) for f in FAMILY_IDS}
+        skill_xp = {f: sxp_map.get(f, 0) for f in FAMILY_IDS}
+        owned    = {item_id: 1 for item_id in inv} if inv else {}
+        eq       = {**DEFAULT_EQ, **eq_map}
+
+        look = None
+        if app.get("display_name") or app.get("body_type") != "medium":
+            look = {
+                "name":      app.get("display_name", ""),
+                "gender":    app.get("gender", ""),
+                "body":      app.get("body_type", "medium"),
+                "skin":      app.get("skin_tone", "medium"),
+                "hairStyle": app.get("hair_style", "short"),
+                "hairColor": app.get("hair_colour", "black"),
+            }
+
+        return {
+            "coins":    wallet.get("coins", 0),
+            "xp":       wallet.get("xp", 0),
+            "level":    level_for_xp(wallet.get("xp", 0)),
+            "tier":     tier,
+            "skills":   skills,
+            "skillXp":  skill_xp,
+            "owned":    owned,
+            "eq":       eq,
+            "look":     look,
+            "created":  created,
+        }
+
     # ----- appearance -----
     def get_appearance(self, player_id: str) -> dict:
         self.state.ensure_player(player_id)

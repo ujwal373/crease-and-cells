@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Build budget, assets and accessibility</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Baloo+2:wght@600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+table{border-collapse:collapse;width:100%}
+th{text-align:left;font-size:15px;letter-spacing:0.06em;text-transform:uppercase;padding:10px 12px;border-bottom:3px solid #1F2A24;background:#F3E6C8}
+td{vertical-align:top;font-size:16px;line-height:1.45;padding:12px;border-bottom:1px solid #CFC6AE}
+code{font-family:'IBM Plex Mono',monospace;font-size:14px;background:#F3E6C8;padding:1px 6px;border-radius:5px}
+</style>
+</helmet>
+<div style="width: 1280px; box-sizing: border-box; padding: 56px 64px 72px; display: flex; flex-direction: column; gap: 44px; background: #FBF6E9; color: #1F2A24; font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; font-size: 17px; line-height: 1.5">
+
+<div style="display: flex; flex-direction: column; gap: 12px">
+<div style="font-size: 15px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #2E6A3B">Constraints, answered</div>
+<h1 style="margin: 0; font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 700; font-size: 56px; line-height: 1">Light, licensed, fair and open to everyone</h1>
+<p style="margin: 0; max-width: 840px; font-size: 20px; text-wrap: pretty">The five rules from the brief, turned into things a builder can check.</p>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 16px">
+<h2 style="margin: 0; font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 700; font-size: 32px; padding-bottom: 8px; border-bottom: 3px solid #F2B632">1 The server decides, the world displays</h2>
+<table>
+<thead><tr><th style="width: 29%">Call</th><th style="width: 38%">What the server decides</th><th>What the world does</th></tr></thead>
+<tbody>
+<tr><td><code>GET /api/world</code></td><td>Level, XP, skills, owned gear, and a marker for every character.</td><td>Draws the markers and the HUD. Never works them out itself.</td></tr>
+<tr><td><code>POST /api/npcs/:id/encounter</code></td><td>The question, store view or recruiter view. Written fresh by that character's agent.</td><td>Slides the panel over the world. No scene change.</td></tr>
+<tr><td><code>POST /api/encounters/:id/answer</code></td><td>Whether the answer is right, the coins, XP and skill paid, and any level up.</td><td>Shows the result and replaces its player copy.</td></tr>
+<tr><td><code>POST /api/encounters/:id/trial</code></td><td>Whether the player may join a club, re-checked on the server.</td><td>Shows the welcome message.</td></tr>
+<tr><td><code>POST /api/store/buy</code> and <code>/api/avatar/equip</code></td><td>Affordability, ownership and the saved look.</td><td>Swaps the matching slot on the hero.</td></tr>
+</tbody>
+</table>
+<p style="margin: 0; font-size: 16px; color: #5A5648">In the prototype a stand in plays the server and the agents, with a short delay. Full request and response shapes are on the Contract board.</p>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px; align-items: start">
+
+<div style="display: flex; flex-direction: column; gap: 16px">
+<h2 style="margin: 0; font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 700; font-size: 32px; padding-bottom: 8px; border-bottom: 3px solid #1F7A7A">2 Runs on a mid range phone</h2>
+<table>
+<thead><tr><th style="width: 42%">Budget</th><th>Limit</th></tr></thead>
+<tbody>
+<tr><td>Engine</td><td>Three.js, no heavy framework.</td></tr>
+<tr><td>Visible triangles</td><td>25,000 or fewer in view.</td></tr>
+<tr><td>Draw calls</td><td>60 or fewer. Trees, palms and mesh fences are instanced.</td></tr>
+<tr><td>Lights</td><td>One directional and one hemisphere. Nothing else.</td></tr>
+<tr><td>Shadows</td><td>Baked ground planes and blob shadows. No real time shadow maps.</td></tr>
+<tr><td>Textures</td><td>Vertex colour. One 512 px atlas for signs and mesh.</td></tr>
+<tr><td>Each model</td><td>60 KB or less, compressed with meshopt.</td></tr>
+<tr><td>First load</td><td>1.5 MB or less. Only The Nets and the hero.</td></tr>
+<tr><td>Lazy loading</td><td>Districts stream in as the camera nears them. The full world is 2400 by 1400 units and only what is within about 1000 units of the camera is drawn.</td></tr>
+<tr><td>Resolution</td><td>Pixel ratio capped at 1.5. Frame rate capped at 30 on low power.</td></tr>
+<tr><td>Hero</td><td>About 900 triangles. Each slot is its own small mesh, swapped on purchase.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 16px">
+<h2 style="margin: 0; font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 700; font-size: 32px; padding-bottom: 8px; border-bottom: 3px solid #D9805F">3 Art that is ours or CC0</h2>
+<p style="margin: 0; font-size: 17px">Every model is either generated in code or taken from a CC0 pack. Nothing else goes in the repo. No real players, teams, clubs or brands: character names are invented, kits have no logos, and signs use plain words.</p>
+<table>
+<thead><tr><th>File</th><th>Source</th><th>Licence</th></tr></thead>
+<tbody>
+<tr><td><code>net_lane.glb</code></td><td>Generated in code by us</td><td>CC0 dedication</td></tr>
+<tr><td><code>palm_01.glb</code></td><td>[CC0 PACK NAME], [AUTHOR], [URL]</td><td>CC0 1.0</td></tr>
+<tr><td>Baloo 2, Atkinson Hyperlegible, IBM Plex Mono</td><td>Google Fonts</td><td>SIL Open Font License 1.1</td></tr>
+</tbody>
+</table>
+<p style="margin: 0; font-size: 16px; color: #5A5648">Every asset gets one row in <code>assets/LICENCES.csv</code> with its file, source, author, licence, link and date added. A build check fails if a model has no row.</p>
+</div>
+
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 16px">
+<h2 style="margin: 0; font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 700; font-size: 32px; padding-bottom: 8px; border-bottom: 3px solid #1F2A24">4 Open to everyone</h2>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px">
+<div style="display: flex; flex-direction: column; gap: 8px; padding-top: 14px; border-top: 3px solid #1F2A24">
+<b style="font-family: 'Baloo 2', system-ui, sans-serif; font-size: 22px">Readable</b>
+<span style="font-size: 16px">Body text is at least 16 px, HUD text at least 15. Contrast is at least 4.5 to 1. The page still works at 200 percent zoom.</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px; padding-top: 14px; border-top: 3px solid #1F2A24">
+<b style="font-family: 'Baloo 2', system-ui, sans-serif; font-size: 22px">Not colour only</b>
+<span style="font-size: 16px">Markers differ by shape and symbol. Selected items get a tick and a thick border. Results show an icon and a word as well as a colour. Colours that must differ also differ in lightness.</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px; padding-top: 14px; border-top: 3px solid #1F2A24">
+<b style="font-family: 'Baloo 2', system-ui, sans-serif; font-size: 22px">Keyboard friendly</b>
+<span style="font-size: 16px">Walk, talk, close, shop and answer without a mouse. A thick gold focus ring shows where you are. Tab reaches every character and button.</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px; padding-top: 14px; border-top: 3px solid #1F2A24">
+<b style="font-family: 'Baloo 2', system-ui, sans-serif; font-size: 22px">Screen readers</b>
+<span style="font-size: 16px">The mission panel is a dialog. Focus moves into it, then back to the world on close. Rewards and level ups are announced politely.</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px; padding-top: 14px; border-top: 3px solid #1F2A24">
+<b style="font-family: 'Baloo 2', system-ui, sans-serif; font-size: 22px">Calm motion</b>
+<span style="font-size: 16px">With reduced motion on, the camera snaps, markers stop bobbing and panels appear without sliding.</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px; padding-top: 14px; border-top: 3px solid #1F2A24">
+<b style="font-family: 'Baloo 2', system-ui, sans-serif; font-size: 22px">No pressure</b>
+<span style="font-size: 16px">No timers on missions. A wrong answer costs nothing, and a hint is always free.</span>
+</div>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

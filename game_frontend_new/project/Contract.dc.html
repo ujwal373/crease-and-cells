@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Backend integration contract</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Baloo+2:wght@600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+table{border-collapse:collapse;width:100%}
+th{text-align:left;font-size:15px;letter-spacing:0.06em;text-transform:uppercase;padding:10px 12px;border-bottom:3px solid #1F2A24;background:#F3E6C8}
+td{vertical-align:top;font-size:16px;line-height:1.45;padding:10px 12px;border-bottom:1px solid #CFC6AE}
+code{font-family:'IBM Plex Mono',monospace;font-size:14px;background:#F3E6C8;padding:1px 6px;border-radius:5px}
+</style>
+</helmet>
+<div style="width: 1280px; box-sizing: border-box; padding: 56px 64px 72px; display: flex; flex-direction: column; gap: 44px; background: #FBF6E9; color: #1F2A24; font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; font-size: 17px; line-height: 1.5">
+
+<div style="display: flex; flex-direction: column; gap: 12px">
+<div style="font-size: 15px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #2E6A3B">Integration contract</div>
+<h1 style="margin: 0; font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 700; font-size: 56px; line-height: 1">What your backend must return</h1>
+<p style="margin: 0; max-width: 900px; font-size: 20px; text-wrap: pretty">The frontend never decides a question, a reward or who may join a club. It calls one object, <code>CCApi</code>, and draws what comes back. Today <code>CCApi</code> uses a built in stand in. Point it at your scraper and agent backend and keep the same shapes.</p>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 16px">
+<h2 style="margin: 0; font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 700; font-size: 32px; padding-bottom: 8px; border-bottom: 3px solid #F2B632">1 Swap the adapter</h2>
+<pre style="margin:0;padding:16px 18px;border-radius:12px;background:#1F2A24;color:#FBF6E9;font-family:'IBM Plex Mono',monospace;font-size:13.5px;line-height:1.5;overflow:auto;white-space:pre">// index of the prototype, before anything renders
+CCApi.use(&#x27;http&#x27;, &#123;
+  baseUrl: &#x27;https://your-server.example&#x27;,
+  headers: &#123; Authorization: &#x27;Bearer &lt;token&gt;&#x27; &#125;
+&#125;);
+// Back to the stand-in at any time:
+CCApi.use(&#x27;mock&#x27;, &#123; delay: 700, failEvery: 0 &#125;);</pre>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px">
+<div style="padding:16px;border-radius:14px;background:#FFFFFF;border:2px solid #1F2A24;display:flex;flex-direction:column;gap:6px"><b>cc-formula.js</b><span style="font-size:15px">A small formula evaluator. Only the stand in uses it. Delete it when your server checks answers.</span></div>
+<div style="padding:16px;border-radius:14px;background:#FFFFFF;border:2px solid #1F2A24;display:flex;flex-direction:column;gap:6px"><b>cc-engine.js</b><span style="font-size:15px">Holds <code>CCApi</code>, the mock agents and the HTTP adapter. The HTTP adapter is the only part you edit.</span></div>
+<div style="padding:16px;border-radius:14px;background:#FFFFFF;border:2px solid #1F2A24;display:flex;flex-direction:column;gap:6px"><b>cc-world.js</b><span style="font-size:15px">Map, buildings, character list and paths. Pure drawing data. Never sent to the server.</span></div>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 700; font-size: 32px; padding-bottom: 8px; border-bottom: 3px solid #1F7A7A">2 Endpoints</h2>
+<table>
+<thead><tr><th style="width:8%">Verb</th><th style="width:34%">Path</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><code>GET</code></td><td><code>/api/world</code></td><td>Game config, the player snapshot, and a marker for every character: <code>new</code>, <code>done</code>, <code>locked</code>, <code>store</code>, <code>match</code>, <code>learn</code> or <code>talk</code>.</td></tr>
+<tr><td><code>POST</code></td><td><code>/api/npcs/:npcId/encounter</code></td><td>The player talked to someone. The agent behind that character writes a question, a store view or a recruiter view.</td></tr>
+<tr><td><code>POST</code></td><td><code>/api/encounters/:id/answer</code></td><td>Check one answer. Pay once, on the first correct answer.</td></tr>
+<tr><td><code>POST</code></td><td><code>/api/encounters/:id/begin</code></td><td>Start an exam or timed match. Re-check every requirement and the cooldown, start the cooldown, return the first question.</td></tr>
+<tr><td><code>POST</code></td><td><code>/api/encounters/:id/lesson</code></td><td>A mentor teaches a chosen topic. Pays a small XP amount.</td></tr>
+<tr><td><code>POST</code></td><td><code>/api/facilities/:id/visit</code></td><td>Standing in a facility. Pays points on a server rate limit, never asks a question.</td></tr>
+<tr><td><code>POST</code></td><td><code>/api/player</code></td><td>Save the character creator choices.</td></tr>
+<tr><td><code>POST</code></td><td><code>/api/store/buy</code></td><td>Spend coins, record ownership, equip it.</td></tr>
+<tr><td><code>POST</code></td><td><code>/api/avatar/equip</code></td><td>Change what is worn. Only owned items.</td></tr>
+<tr><td><code>GET</code></td><td><code>/api/clubs</code></td><td>The seven club objects with live requirement ticks. Used by Career and the next goal line.</td></tr>
+</tbody>
+</table>
+<p style="margin:0;font-size:16px;color:#5A5648">Character ids the frontend sends are: <code>coach0</code> to <code>coach6</code>, <code>akshita</code>, <code>tea</code>, <code>kit</code>, <code>pav</code>, <code>sana</code>, <code>rec1</code> to <code>rec7</code> and <code>w0</code> to <code>w5</code>. Add more by adding rows to cc-world.js.</p>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; align-items: start">
+<div style="display:flex;flex-direction:column;gap:20px">
+<h2 style="margin: 0; font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 700; font-size: 32px; padding-bottom: 8px; border-bottom: 3px solid #D9805F">3 Shapes it reads</h2>
+
+<div style="display:flex;flex-direction:column;gap:8px"><b style="font-size:18px">Player snapshot, inside every response</b><pre style="margin:0;padding:16px 18px;border-radius:12px;background:#1F2A24;color:#FBF6E9;font-family:'IBM Plex Mono',monospace;font-size:13.5px;line-height:1.5;overflow:auto;white-space:pre">&#123;
+  &quot;coins&quot;: 120, &quot;xp&quot;: 340, &quot;level&quot;: 4, &quot;tier&quot;: 1,
+  &quot;skills&quot;:  &#123; &quot;maths&quot;: 2, &quot;text&quot;: 1, &quot;logic&quot;: 1, &quot;date&quot;: 0, &quot;lookup&quot;: 0, &quot;stats&quot;: 0, &quot;arrays&quot;: 0 &#125;,
+  &quot;skillXp&quot;: &#123; &quot;maths&quot;: 190, &quot;text&quot;: 70, &quot;logic&quot;: 65, &quot;date&quot;: 0, &quot;lookup&quot;: 0, &quot;stats&quot;: 0, &quot;arrays&quot;: 0 &#125;,
+  &quot;owned&quot;: &#123; &quot;c_white&quot;: 1, &quot;j_white&quot;: 1, &quot;s_white&quot;: 1, &quot;a_white&quot;: 1, &quot;j_teal&quot;: 1 &#125;,
+  &quot;eq&quot;:    &#123; &quot;cap&quot;: &quot;c_white&quot;, &quot;jersey&quot;: &quot;j_teal&quot;, &quot;shoes&quot;: &quot;s_white&quot;, &quot;sleeve&quot;: &quot;a_white&quot; &#125;
+&#125;</pre><span style="font-size:15px;color:#5A5648">The frontend replaces its copy with this every time. It never adds coins itself.</span></div>
+<div style="display:flex;flex-direction:column;gap:8px"><b style="font-size:18px">World</b><pre style="margin:0;padding:16px 18px;border-radius:12px;background:#1F2A24;color:#FBF6E9;font-family:'IBM Plex Mono',monospace;font-size:13.5px;line-height:1.5;overflow:auto;white-space:pre">// GET /api/world   (the frontend sends nothing; it keeps its own NPC list)
+&#123;
+  &quot;config&quot;: &#123;
+    &quot;levelXp&quot;: [0, 100, 250, 450, 700, 1000, 1400, 1900, 2500, 3200],
+    &quot;skillXp&quot;: [0, 60, 180, 360, 600],
+    &quot;families&quot;: [ &#123; &quot;id&quot;: &quot;maths&quot;, &quot;name&quot;: &quot;Maths&quot;, &quot;blurb&quot;: &quot;SUM, AVERAGE ...&quot; &#125; ],
+    &quot;items&quot;:    [ &#123; &quot;id&quot;: &quot;j_teal&quot;, &quot;slot&quot;: &quot;jersey&quot;, &quot;name&quot;: &quot;Club Teal Stripe&quot;, &quot;price&quot;: 120, &quot;hex&quot;: &quot;#1F7A7A&quot; &#125; ],
+    &quot;clubs&quot;:    [ &#123; &quot;id&quot;: &quot;univ&quot;, &quot;tier&quot;: 1, &quot;name&quot;: &quot;University of Mumbai&quot;, &quot;venue&quot;: &quot;University of Mumbai&quot; &#125; ]
+  &#125;,
+  &quot;player&quot;: &#123; &#125;,
+  &quot;markers&quot;: &#123; &quot;coach0&quot;: &quot;new&quot;, &quot;akshita&quot;: &quot;store&quot;, &quot;mishra&quot;: &quot;locked&quot;, &quot;dean&quot;: &quot;done&quot;, &quot;fBat&quot;: &quot;learn&quot; &#125;
+&#125;</pre></div>
+<div style="display:flex;flex-direction:column;gap:8px"><b style="font-size:18px">Errors</b><pre style="margin:0;padding:16px 18px;border-radius:12px;background:#1F2A24;color:#FBF6E9;font-family:'IBM Plex Mono',monospace;font-size:13.5px;line-height:1.5;overflow:auto;white-space:pre">// Any non 2xx response. The frontend shows message in plain words and offers Try again.
+&#123; &quot;code&quot;: &quot;FUNDS&quot;, &quot;message&quot;: &quot;Not enough coins. Solve more questions at the Nets.&quot; &#125;
+// Codes the UI already understands: NETWORK, EXPIRED, FUNDS, OWNED, NOT_OWNED, NOT_FOUND, NOT_ELIGIBLE, COOLDOWN. Anything else shows message as is.</pre></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:20px">
+<div style="height:0"></div>
+<div style="display:flex;flex-direction:column;gap:8px;margin-top:49px"><b style="font-size:18px">A question</b><pre style="margin:0;padding:16px 18px;border-radius:12px;background:#1F2A24;color:#FBF6E9;font-family:'IBM Plex Mono',monospace;font-size:13.5px;line-height:1.5;overflow:auto;white-space:pre">// POST /api/npcs/:npcId/encounter   body: none   -&gt; one fresh question
+&#123;
+  &quot;encounterId&quot;: &quot;enc_8f31&quot;,
+  &quot;kind&quot;: &quot;question&quot;,
+  &quot;npc&quot;: &quot;Mukesh&quot;,
+  &quot;family&quot;: &quot;maths&quot;,
+  &quot;difficulty&quot;: 2,
+  &quot;say&quot;: &quot;The scorer lost the calculator again.&quot;,
+  &quot;question&quot;: &#123;
+    &quot;type&quot;: &quot;formula&quot;,              // &quot;formula&quot; | &quot;value&quot;
+    &quot;prompt&quot;: &quot;The scorer lost the calculator again.&quot;,
+    &quot;task&quot;: &quot;Add up every over in B2:B7 and put the total in B8.&quot;,
+    &quot;sheet&quot;: &#123;
+      &quot;cols&quot;: [&quot;A&quot;, &quot;B&quot;],
+      &quot;rows&quot;: [[&quot;Over&quot;, &quot;Runs&quot;], [1, 6], [2, 11], [3, 4], [4, 9], [5, 12], [6, 3], [&quot;Total&quot;, &quot;&quot;]],
+      &quot;target&quot;: &#123; &quot;r&quot;: 7, &quot;c&quot;: 1 &#125;   // zero based row and column of the answer cell
+    &#125;,
+    &quot;mustUse&quot;: [&quot;SUM&quot;],               // shown nowhere, used for the hint wording only
+    &quot;hint&quot;: &quot;SUM adds a range. Write =SUM(first:last).&quot;
+  &#125;,
+  &quot;reward&quot;: &#123; &quot;coins&quot;: 24, &quot;xp&quot;: 40 &#125;,
+  &quot;player&quot;: &#123; &#125;
+&#125;</pre></div>
+<div style="display:flex;flex-direction:column;gap:8px"><b style="font-size:18px">An answer and its result</b><pre style="margin:0;padding:16px 18px;border-radius:12px;background:#1F2A24;color:#FBF6E9;font-family:'IBM Plex Mono',monospace;font-size:13.5px;line-height:1.5;overflow:auto;white-space:pre">// POST /api/encounters/:encounterId/answer   body: &#123; &quot;answer&quot;: &quot;=SUM(B2:B7)&quot; &#125;
+// wrong
+&#123; &quot;correct&quot;: false, &quot;feedback&quot;: &quot;Your formula gives 35. That is not the answer. Check your range.&quot;, &quot;attempt&quot;: 1, &quot;player&quot;: &#123; &#125; &#125;
+
+// right
+&#123;
+  &quot;correct&quot;: true,
+  &quot;feedback&quot;: &quot;Correct.&quot;,
+  &quot;explanation&quot;: &quot;SUM adds all the numbers in a range.&quot;,
+  &quot;rewards&quot;: &#123; &quot;coins&quot;: 24, &quot;xp&quot;: 40, &quot;skill&quot;: &#123; &quot;family&quot;: &quot;maths&quot;, &quot;level&quot;: 2, &quot;up&quot;: true &#125; &#125;,
+  &quot;levelUp&quot;: 4,                      // or null
+  &quot;player&quot;: &#123; &#125;
+&#125;</pre></div>
+</div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; align-items: start">
+<div style="display:flex;flex-direction:column;gap:8px"><b style="font-size:18px">Lobbies, sessions and timed matches</b><pre style="margin:0;padding:16px 18px;border-radius:12px;background:#1F2A24;color:#FBF6E9;font-family:'IBM Plex Mono',monospace;font-size:13.5px;line-height:1.5;overflow:auto;white-space:pre">// POST /api/npcs/shieldSel/encounter  body: &#123; id, role, family, tier, session, step, lesson &#125;
+// recruiters, selectors and coaches return kind &quot;lobby&quot;
+&#123;
+  &quot;encounterId&quot;: &quot;enc_8f40&quot;, &quot;kind&quot;: &quot;lobby&quot;, &quot;npc&quot;: &quot;Selector Kamat&quot;,
+  &quot;say&quot;: &quot;You meet every requirement. 5 hard questions, 90 seconds each. Get 3 right.&quot;,
+  &quot;session&quot;: &#123; &quot;id&quot;: &quot;shield&quot;, &quot;name&quot;: &quot;Shield Cup match&quot;, &quot;rounds&quot;: 5, &quot;passMark&quot;: 3,
+               &quot;secondsPerRound&quot;: 90, &quot;cooldownHours&quot;: 6, &quot;ready&quot;: true,
+               &quot;nextAt&quot;: 0,                       // ms timestamp when the next attempt opens, 0 if open now
+               &quot;purpose&quot;: &quot;enrol&quot; &#125;,              // &quot;enrol&quot; | &quot;play&quot; | &quot;joined&quot;
+  &quot;club&quot;: &#123; &quot;tier&quot;: 2, &quot;name&quot;: &quot;Shield Cup&quot;, &quot;requirements&quot;: [ ], &quot;eligible&quot;: true, &quot;enrolled&quot;: false &#125;,
+  &quot;canBegin&quot;: true, &quot;player&quot;: &#123; &#125;
+&#125;
+
+// POST /api/encounters/:id/begin   body: &#123; &quot;relaxed&quot;: false &#125;   -&gt; the first question (kind &quot;question&quot;)
+// The server starts the cooldown here, not at the end, so leaving does not reset it.
+// A session question carries these extras:
+&quot;session&quot;: &#123; &quot;id&quot;: &quot;shield&quot;, &quot;name&quot;: &quot;Shield Cup match&quot;, &quot;round&quot;: 1, &quot;rounds&quot;: 5, &quot;passMark&quot;: 3, &quot;correct&quot;: 0, &quot;relaxed&quot;: false &#125;,
+&quot;question&quot;: &#123; &quot;timeLimit&quot;: 90 &#125;                    // seconds, 0 means no clock
+
+// POST /api/encounters/:id/answer   body: &#123; &quot;answer&quot;: &quot;=SUM(B2:B7)&quot; &#125;   or  &#123; &quot;answer&quot;: null &#125; when the clock ran out
+// Inside a session the answer response may add:
+&quot;roundOver&quot;: true,                                 // wrong twice or timed out; that over is lost
+&quot;next&quot;: &#123; &#125;,                                       // the next question encounter, same shape as above
+&quot;sessionResult&quot;: &#123; &quot;passed&quot;: true, &quot;correct&quot;: 4, &quot;rounds&quot;: 5, &quot;passMark&quot;: 3, &quot;name&quot;: &quot;Shield Cup match&quot;,
+                   &quot;enrolledTier&quot;: 2, &quot;bonus&quot;: &#123; &quot;coins&quot;: 60, &quot;xp&quot;: 100 &#125;, &quot;levelUp&quot;: null,
+                   &quot;message&quot;: &quot;Selected. Welcome to Shield Cup.&quot;, &quot;nextAt&quot;: 1767225600000 &#125;</pre><b style="font-size:18px;margin-top:12px">Checkpoints</b><pre style="margin:0;padding:16px 18px;border-radius:12px;background:#1F2A24;color:#FBF6E9;font-family:'IBM Plex Mono',monospace;font-size:13.5px;line-height:1.5;overflow:auto;white-space:pre">// A checkpoint question (Borivali District Club, National XI) is a normal question with
+&quot;checkpoint&quot;: &#123; &quot;tier&quot;: 3, &quot;step&quot;: 1, &quot;of&quot;: 2 &#125;
+// The server must refuse step 2 until step 1 is cleared, and answers with a plain chat line:
+&#123; &quot;kind&quot;: &quot;chat&quot;, &quot;npc&quot;: &quot;Club secretary&quot;, &quot;say&quot;: &quot;Checkpoints go in order. Clear checkpoint 1 first.&quot;, &quot;player&quot;: &#123; &#125; &#125;
+// A correct answer adds:  &quot;checkpointCleared&quot;: &#123; &quot;tier&quot;: 3, &quot;step&quot;: 1, &quot;of&quot;: 2 &#125;</pre></div>
+<div style="display:flex;flex-direction:column;gap:8px"><b style="font-size:18px">Store and gear</b><pre style="margin:0;padding:16px 18px;border-radius:12px;background:#1F2A24;color:#FBF6E9;font-family:'IBM Plex Mono',monospace;font-size:13.5px;line-height:1.5;overflow:auto;white-space:pre">// POST /api/npcs/akshita/encounter      -&gt; kind &quot;store&quot;, the panel switches to the wardrobe
+&#123; &quot;encounterId&quot;: &quot;enc_8f12&quot;, &quot;kind&quot;: &quot;store&quot;, &quot;npc&quot;: &quot;Akshita&quot;, &quot;say&quot;: &quot;Welcome. ...&quot;, &quot;items&quot;: [ ], &quot;player&quot;: &#123; &#125; &#125;
+
+// POST /api/store/buy      body: &#123; &quot;itemId&quot;: &quot;j_teal&quot; &#125;     -&gt; &#123; &quot;ok&quot;: true, &quot;player&quot;: &#123; &#125; &#125;
+// POST /api/avatar/equip   body: &#123; &quot;itemId&quot;: &quot;j_teal&quot; &#125;     -&gt; &#123; &quot;ok&quot;: true, &quot;player&quot;: &#123; &#125; &#125;
+// GET  /api/clubs                                          -&gt; an array of the club objects above</pre><b style="font-size:18px;margin-top:12px">Lessons and facilities</b><pre style="margin:0;padding:16px 18px;border-radius:12px;background:#1F2A24;color:#FBF6E9;font-family:'IBM Plex Mono',monospace;font-size:13.5px;line-height:1.5;overflow:auto;white-space:pre">// kind &quot;lesson&quot; (franchise and National mentors). No marks, no pass or fail.
+&#123; &quot;encounterId&quot;: &quot;enc_8f51&quot;, &quot;kind&quot;: &quot;lesson&quot;, &quot;npc&quot;: &quot;Rohan Sen&quot;, &quot;say&quot;: &quot;What would you like to learn today?&quot;,
+  &quot;topics&quot;: [ &#123; &quot;id&quot;: &quot;maths&quot;, &quot;name&quot;: &quot;Maths&quot;, &quot;blurb&quot;: &quot;SUM, AVERAGE ...&quot; &#125; ], &quot;player&quot;: &#123; &#125; &#125;
+
+// POST /api/encounters/:id/lesson   body: &#123; &quot;topic&quot;: &quot;maths&quot; &#125;
+&#123; &quot;title&quot;: &quot;Maths: totals and averages&quot;, &quot;steps&quot;: [&quot;...&quot;], &quot;example&quot;: &quot;=SUM(B2:B7)&quot;,
+  &quot;rewards&quot;: &#123; &quot;coins&quot;: 0, &quot;xp&quot;: 8 &#125;, &quot;levelUp&quot;: null, &quot;player&quot;: &#123; &#125; &#125;
+
+// POST /api/facilities/:facilityId/visit    (the frontend calls this about every 9 s while standing in a facility)
+&#123; &quot;ok&quot;: true, &quot;rewards&quot;: &#123; &quot;coins&quot;: 2, &quot;xp&quot;: 6 &#125;, &quot;message&quot;: &quot;+2 coins, +6 XP&quot;, &quot;levelUp&quot;: null, &quot;player&quot;: &#123; &#125; &#125;
+&#123; &quot;ok&quot;: false, &quot;locked&quot;: true, &quot;message&quot;: &quot;Members only. Join Harbour Blues to use this.&quot; &#125;
+&#123; &quot;ok&quot;: true, &quot;tooSoon&quot;: true &#125;                       // the server rate limits, the client only asks politely
+// facility ids: gym, pool, sauna, machine (tier 6), gymN, poolN (tier 7)</pre><b style="font-size:18px;margin-top:12px">Character creator</b><pre style="margin:0;padding:16px 18px;border-radius:12px;background:#1F2A24;color:#FBF6E9;font-family:'IBM Plex Mono',monospace;font-size:13.5px;line-height:1.5;overflow:auto;white-space:pre">// POST /api/player   body: &#123; name, gender, body, skin, hairStyle, hairColor &#125;  -&gt; &#123; &quot;ok&quot;: true, &quot;player&quot;: &#123; &#125; &#125;
+// gender: &quot;Male&quot; | &quot;Female&quot;   body: slim | regular | broad
+// hairStyle: short | curly | long | bun | none   skin and hairColor: hex strings from the creator
+// The player snapshot now also carries  &quot;look&quot;: &#123; ... &#125;,  &quot;created&quot;: true,  &quot;cp&quot;: &#123; &quot;3&quot;: 2 &#125;  (checkpoints cleared per tier)
+// If &quot;created&quot; is false the frontend opens the creator before anything else.</pre></div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px; align-items: start">
+<div style="display:flex;flex-direction:column;gap:14px">
+<h2 style="margin: 0; font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 700; font-size: 32px; padding-bottom: 8px; border-bottom: 3px solid #4B5A8A">4 What your agents should do</h2>
+<div style="display:flex;flex-direction:column;gap:10px;font-size:16px">
+<span><b>Unique every time.</b> Each encounter makes a new sheet and a new target. Seed it per player, character and time so a repeat is rare.</span>
+<span><b>Keep the answer key.</b> Never put the expected value or a model formula in a response. Check on the server and say only correct or not.</span>
+<span><b>Check by value.</b> Run the player's formula on the sheet you made and compare the result. That accepts every valid way to write it.</span>
+<span><b>Teach in feedback.</b> A wrong answer should say what Excel would show, for example the formula result or <code>#NAME?</code>.</span>
+<span><b>Match the family.</b> Coaches always ask their own family. Wanderers and workers mix. Difficulty 1 to 3 follows the player's skill level.</span>
+<span><b>Pay once.</b> The first correct answer to an encounter pays. Repeats return <code>correct</code> with zero rewards.</span>
+<span><b>Say when it is slow.</b> The panel shows a waiting state. Aim for under 2 seconds, and fail fast with a clear <code>message</code>.</span>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:14px">
+<h2 style="margin: 0; font-family: 'Baloo 2', system-ui, sans-serif; font-weight: 700; font-size: 32px; padding-bottom: 8px; border-bottom: 3px solid #2E6A3B">5 States the frontend already draws</h2>
+<table>
+<thead><tr><th>State</th><th>What the player sees</th></tr></thead>
+<tbody>
+<tr><td>Waiting for the agent</td><td>A panel with the character's name, a moving bar and the line "No two are the same".</td></tr>
+<tr><td>Agent or network failed</td><td>A red alert with your <code>message</code>, a Try again button and a Back to the world button.</td></tr>
+<tr><td>Wrong answer</td><td>An icon, the word Not yet, and your <code>feedback</code>. The player can try again for free.</td></tr>
+<tr><td>Right answer</td><td>A tick, the coins and XP paid, your <code>explanation</code>, and Ask another question.</td></tr>
+<tr><td>Skill or level up</td><td>A toast that is read out to screen readers.</td></tr>
+<tr><td>Lobby not ready</td><td>The requirement list with a tick or a dashed circle and the words Done or Missing, and a live countdown when a cooldown is running.</td></tr>
+<tr><td>Timed match</td><td>A banner with the over, the pass mark and a visible seconds clock. Relaxed timing doubles the seconds.</td></tr>
+<tr><td>Session over</td><td>A result card with the score and bonus, then Back to the world.</td></tr>
+</tbody>
+</table>
+<p style="margin:0;font-size:16px;color:#5A5648">Test these without a backend: <code>CCApi.use('mock', { failEvery: 3 })</code> makes every third call fail.</p>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

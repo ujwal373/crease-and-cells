@@ -1,0 +1,37 @@
+{
+  "v": 3,
+  "createdOnFiles": { "v": 1, "at": "2026-10-30T20:20:00Z" },
+  "title": "Crease and Cells",
+  "launch": { "view": "canvas" },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": { "x": 0, "y": 0, "w": 1280, "h": 2250, "title": "1 Visual direction" },
+    "Prototype.dc.html": { "x": 0, "y": 2370, "w": 1280, "h": 820, "title": "6 Clickable prototype: the full world", "expand": "fill", "is_interactive": true },
+    "Build.dc.html": { "x": 0, "y": 3310, "w": 1280, "h": 1800, "title": "7 Build budget, assets and accessibility" },
+    "Map.dc.html": { "x": 1360, "y": 0, "w": 1280, "h": 4900, "title": "2 Map: the whole world" },
+    "Progression.dc.html": { "x": 1360, "y": 5100, "w": 1280, "h": 2300, "title": "8 Levels, skills, gear and clubs" },
+    "Contract.dc.html": { "x": 1360, "y": 7500, "w": 1280, "h": 3700, "title": "9 Backend integration contract" },
+    "Controls.dc.html": { "x": 2720, "y": 0, "w": 1280, "h": 1340, "title": "3 Camera and controls" },
+    "Character.dc.html": { "x": 2720, "y": 1460, "w": 1280, "h": 1560, "title": "4 Character creator and attire slots", "is_interactive": true },
+    "NpcHud.dc.html": { "x": 2720, "y": 3140, "w": 1280, "h": 1660, "title": "5 NPC quest markers and HUD" },
+    "Hero.dc.html": { "x": 4080, "y": 0, "w": 240, "h": 400, "title": "Component: Hero sprite" },
+    "Tree.dc.html": { "x": 4080, "y": 520, "w": 160, "h": 240, "title": "Component: Tree sprite" }
+  },
+  "order": [
+    "Main.dc.html",
+    "Map.dc.html",
+    "Controls.dc.html",
+    "Character.dc.html",
+    "NpcHud.dc.html",
+    "Prototype.dc.html",
+    "Progression.dc.html",
+    "Contract.dc.html",
+    "Build.dc.html",
+    "Hero.dc.html",
+    "Tree.dc.html"
+  ],
+  "notes": {
+    "t1": { "x": 0, "y": -300, "text": "Crease and Cells: the full world, the club ladder and the backend contract", "kind": "title1", "maxW": 4320 }
+  },
+  "designSystems": []
+}
