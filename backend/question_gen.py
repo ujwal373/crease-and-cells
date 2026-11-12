@@ -97,7 +97,8 @@ def _range_ref(c: int, r1: int, r2: int) -> str:
 def _eval_model(model: str, rows: list[list]) -> Any:
     from .formula_engine import evaluate, Grid
     grid = Grid(rows)
-    return evaluate(model, grid)
+    result = evaluate(model, grid)
+    return result.value if hasattr(result, "value") else result
 
 
 # ---------------------------------------------------------------------------

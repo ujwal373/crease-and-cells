@@ -319,7 +319,12 @@ class EncounterService:
         session_meta: dict | None = None,
         say_prefix: str = "",
     ) -> dict:
-        q = build_question(family, difficulty, seed)
+        from .formula_engine import FormulaError
+        try:
+            q = build_question(family, difficulty, seed)
+        except FormulaError:
+            # Family uses functions not yet in the engine; fall back to maths.
+            q = build_question("maths", difficulty, seed)
         coins, xp = reward_for(difficulty, seed)
 
         # Double coins for practice daily bonus
