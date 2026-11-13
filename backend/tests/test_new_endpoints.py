@@ -272,6 +272,74 @@ def test_leaderboard_limit_param(client):
 
 
 # ---------------------------------------------------------------------------
+# POST /api/encounters/{enc_id}/begin
+# ---------------------------------------------------------------------------
+
+def test_begin_session_ok(client):
+    pid = _pid()
+    svc = app.state.svc
+    svc.state.ensure_player(pid)
+    svc.state.award(pid, 0, 100)           # level 2
+    svc.state.add_skill_xp(pid, "maths", 60)  # maths skill 1
+    # Create lobby encounter
+    lobby_r = client.post("/api/npcs/dean/encounter", headers=_auth(pid))
+    assert lobby_r.status_code == 200
+    lobby = lobby_r.json()
+    assert lobby["kind"] == "lobby"
+    enc_id = lobby["encounterId"]
+    # Begin session
+    r = client.post(f"/api/encounters/{enc_id}/begin", json={}, headers=_auth(pid))
+    assert r.status_code == 200
+    data = r.json()
+    assert data["kind"] == "question"
+    assert data["session"]["round"] == 1
+
+
+def test_begin_session_requirements_not_met_returns_400(client):
+    pid = _pid()
+    svc = app.state.svc
+    svc.state.ensure_player(pid)
+    lobby_r = client.post("/api/npcs/dean/encounter", headers=_auth(pid))
+    enc_id = lobby_r.json()["encounterId"]
+    r = client.post(f"/api/encounters/{enc_id}/begin", json={}, headers=_auth(pid))
+    assert r.status_code == 400
+    assert r.json()["code"] == "NOT_ELIGIBLE"
+
+
+# ---------------------------------------------------------------------------
+# POST /api/encounters/{enc_id}/lesson
+# ---------------------------------------------------------------------------
+
+def test_lesson_topic_ok(client):
+    pid = _pid()
+    svc = app.state.svc
+    svc.state.ensure_player(pid)
+    svc.state.set_player_tier(pid, 1)   # unlock sana
+    lesson_r = client.post("/api/npcs/sana/encounter", headers=_auth(pid))
+    assert lesson_r.status_code == 200
+    enc_id = lesson_r.json()["encounterId"]
+    r = client.post(f"/api/encounters/{enc_id}/lesson",
+                    json={"topic": "text"}, headers=_auth(pid))
+    assert r.status_code == 200
+    data = r.json()
+    assert "steps" in data
+    assert data["rewards"]["xp"] == 8
+
+
+def test_lesson_unknown_topic_returns_400(client):
+    pid = _pid()
+    svc = app.state.svc
+    svc.state.ensure_player(pid)
+    svc.state.set_player_tier(pid, 1)
+    lesson_r = client.post("/api/npcs/sana/encounter", headers=_auth(pid))
+    enc_id = lesson_r.json()["encounterId"]
+    r = client.post(f"/api/encounters/{enc_id}/lesson",
+                    json={"topic": "badtopic"}, headers=_auth(pid))
+    assert r.status_code == 400
+    assert r.json()["code"] == "NOT_FOUND"
+
+
+# ---------------------------------------------------------------------------
 # Auth edge cases
 # ---------------------------------------------------------------------------
 

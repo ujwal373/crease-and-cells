@@ -292,3 +292,136 @@ def test_markers_unknown_npc_returns_locked(svc, enc_svc):
     pid = _setup(svc)
     markers = enc_svc.compute_markers(pid, ["nonexistent_npc"])
     assert markers["nonexistent_npc"] == "locked"
+
+
+# ---------------------------------------------------------------------------
+# begin_session
+# ---------------------------------------------------------------------------
+
+def _make_eligible(svc, pid: str) -> None:
+    """Give player the minimum state to be eligible for univ_exam (tier-1 club)."""
+    svc.state.award(pid, 0, 100)          # reach level 2
+    svc.state.add_skill_xp(pid, "maths", 60)  # maths skill level 1
+
+
+def test_begin_session_returns_first_question(svc, enc_svc):
+    pid = _setup(svc, 40)
+    _make_eligible(svc, pid)
+    enc = enc_svc.create_encounter(pid, "dean")
+    assert enc["kind"] == "lobby"
+    assert enc["canBegin"] is True
+    result = enc_svc.begin_session(pid, enc["encounterId"], {})
+    assert result["kind"] == "question"
+    assert result["session"]["round"] == 1
+    assert result["session"]["rounds"] == 3   # univ_exam has 3 rounds
+    assert result["session"]["passMark"] == 2
+
+
+def test_begin_session_non_lobby_raises(svc, enc_svc):
+    pid = _setup(svc, 41)
+    enc = enc_svc.create_encounter(pid, "mukesh")  # question encounter, not lobby
+    with pytest.raises(EncounterError) as exc_info:
+        enc_svc.begin_session(pid, enc["encounterId"], {})
+    assert exc_info.value.code == "EXPIRED"
+
+
+def test_begin_session_requirements_not_met_raises(svc, enc_svc):
+    pid = _setup(svc, 42)  # tier=0, level=1, maths=0 — not eligible
+    enc = enc_svc.create_encounter(pid, "dean")
+    with pytest.raises(EncounterError) as exc_info:
+        enc_svc.begin_session(pid, enc["encounterId"], {})
+    assert exc_info.value.code == "NOT_ELIGIBLE"
+
+
+def test_begin_session_already_enrolled_raises(svc, enc_svc):
+    pid = _setup(svc, 43)
+    svc.state.set_player_tier(pid, 1)   # already in university
+    enc = enc_svc.create_encounter(pid, "dean")
+    with pytest.raises(EncounterError) as exc_info:
+        enc_svc.begin_session(pid, enc["encounterId"], {})
+    assert exc_info.value.code == "NOT_ELIGIBLE"
+
+
+def test_full_session_pass_enrolls_tier(svc, enc_svc):
+    pid = _setup(svc, 44)
+    _make_eligible(svc, pid)
+    enc = enc_svc.create_encounter(pid, "dean")
+    q   = enc_svc.begin_session(pid, enc["encounterId"], {})
+    assert q["kind"] == "question"
+
+    result = None
+    for _ in range(4):   # max 3 rounds + safety
+        enc_id = q["encounterId"]
+        stored = svc.state.get_encounter(enc_id)
+        result = enc_svc.answer_encounter(pid, enc_id, stored["model"])
+        if "sessionResult" in result:
+            break
+        assert "next" in result, f"Unexpected result keys: {list(result.keys())}"
+        q = result["next"]
+
+    assert result is not None and "sessionResult" in result
+    sr = result["sessionResult"]
+    assert sr["passed"] is True
+    assert sr["enrolledTier"] == 1
+    assert svc.state.player_tier(pid) == 1
+
+
+def test_full_session_fail_no_tier_change(svc, enc_svc):
+    pid = _setup(svc, 45)
+    _make_eligible(svc, pid)
+    enc = enc_svc.create_encounter(pid, "dean")
+    q   = enc_svc.begin_session(pid, enc["encounterId"], {})
+
+    result = None
+    for _ in range(6):   # up to 3 rounds × 2 wrong tries each
+        enc_id = q["encounterId"]
+        r = enc_svc.answer_encounter(pid, enc_id, "=SUM(Z99:Z100)")
+        if "sessionResult" in r:
+            result = r
+            break
+        if "next" in r:
+            q = r["next"]
+        # second wrong on the same enc_id if round not yet advanced
+        elif r.get("correct") is False and not r.get("next"):
+            r2 = enc_svc.answer_encounter(pid, enc_id, "=SUM(Z99:Z100)")
+            if "sessionResult" in r2:
+                result = r2
+                break
+            if "next" in r2:
+                q = r2["next"]
+
+    assert result is not None and "sessionResult" in result
+    sr = result["sessionResult"]
+    assert sr["passed"] is False
+    assert svc.state.player_tier(pid) == 0
+
+
+def test_session_pass_requires_enough_correct(svc, enc_svc):
+    """Pass 2 of 3 rounds (univ_exam pass_mark=2) — should still enrol."""
+    pid = _setup(svc, 46)
+    _make_eligible(svc, pid)
+    enc = enc_svc.create_encounter(pid, "dean")
+    q   = enc_svc.begin_session(pid, enc["encounterId"], {})
+
+    result = None
+    rounds_attempted = 0
+    for _ in range(6):
+        enc_id = q["encounterId"]
+        stored = svc.state.get_encounter(enc_id)
+        # Answer correctly for first 2 rounds, wrong for the last
+        if rounds_attempted < 2:
+            r = enc_svc.answer_encounter(pid, enc_id, stored["model"])
+        else:
+            r = enc_svc.answer_encounter(pid, enc_id, "=SUM(Z99:Z100)")
+            if r.get("correct") is False and not r.get("next") and "sessionResult" not in r:
+                r = enc_svc.answer_encounter(pid, enc_id, "=SUM(Z99:Z100)")
+        rounds_attempted += 1
+        if "sessionResult" in r:
+            result = r
+            break
+        if "next" in r:
+            q = r["next"]
+
+    assert result is not None and "sessionResult" in result
+    # 2 correct ≥ pass_mark 2 → passed
+    assert result["sessionResult"]["passed"] is True
