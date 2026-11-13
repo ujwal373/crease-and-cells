@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>Crease and Cells full world</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="./vendor/react.js"></script>
 <script src="./vendor/react-dom.js"></script>
 <script src="./support.js"></script>
@@ -11,12 +12,71 @@
 <script src="./assets/0973df3abba64705a996f4579a92a14d.js"></script>
 <script src="./assets/f1395e74f1fee6c8469877415befc531.js"></script>
 <script>
-  var _pid = localStorage.getItem('cc_pid') || crypto.randomUUID();
-  localStorage.setItem('cc_pid', _pid);
-  CCApi.use('http', { baseUrl: '', headers: { Authorization: 'Bearer ' + _pid } });
+(function () {
+  /* ---- fill these two values from your Supabase project dashboard ---- */
+  var SB_URL  = 'YOUR_SUPABASE_URL';       /* e.g. https://xxxx.supabase.co   */
+  var SB_ANON = 'YOUR_SUPABASE_ANON_KEY';  /* safe to expose — public by design */
+  /* -------------------------------------------------------------------- */
+
+  var _sb = supabase.createClient(SB_URL, SB_ANON);
+
+  function _startGame(uid) {
+    CCApi.use('http', { baseUrl: '', headers: { Authorization: 'Bearer ' + uid } });
+    var gate = document.getElementById('cc-gate');
+    if (gate) gate.style.display = 'none';
+  }
+
+  window._ccSignIn = function () {
+    var btn = document.getElementById('cc-gbtn');
+    var st  = document.getElementById('cc-gstatus');
+    if (btn) btn.disabled = true;
+    if (st)  st.textContent = 'Redirecting to Google…';
+    _sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin + window.location.pathname }
+    });
+  };
+
+  /* Fast path: returning user — read the existing session from localStorage
+     synchronously so CCApi is configured before React mounts.             */
+  function _syncReadUid() {
+    try {
+      for (var k in localStorage) {
+        if (k.startsWith('sb-') && k.endsWith('-auth-token')) {
+          var v = JSON.parse(localStorage.getItem(k) || 'null');
+          var uid = v && v.user && v.user.id;
+          if (uid) return uid;
+        }
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  var uid = _syncReadUid();
+  if (uid) {
+    _startGame(uid);
+  } else {
+    /* Async path: handles fresh OAuth callback (URL contains auth params). */
+    _sb.auth.getSession().then(function (r) {
+      var s = r.data && r.data.session;
+      if (s && s.user && s.user.id) {
+        /* Session stored now — reload cleanly so React starts with CCApi
+           already configured via the fast path.                           */
+        window.location.replace(window.location.pathname);
+      }
+      /* No session: login gate remains visible for the user to sign in.  */
+    });
+  }
+})();
 </script>
 </head>
 <body>
+<div id="cc-gate" style="position:fixed;inset:0;background:#1F2A24;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;z-index:9999;font-family:'Atkinson Hyperlegible',sans-serif;">
+  <h1 style="margin:0;color:#F2B632;font-family:'Baloo 2',sans-serif;font-size:2.4rem;">Crease &amp; Cells</h1>
+  <p style="margin:0;color:#9db09d;font-size:1.1rem;">Sign in to save your progress.</p>
+  <button id="cc-gbtn" onclick="window._ccSignIn()" style="background:#F2B632;color:#1F2A24;border:none;padding:14px 36px;border-radius:10px;font-size:1.1rem;font-weight:700;cursor:pointer;font-family:inherit;">Sign in with Google</button>
+  <span id="cc-gstatus" style="color:#9fa;font-size:0.9rem;min-height:1.2em;"></span>
+</div>
 <x-dc>
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
