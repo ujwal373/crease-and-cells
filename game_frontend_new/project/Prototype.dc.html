@@ -21,10 +21,18 @@
 
       var _sb = supabase.createClient(SB_URL, SB_ANON);
 
+      var _started = false;
+
       function _startGame(uid) {
+        if (_started) return;
+        _started = true;
         CCApi.use('http', { baseUrl: '', headers: { Authorization: 'Bearer ' + uid } });
         var gate = document.getElementById('cc-gate');
         if (gate) gate.style.display = 'none';
+        /* Clean OAuth tokens out of the URL without reloading. */
+        if (window.location.hash || window.location.search) {
+          history.replaceState(null, '', window.location.pathname);
+        }
       }
 
       window._ccSignIn = function () {
@@ -38,36 +46,15 @@
         });
       };
 
-      /* Fast path: returning user — read the existing session from localStorage
-         synchronously so CCApi is configured before React mounts.             */
-      function _syncReadUid() {
-        try {
-          for (var k in localStorage) {
-            if (k.startsWith('sb-') && k.endsWith('-auth-token')) {
-              var v = JSON.parse(localStorage.getItem(k) || 'null');
-              var uid = v && v.user && v.user.id;
-              if (uid) return uid;
-            }
-          }
-        } catch (e) { }
-        return null;
-      }
-
-      var uid = _syncReadUid();
-      if (uid) {
-        _startGame(uid);
-      } else {
-        /* Async path: handles fresh OAuth callback (URL contains auth params). */
-        _sb.auth.getSession().then(function (r) {
-          var s = r.data && r.data.session;
-          if (s && s.user && s.user.id) {
-            /* Session stored now — reload cleanly so React starts with CCApi
-               already configured via the fast path.                           */
-            window.location.replace(window.location.pathname);
-          }
-          /* No session: login gate remains visible for the user to sign in.  */
-        });
-      }
+      /* onAuthStateChange fires immediately when a session already exists in
+         localStorage, and fires again after an OAuth callback is processed.
+         Supabase guarantees the session is fully stored before this callback
+         runs, so there is no race condition with localStorage reads.         */
+      _sb.auth.onAuthStateChange(function (event, session) {
+        if (session && session.user && session.user.id) {
+          _startGame(session.user.id);
+        }
+      });
     })();
   </script>
 </head>
