@@ -19,44 +19,46 @@
       var SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqZ2Fyc3ZsY3V2Zm96Z2pjZGRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1OTkwMzIsImV4cCI6MjExMDE3NTAzMn0.8DI6ANIBeJuiFeU_Y19yNlqE_A404wgmd9oGEp63d6w';  /* safe to expose — public by design */
       /* -------------------------------------------------------------------- */
 
-      var _sb = supabase.createClient(SB_URL, SB_ANON, {
-        auth: { flowType: 'implicit' }
-      });
-
-      var _started = false;
+      var UID_KEY = 'cc_uid';
 
       function _startGame(uid) {
-        if (_started) return;
-        _started = true;
         CCApi.use('http', { baseUrl: '', headers: { Authorization: 'Bearer ' + uid } });
         var gate = document.getElementById('cc-gate');
         if (gate) gate.style.display = 'none';
-        /* Clean OAuth tokens out of the URL without reloading. */
-        if (window.location.hash || window.location.search) {
-          history.replaceState(null, '', window.location.pathname);
-        }
       }
 
       window._ccSignIn = function () {
         var btn = document.getElementById('cc-gbtn');
-        var st = document.getElementById('cc-gstatus');
+        var st  = document.getElementById('cc-gstatus');
         if (btn) btn.disabled = true;
-        if (st) st.textContent = 'Redirecting to Google…';
-        _sb.auth.signInWithOAuth({
-          provider: 'google',
-          options: { redirectTo: window.location.origin + window.location.pathname }
-        });
+        if (st)  st.textContent = 'Redirecting to Google…';
+        supabase.createClient(SB_URL, SB_ANON, { auth: { flowType: 'implicit' } })
+          .auth.signInWithOAuth({
+            provider: 'google',
+            options: { redirectTo: window.location.origin + window.location.pathname }
+          });
       };
 
-      /* onAuthStateChange fires immediately when a session already exists in
-         localStorage, and fires again after an OAuth callback is processed.
-         Supabase guarantees the session is fully stored before this callback
-         runs, so there is no race condition with localStorage reads.         */
-      _sb.auth.onAuthStateChange(function (event, session) {
-        if (session && session.user && session.user.id) {
-          _startGame(session.user.id);
-        }
-      });
+      /* Sync fast path — returning user: UID already cached so CCApi is
+         configured before React mounts and refresh() uses the real API.   */
+      var _uid = localStorage.getItem(UID_KEY);
+      if (_uid && /^[0-9a-f-]{36}$/.test(_uid)) {
+        _startGame(_uid);
+      } else {
+        /* Async path — OAuth callback or first-time visitor.
+           onAuthStateChange fires after Supabase processes the implicit-flow
+           tokens from the URL hash. We cache the UID and reload once so the
+           next load takes the sync path with CCApi ready before React mounts. */
+        var _done = false;
+        supabase.createClient(SB_URL, SB_ANON, { auth: { flowType: 'implicit' } })
+          .auth.onAuthStateChange(function (event, session) {
+            if (_done || !session || !session.user || !session.user.id) return;
+            _done = true;
+            try { localStorage.setItem(UID_KEY, session.user.id); } catch (e) {}
+            history.replaceState(null, '', window.location.pathname);
+            window.location.reload();
+          });
+      }
     })();
   </script>
 </head>
