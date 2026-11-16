@@ -16,7 +16,7 @@
     (function () {
       /* ---- fill these two values from your Supabase project dashboard ---- */
       var SB_URL = 'https://ijgarsvlcuvfozgjcddl.supabase.co';       /* e.g. https://xxxx.supabase.co   */
-      var SB_ANON = 'sb_publishable_4xKaPHy8WLGENUz1_iNZQA_e5fK1X0C';  /* safe to expose — public by design */
+      var SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqZ2Fyc3ZsY3V2Zm96Z2pjZGRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1OTkwMzIsImV4cCI6MjExMDE3NTAzMn0.8DI6ANIBeJuiFeU_Y19yNlqE_A404wgmd9oGEp63d6w';  /* safe to expose — public by design */
       /* -------------------------------------------------------------------- */
 
       var _sb = supabase.createClient(SB_URL, SB_ANON);
@@ -516,11 +516,13 @@
           <sc-if value="{{hasFac}}" hint-placeholder-val="{{ false }}">
             <div role="status"
               style="max-width: 300px; padding: 5px 12px; border-radius: 12px; background: rgba(46,106,59,0.92); color: #FBF6E9; border: 2px solid #FBF6E9; font-size: 14px; line-height: 1.3">
-              <b>{{facName}}.</b> {{facNote}}</div>
+              <b>{{facName}}.</b> {{facNote}}
+            </div>
           </sc-if>
           <div
             style="max-width: 300px; padding: 5px 12px; border-radius: 12px; background: rgba(31,42,36,0.78); color: #FBF6E9; font-size: 14px; line-height: 1.3">
-            <b>Next goal.</b> {{goalText}}</div>
+            <b>Next goal.</b> {{goalText}}
+          </div>
           <sc-if value="{{hasHint}}" hint-placeholder-val="{{ true }}">
             <div
               style="max-width: 300px; padding: 6px 12px; border-radius: 12px; background: rgba(251,246,233,0.94); border: 2px solid #1F2A24; font-size: 14px; line-height: 1.3">
@@ -616,7 +618,8 @@
               style="padding: 10px 16px; display: flex; flex-direction: column; gap: 4px; background: #F6E7B8; border-bottom: 3px solid #1F2A24">
               <span style="font-size: 17px"><b>Your task.</b> {{qTask}}</span><span
                 style="font-size: 15px; color: #5A5648">Answer cell: <b>{{qRef}}</b>. Your formula so far: <span
-                  style="font-family: 'IBM Plex Mono', monospace; font-weight: 700">{{formulaShown}}</span></span></div>
+                  style="font-family: 'IBM Plex Mono', monospace; font-weight: 700">{{formulaShown}}</span></span>
+            </div>
             <div style="flex: 1 1 auto; min-height: 0; overflow: auto; background: #FFFFFF" tabindex="0" role="region"
               aria-label="Full spreadsheet, scrollable">
               <div style="display: grid; grid-template-columns: {{gridColsBig}}; width: max-content; min-width: 100%"
@@ -691,7 +694,8 @@
             <sc-if value="{{hasCp}}" hint-placeholder-val="{{ false }}">
               <div
                 style="padding: 10px 14px; border-radius: 12px; background: #1F2A24; color: #FBF6E9; font-size: 16px">
-                <b>Checkpoint {{cpStep}} of {{cpOf}}.</b> Answer to pass through.</div>
+                <b>Checkpoint {{cpStep}} of {{cpOf}}.</b> Answer to pass through.
+              </div>
             </sc-if>
             <div style="display: flex; flex-direction: column; gap: 6px">
               <span
@@ -743,7 +747,8 @@
               </div>
               <sc-if value="{{hint}}" hint-placeholder-val="{{ false }}">
                 <div style="padding: 12px 14px; border-radius: 12px; border: 2px dashed #1F2A24; font-size: 17px">
-                  <b>Hint.</b> {{qHint}}</div>
+                  <b>Hint.</b> {{qHint}}
+                </div>
               </sc-if>
             </sc-if>
 
@@ -820,7 +825,8 @@
             <sc-if value="{{lWait}}" hint-placeholder-val="{{ false }}">
               <div role="timer"
                 style="padding: 12px 14px; border-radius: 12px; border: 3px solid #1F2A24; background: #F9DDD2; font-size: 18px">
-                <b>Next attempt in {{lWaitText}}</b></div>
+                <b>Next attempt in {{lWaitText}}</b>
+              </div>
             </sc-if>
             <sc-if value="{{lHasReqs}}" hint-placeholder-val="{{ false }}">
               <div style="display: flex; flex-direction: column; gap: 8px">
@@ -937,7 +943,8 @@
               <sc-for list="{{skills}}" as="k" hint-placeholder-count="7">
                 <div style="display: flex; flex-direction: column; gap: 4px">
                   <div style="display: flex; justify-content: space-between; font-size: 16px">
-                    <b>{{k.name}}</b><span>Level {{k.level}} of 4</span></div>
+                    <b>{{k.name}}</b><span>Level {{k.level}} of 4</span>
+                  </div>
                   <div role="progressbar" aria-label="{{k.name}} skill" aria-valuemin="0" aria-valuemax="100"
                     aria-valuenow="{{k.pct}}"
                     style="height: 12px; border-radius: 6px; background: #E6DFC9; overflow: hidden; border: 2px solid #1F2A24">
