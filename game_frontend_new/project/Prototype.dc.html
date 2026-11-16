@@ -19,7 +19,9 @@
       var SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqZ2Fyc3ZsY3V2Zm96Z2pjZGRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1OTkwMzIsImV4cCI6MjExMDE3NTAzMn0.8DI6ANIBeJuiFeU_Y19yNlqE_A404wgmd9oGEp63d6w';  /* safe to expose — public by design */
       /* -------------------------------------------------------------------- */
 
-      var _sb = supabase.createClient(SB_URL, SB_ANON);
+      var _sb = supabase.createClient(SB_URL, SB_ANON, {
+        auth: { flowType: 'implicit' }
+      });
 
       var _started = false;
 
