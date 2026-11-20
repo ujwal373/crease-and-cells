@@ -586,6 +586,50 @@ class LessonBody(BaseModel):
     topic: str
 
 
+class RegisterBody(BaseModel):
+    name: str
+    email: str
+
+
+class LoginBody(BaseModel):
+    email: str
+
+
+# ---------------------------------------------------------------------------
+# Auth endpoints — no Bearer token required (these create/return the token)
+# ---------------------------------------------------------------------------
+
+_EMAIL_RE = __import__("re").compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+
+@app.post("/api/auth/register", response_model=dict)
+def auth_register(body: RegisterBody, request: Request):
+    name = body.name.strip()[:30]
+    email = body.email.strip().lower()
+    if not name:
+        raise HTTPException(400, detail={"error": "invalid_name"})
+    if not _EMAIL_RE.match(email):
+        raise HTTPException(400, detail={"error": "invalid_email"})
+    svc = _svc(request)
+    player_id, is_new = svc.state.register_email(email, name)
+    if not is_new:
+        raise HTTPException(409, detail={"error": "email_exists"})
+    svc.state.ensure_player(player_id, name)
+    return {"player_id": player_id, "created": True}
+
+
+@app.post("/api/auth/login", response_model=dict)
+def auth_login(body: LoginBody, request: Request):
+    email = body.email.strip().lower()
+    if not _EMAIL_RE.match(email):
+        raise HTTPException(400, detail={"error": "invalid_email"})
+    svc = _svc(request)
+    player_id = svc.state.lookup_email(email)
+    if not player_id:
+        raise HTTPException(404, detail={"error": "not_found"})
+    return {"player_id": player_id}
+
+
 # ---------------------------------------------------------------------------
 # New frontend endpoints — all use _bearer_player
 # ---------------------------------------------------------------------------

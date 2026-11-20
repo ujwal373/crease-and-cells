@@ -4,7 +4,6 @@
 <head>
   <meta charset="utf-8">
   <title>Crease and Cells full world</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="./vendor/react.js"></script>
   <script src="./vendor/react-dom.js"></script>
   <script src="./support.js"></script>
@@ -14,64 +13,97 @@
   <script src="./assets/f1395e74f1fee6c8469877415befc531.js"></script>
   <script>
     (function () {
-      /* ---- fill these two values from your Supabase project dashboard ---- */
-      var SB_URL = 'https://ijgarsvlcuvfozgjcddl.supabase.co';       /* e.g. https://xxxx.supabase.co   */
-      var SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqZ2Fyc3ZsY3V2Zm96Z2pjZGRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1OTkwMzIsImV4cCI6MjExMDE3NTAzMn0.8DI6ANIBeJuiFeU_Y19yNlqE_A404wgmd9oGEp63d6w';  /* safe to expose — public by design */
-      /* -------------------------------------------------------------------- */
-
       var UID_KEY = 'cc_uid';
 
       function _startGame(uid) {
         CCApi.use('http', { baseUrl: '', headers: { Authorization: 'Bearer ' + uid } });
-        var gate = document.getElementById('cc-gate');
-        if (gate) gate.style.display = 'none';
+        document.getElementById('cc-gate').style.display = 'none';
       }
 
-      window._ccSignIn = function () {
-        var btn = document.getElementById('cc-gbtn');
-        var st  = document.getElementById('cc-gstatus');
-        if (btn) btn.disabled = true;
-        if (st)  st.textContent = 'Redirecting to Google…';
-        supabase.createClient(SB_URL, SB_ANON, { auth: { flowType: 'implicit' } })
-          .auth.signInWithOAuth({
-            provider: 'google',
-            options: { redirectTo: window.location.origin + window.location.pathname }
-          });
+      function _status(msg, bad) {
+        var s = document.getElementById('cc-status');
+        if (s) { s.textContent = msg; s.style.color = bad ? '#f99' : '#9fa'; }
+      }
+
+      window._ccShowTab = function (tab) {
+        document.getElementById('cc-login').style.display  = tab === 'login'    ? 'flex' : 'none';
+        document.getElementById('cc-reg').style.display    = tab === 'register' ? 'flex' : 'none';
+        document.getElementById('cc-tab-login').style.fontWeight    = tab === 'login'    ? '700' : '400';
+        document.getElementById('cc-tab-reg').style.fontWeight      = tab === 'register' ? '700' : '400';
+        _status('');
       };
 
-      /* Sync fast path — returning user: UID already cached so CCApi is
-         configured before React mounts and refresh() uses the real API.   */
+      window._ccLogin = function () {
+        var email = document.getElementById('cc-email-login').value.trim();
+        if (!email) return _status('Enter your email.', true);
+        _status('Looking you up…');
+        fetch('/api/auth/login', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email })
+        }).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+          .then(function (res) {
+            if (res.ok && res.d.player_id) {
+              localStorage.setItem(UID_KEY, res.d.player_id);
+              _startGame(res.d.player_id);
+            } else {
+              _status('Email not found. Register first.', true);
+            }
+          }).catch(function () { _status('Network error. Try again.', true); });
+      };
+
+      window._ccRegister = function () {
+        var name  = document.getElementById('cc-name').value.trim();
+        var email = document.getElementById('cc-email-reg').value.trim();
+        if (!name)  return _status('Enter your name.', true);
+        if (!email) return _status('Enter your email.', true);
+        _status('Creating your account…');
+        fetch('/api/auth/register', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: name, email: email })
+        }).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+          .then(function (res) {
+            if (res.ok && res.d.player_id) {
+              localStorage.setItem(UID_KEY, res.d.player_id);
+              _startGame(res.d.player_id);
+            } else if (res.d.error === 'email_exists') {
+              _status('Email already registered. Use Login.', true);
+            } else {
+              _status('Something went wrong. Try again.', true);
+            }
+          }).catch(function () { _status('Network error. Try again.', true); });
+      };
+
+      /* Sync fast path — returning player has UID cached in localStorage. */
       var _uid = localStorage.getItem(UID_KEY);
-      if (_uid && /^[0-9a-f-]{36}$/.test(_uid)) {
-        _startGame(_uid);
-      } else {
-        /* Async path — OAuth callback or first-time visitor.
-           onAuthStateChange fires after Supabase processes the implicit-flow
-           tokens from the URL hash. We cache the UID and reload once so the
-           next load takes the sync path with CCApi ready before React mounts. */
-        var _done = false;
-        supabase.createClient(SB_URL, SB_ANON, { auth: { flowType: 'implicit' } })
-          .auth.onAuthStateChange(function (event, session) {
-            if (_done || !session || !session.user || !session.user.id) return;
-            _done = true;
-            try { localStorage.setItem(UID_KEY, session.user.id); } catch (e) {}
-            history.replaceState(null, '', window.location.pathname);
-            window.location.reload();
-          });
-      }
+      if (_uid && /^[0-9a-f-]{36}$/.test(_uid)) { _startGame(_uid); }
     })();
   </script>
 </head>
 
 <body>
-  <div id="cc-gate"
-    style="position:fixed;inset:0;background:#1F2A24;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;z-index:9999;font-family:'Atkinson Hyperlegible',sans-serif;">
+  <div id="cc-gate" style="position:fixed;inset:0;background:#1F2A24;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999;font-family:'Atkinson Hyperlegible',sans-serif;">
     <h1 style="margin:0;color:#F2B632;font-family:'Baloo 2',sans-serif;font-size:2.4rem;">Crease &amp; Cells</h1>
-    <p style="margin:0;color:#9db09d;font-size:1.1rem;">Sign in to save your progress.</p>
-    <button id="cc-gbtn" onclick="window._ccSignIn()"
-      style="background:#F2B632;color:#1F2A24;border:none;padding:14px 36px;border-radius:10px;font-size:1.1rem;font-weight:700;cursor:pointer;font-family:inherit;">Sign
-      in with Google</button>
-    <span id="cc-gstatus" style="color:#9fa;font-size:0.9rem;min-height:1.2em;"></span>
+    <div style="display:flex;gap:24px;border-bottom:2px solid #3a4f3a;padding-bottom:8px;">
+      <button id="cc-tab-login" onclick="_ccShowTab('login')"
+        style="background:none;border:none;color:#F2B632;font-size:1rem;font-weight:700;cursor:pointer;padding:4px 0;">Login</button>
+      <button id="cc-tab-reg" onclick="_ccShowTab('register')"
+        style="background:none;border:none;color:#F2B632;font-size:1rem;font-weight:400;cursor:pointer;padding:4px 0;">Register</button>
+    </div>
+    <div id="cc-login" style="display:flex;flex-direction:column;gap:10px;width:280px;">
+      <input id="cc-email-login" type="email" placeholder="Your email"
+        style="padding:12px 14px;border-radius:8px;border:none;font-size:1rem;background:#2e3d2e;color:#eee;outline:none;" />
+      <button onclick="_ccLogin()"
+        style="background:#F2B632;color:#1F2A24;border:none;padding:12px;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;">Enter</button>
+    </div>
+    <div id="cc-reg" style="display:none;flex-direction:column;gap:10px;width:280px;">
+      <input id="cc-name" type="text" placeholder="Your name" maxlength="30"
+        style="padding:12px 14px;border-radius:8px;border:none;font-size:1rem;background:#2e3d2e;color:#eee;outline:none;" />
+      <input id="cc-email-reg" type="email" placeholder="Your email"
+        style="padding:12px 14px;border-radius:8px;border:none;font-size:1rem;background:#2e3d2e;color:#eee;outline:none;" />
+      <button onclick="_ccRegister()"
+        style="background:#F2B632;color:#1F2A24;border:none;padding:12px;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;">Start Playing</button>
+    </div>
+    <span id="cc-status" style="font-size:0.9rem;min-height:1.2em;color:#9fa;"></span>
   </div>
   <x-dc>
     <helmet>

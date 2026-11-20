@@ -118,6 +118,11 @@ CREATE TABLE IF NOT EXISTS leaderboard (
     level        INTEGER NOT NULL DEFAULT 1,
     tier         INTEGER NOT NULL DEFAULT 0
 );
+CREATE TABLE IF NOT EXISTS player_emails (
+    email      TEXT PRIMARY KEY,
+    player_id  TEXT NOT NULL,
+    name       TEXT NOT NULL DEFAULT ''
+);
 """
 
 _ALTER_PLAYERS = [
@@ -150,6 +155,34 @@ class GameState:
                 "INSERT OR IGNORE INTO players (id, name) VALUES (?, ?)", (player_id, name or player_id)
             )
             self.db.commit()
+
+    def register_email(self, email: str, name: str) -> tuple[str, bool]:
+        """Register a new player by email. Returns (player_id, is_new).
+        If the email already exists, returns the existing player_id with is_new=False."""
+        import uuid as _uuid
+        email = email.lower().strip()
+        with self._lock:
+            row = self.db.execute(
+                "SELECT player_id FROM player_emails WHERE email = ?", (email,)
+            ).fetchone()
+            if row:
+                return row[0], False
+            player_id = str(_uuid.uuid4())
+            self.db.execute(
+                "INSERT INTO player_emails (email, player_id, name) VALUES (?, ?, ?)",
+                (email, player_id, name),
+            )
+            self.db.commit()
+            return player_id, True
+
+    def lookup_email(self, email: str) -> str | None:
+        """Return player_id for a registered email, or None if not found."""
+        email = email.lower().strip()
+        with self._lock:
+            row = self.db.execute(
+                "SELECT player_id FROM player_emails WHERE email = ?", (email,)
+            ).fetchone()
+            return row[0] if row else None
 
     def wallet(self, player_id: str) -> dict:
         with self._lock:
