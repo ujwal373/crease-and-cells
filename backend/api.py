@@ -809,6 +809,27 @@ def save_appearance(body: AppearanceBody, request: Request):
 
 
 # ---------------------------------------------------------------------------
+# Admin endpoint — protected by CC_ADMIN_TOKEN env var
+# ---------------------------------------------------------------------------
+
+_ADMIN_TOKEN = os.environ.get("CC_ADMIN_TOKEN", "")
+
+
+@app.get("/api/admin/players", response_model=list)
+def admin_players(token: str, request: Request):
+    if not _ADMIN_TOKEN or token != _ADMIN_TOKEN:
+        raise HTTPException(403, detail={"error": "forbidden"})
+    rows = _svc(request).state.db.execute("""
+        SELECT pe.email, pe.name, pe.player_id,
+               p.coins, p.xp, p.level, p.tier
+        FROM player_emails pe
+        LEFT JOIN players p ON p.id = pe.player_id
+        ORDER BY p.xp DESC NULLS LAST
+    """).fetchall()
+    return [dict(r) for r in rows]
+
+
+# ---------------------------------------------------------------------------
 # Static files — mounted last; FastAPI always matches /api/... routes first
 # ---------------------------------------------------------------------------
 
