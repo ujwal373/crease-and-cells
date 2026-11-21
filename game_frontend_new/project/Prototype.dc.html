@@ -1118,52 +1118,81 @@
           </sc-if>
 
           <sc-if value="{{isGuide}}" hint-placeholder-val="{{ false }}">
+
+            <!-- Sticky tier tabs — always visible while scrolling -->
             <div style="position: sticky; top: -18px; z-index: 2; background: #FBF6E9; padding: 10px 0 8px; margin-top: -16px; display: flex; gap: 6px; flex-wrap: wrap">
               <sc-for list="{{guideTabs}}" as="gt" hint-placeholder-count="7">
                 <button type="button" onClick="{{gt.pick}}" aria-pressed="{{gt.active}}"
                   style="min-height: 36px; padding: 0 12px; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; border: 2px solid {{gt.bd}}; background: {{gt.bg}}; color: {{gt.fg}}; opacity: {{gt.op}}; font-family: 'IBM Plex Mono', monospace">{{gt.label}}</button>
               </sc-for>
             </div>
+
             <sc-if value="{{guideLoading}}" hint-placeholder-val="{{ false }}">
               <p style="margin: 0; font-size: 17px; color: #5A5648">Loading guide…</p>
             </sc-if>
             <sc-if value="{{guideEmpty}}" hint-placeholder-val="{{ false }}">
               <p style="margin: 0; font-size: 17px; color: #5A5648">Could not load the guide. Make sure the server is running.</p>
             </sc-if>
+
             <sc-if value="{{guideHasLevel}}" hint-placeholder-val="{{ true }}">
-              <div style="padding: 10px 14px; border-radius: 12px; background: #E4F0D2; border: 2px solid #2E6A3B">
-                <div style="font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #2E6A3B">{{guideLevelZone}}</div>
-                <div style="font-size: 15px; margin-top: 2px; color: #1F2A24">{{guideLevelTagline}}</div>
-              </div>
-              <sc-if value="{{guideComingSoon}}" hint-placeholder-val="{{ false }}">
-                <div style="padding: 10px 14px; border-radius: 10px; background: #F6E7B8; border: 2px solid #F2B632; font-size: 15px; color: #1F2A24">
-                  These formulas are coming in a future update. Keep earning XP to unlock them!
+
+              <!-- LIST VIEW: tap a formula to open its detail page -->
+              <sc-if value="{{guideIsList}}" hint-placeholder-val="{{ true }}">
+                <div style="padding: 10px 14px; border-radius: 12px; background: #E4F0D2; border: 2px solid #2E6A3B">
+                  <div style="font-size: 12px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: #2E6A3B">{{guideLevelZone}}</div>
+                  <div style="font-size: 15px; margin-top: 4px; color: #1F2A24; line-height: 1.4">{{guideLevelTagline}}</div>
+                </div>
+                <sc-if value="{{guideComingSoon}}" hint-placeholder-val="{{ false }}">
+                  <div style="padding: 10px 14px; border-radius: 10px; background: #F6E7B8; border: 2px solid #F2B632; font-size: 15px; color: #1F2A24">
+                    These formulas are coming in a future update. Keep earning XP to unlock them!
+                  </div>
+                </sc-if>
+                <div style="font-size: 13px; color: #5A5648">Tap a formula to open its full explanation.</div>
+                <div style="display: flex; flex-direction: column; gap: 8px">
+                  <sc-for list="{{guideList}}" as="fl" hint-placeholder-count="10">
+                    <button type="button" onClick="{{fl.open}}"
+                      style="width: 100%; text-align: left; padding: 13px 16px; border-radius: 12px; border: 2px solid {{fl.bd}}; background: {{fl.bg}}; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-family: 'Baloo 2', system-ui, sans-serif">
+                      <span style="font-size: 16px; font-weight: 700; color: {{fl.fg}}">{{fl.name}}</span>
+                      <span style="display: flex; align-items: center; gap: 8px; flex-shrink: 0">
+                        <sc-if value="{{fl.soon}}" hint-placeholder-val="{{ false }}">
+                          <span style="font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 6px; background: #F2B632; color: #1F2A24">soon</span>
+                        </sc-if>
+                        <span style="font-size: 20px; color: {{fl.fg}}; line-height: 1">›</span>
+                      </span>
+                    </button>
+                  </sc-for>
                 </div>
               </sc-if>
-              <sc-for list="{{guideCards}}" as="fc" hint-placeholder-count="8">
-                <div style="border-radius: 12px; border: 2px solid {{fc.bd}}; background: #FFFFFF; overflow: hidden">
-                  <button type="button" onClick="{{fc.toggle}}" aria-expanded="{{fc.open}}"
-                    style="width: 100%; text-align: left; border: none; background: {{fc.hbg}}; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; font-family: 'Baloo 2', system-ui, sans-serif">
-                    <span style="font-size: 15px; font-weight: 700; color: {{fc.hfg}}; letter-spacing: 0.04em; flex: 1">{{fc.name}}</span>
-                    <span style="display: flex; align-items: center; gap: 6px; flex-shrink: 0">
-                      <sc-if value="{{fc.soon}}" hint-placeholder-val="{{ false }}">
-                        <span style="font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 6px; background: #F2B632; color: #1F2A24">coming soon</span>
-                      </sc-if>
-                      <span style="font-size: 11px; font-weight: 700; color: {{fc.hfg}}">{{fc.chevron}}</span>
-                    </span>
-                  </button>
-                  <sc-if value="{{fc.open}}" hint-placeholder-val="{{ false }}">
-                    <div style="padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; border-top: 2px solid {{fc.bd}}">
-                      <code style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; background: #F0F0EC; padding: 6px 10px; border-radius: 6px; word-break: break-all; display: block; line-height: 1.5">{{fc.syntax}}</code>
-                      <div style="font-size: 15px; color: #1F2A24; line-height: 1.4">{{fc.what}}</div>
-                      <div style="font-size: 13px; padding: 8px 10px; border-radius: 8px; background: #F6E7B8; border-left: 3px solid #F2B632; line-height: 1.5">
-                        <span style="font-weight: 700">Cricket: </span>{{fc.tip}}
-                      </div>
-                      <code style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #2E6A3B; word-break: break-all; line-height: 1.5">{{fc.example}}</code>
-                    </div>
-                  </sc-if>
+
+              <!-- DETAIL VIEW: full explanation, scrollable -->
+              <sc-if value="{{guideIsDetail}}" hint-placeholder-val="{{ false }}">
+                <button type="button" onClick="{{guideBack}}"
+                  style="align-self: flex-start; min-height: 40px; padding: 0 16px; border-radius: 10px; border: 2px solid #2E6A3B; background: #E4F0D2; color: #2E6A3B; font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; font-family: 'Baloo 2', system-ui, sans-serif">
+                  ← Back
+                </button>
+                <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: #8D887A">{{guideLevelZone}}</div>
+                <sc-if value="{{guideDetailSoon}}" hint-placeholder-val="{{ false }}">
+                  <div style="display: inline-block; padding: 4px 10px; border-radius: 8px; background: #F6E7B8; border: 2px solid #F2B632; font-size: 13px; font-weight: 700; color: #1F2A24">Coming in a future update</div>
+                </sc-if>
+                <div style="font-family: 'Baloo 2', system-ui, sans-serif; font-size: 28px; font-weight: 700; color: #1F2A24; line-height: 1.2">{{guideDetailName}}</div>
+                <div style="display: flex; flex-direction: column; gap: 4px">
+                  <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: #5A5648">Syntax</div>
+                  <code style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; background: #F0F0EC; padding: 10px 14px; border-radius: 10px; word-break: break-all; display: block; line-height: 1.7; color: #1F2A24; border: 2px solid #E0D8C8">{{guideDetailSyntax}}</code>
                 </div>
-              </sc-for>
+                <div style="display: flex; flex-direction: column; gap: 4px">
+                  <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: #5A5648">What it does</div>
+                  <div style="font-size: 16px; color: #1F2A24; line-height: 1.6">{{guideDetailWhat}}</div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px">
+                  <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: #5A5648">Cricket example</div>
+                  <div style="font-size: 15px; padding: 12px 16px; border-radius: 10px; background: #F6E7B8; border-left: 4px solid #F2B632; line-height: 1.6; color: #1F2A24">{{guideDetailTip}}</div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px">
+                  <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: #5A5648">Example formula</div>
+                  <code style="font-family: 'IBM Plex Mono', monospace; font-size: 15px; color: #2E6A3B; word-break: break-all; display: block; padding: 12px 16px; background: #E4F0D2; border-radius: 10px; line-height: 1.7; border: 2px solid #C8DFB8">{{guideDetailExample}}</code>
+                </div>
+              </sc-if>
+
             </sc-if>
           </sc-if>
 
@@ -1872,7 +1901,7 @@ class Component extends DCLogic {
     const levels = gd ? (gd.levels || []) : [];
     const guideTabs = levels.map((lv) => ({
       label: 'T' + lv.level + (lv.coming_soon ? ' ★' : ''),
-      pick: () => this.setState({ guideLvl: lv.level, guideOpenCard: null }),
+      pick: () => { this.setState({ guideLvl: lv.level, guideOpenCard: null }); var b = document.getElementById('cc-pbody'); if (b) b.scrollTop = 0; },
       active: st.guideLvl === lv.level,
       bd: st.guideLvl === lv.level ? '#2E6A3B' : '#8D887A',
       bg: st.guideLvl === lv.level ? '#2E6A3B' : '#FBF6E9',
@@ -1880,34 +1909,45 @@ class Component extends DCLogic {
       op: lv.coming_soon ? '0.65' : '1'
     }));
     const curLevel = levels.find((lv) => lv.level === st.guideLvl) || null;
-    const guideCards = curLevel ? (curLevel.formulas || []).map((f, idx) => {
+    // List view: one pill per formula
+    const guideList = curLevel ? (curLevel.formulas || []).map((f, idx) => {
       const key = curLevel.level + ':' + idx;
-      const open = st.guideOpenCard === key;
       const soon = !!f.coming_soon;
       return {
         name: f.name,
-        syntax: f.syntax,
-        what: f.what,
-        tip: f.tip,
-        example: f.example,
         soon: soon,
-        open: open,
-        toggle: () => this.setState({ guideOpenCard: open ? null : key }),
-        chevron: open ? '▲' : '▼',
+        open: () => { this.setState({ guideOpenCard: key }); var b = document.getElementById('cc-pbody'); if (b) b.scrollTop = 0; },
         bd: soon ? '#E0D8C8' : '#C8DFB8',
-        hbg: open ? '#2E6A3B' : (soon ? '#F0EBE0' : '#E4F0D2'),
-        hfg: open ? '#FBF6E9' : (soon ? '#8D887A' : '#2E6A3B'),
+        bg: soon ? '#F5F0E8' : '#F0FAE8',
+        fg: soon ? '#8D887A' : '#2E6A3B',
       };
     }) : [];
+    // Detail view: find the open formula
+    const isDetail = !!(st.guideOpenCard && curLevel);
+    let detailF = null;
+    if (isDetail) {
+      const idx = parseInt((st.guideOpenCard || '').split(':')[1], 10);
+      detailF = ((curLevel && curLevel.formulas) || [])[idx] || null;
+    }
+    const zone = curLevel ? 'Tier ' + curLevel.level + ' — ' + curLevel.zone.toUpperCase() : '';
     return {
       guideLoading: st.guideLoading,
       guideEmpty: !st.guideLoading && !!gd && levels.length === 0,
       guideTabs: guideTabs,
       guideHasLevel: !!curLevel,
-      guideLevelZone: curLevel ? 'Tier ' + curLevel.level + ' — ' + curLevel.zone.toUpperCase() : '',
+      guideIsList: !isDetail,
+      guideIsDetail: isDetail,
+      guideLevelZone: zone,
       guideLevelTagline: curLevel ? curLevel.tagline : '',
       guideComingSoon: !!(curLevel && curLevel.coming_soon),
-      guideCards: guideCards
+      guideList: guideList,
+      guideBack: () => { this.setState({ guideOpenCard: null }); var b = document.getElementById('cc-pbody'); if (b) b.scrollTop = 0; },
+      guideDetailName: detailF ? detailF.name : '',
+      guideDetailSyntax: detailF ? detailF.syntax : '',
+      guideDetailWhat: detailF ? detailF.what : '',
+      guideDetailTip: detailF ? detailF.tip : '',
+      guideDetailExample: detailF ? detailF.example : '',
+      guideDetailSoon: !!(detailF && detailF.coming_soon),
     };
   }
 }
