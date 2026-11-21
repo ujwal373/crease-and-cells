@@ -18,7 +18,8 @@
 
       function _startGame(uid) {
         CCApi.use('http', { baseUrl: '', headers: { Authorization: 'Bearer ' + uid } });
-        document.getElementById('cc-gate').style.display = 'none';
+        var hideGate = function () { var g = document.getElementById('cc-gate'); if (g) g.style.display = 'none'; };
+        if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', hideGate); } else { hideGate(); }
       }
 
       function _status(msg, bad) {
@@ -1791,7 +1792,7 @@ class Component extends DCLogic {
     const isQuestion = ok && !!q;
     const resOk = !!(st.result && st.result.ok);
     const resBad = !!(st.result && !st.result.ok);
-    const title = st.panel === ‘map’ ? ‘World map’ : st.panel === ‘career’ ? ‘Career’ : st.panel === ‘create’ ? ‘Create your player’ : st.panel === ‘wardrobe’ ? (st.shopOpen ? ‘Akshita’s Store’ : ‘Customise’) : st.panel === ‘guide’ ? ‘Formula Guide’ : lob ? ls.name : les ? les.npc : q ? (enc.npc || ‘Question’) : st.loading ? ‘Talking’ : (enc && enc.npc) || ‘Conversation’;
+    const title = st.panel === "map" ? "World map" : st.panel === "career" ? "Career" : st.panel === "create" ? "Create your player" : st.panel === "wardrobe" ? (st.shopOpen ? "Akshita’s Store" : "Customise") : st.panel === "guide" ? "Formula Guide" : lob ? ls.name : les ? les.npc : q ? (enc.npc || "Question") : st.loading ? "Talking" : (enc && enc.npc) || "Conversation";
 
     return {
       stageT: 'scale(' + st.scale + ') rotateX(58deg) rotateZ(45deg)',
