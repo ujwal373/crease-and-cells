@@ -490,7 +490,7 @@ def test_skills_catalogue(client):
     data = r.json()
     assert "levels" in data
     levels = data["levels"]
-    assert len(levels) >= 4
+    assert len(levels) >= 7
     nums = [lv["level"] for lv in levels]
     assert nums == sorted(nums), "levels must be in ascending order"
     for lv in levels:

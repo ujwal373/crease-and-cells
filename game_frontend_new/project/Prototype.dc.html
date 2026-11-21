@@ -1119,7 +1119,7 @@
 
           <sc-if value="{{isGuide}}" hint-placeholder-val="{{ false }}">
             <div style="display: flex; gap: 6px; flex-wrap: wrap">
-              <sc-for list="{{guideTabs}}" as="gt" hint-placeholder-count="6">
+              <sc-for list="{{guideTabs}}" as="gt" hint-placeholder-count="7">
                 <button type="button" onClick="{{gt.pick}}" aria-pressed="{{gt.active}}"
                   style="min-height: 40px; padding: 0 14px; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; border: 2px solid {{gt.bd}}; background: {{gt.bg}}; color: {{gt.fg}}; opacity: {{gt.op}}">{{gt.label}}</button>
               </sc-for>
@@ -1865,7 +1865,7 @@ class Component extends DCLogic {
     const gd = st.guideData;
     const levels = gd ? (gd.levels || []) : [];
     const guideTabs = levels.map((lv) => ({
-      label: 'L' + lv.level + (lv.coming_soon ? ' ★' : ''),
+      label: 'T' + lv.level + (lv.coming_soon ? ' ★' : ''),
       pick: () => this.setState({ guideLvl: lv.level }),
       active: st.guideLvl === lv.level,
       bd: st.guideLvl === lv.level ? '#2E6A3B' : '#8D887A',
@@ -1890,7 +1890,7 @@ class Component extends DCLogic {
       guideEmpty: !st.guideLoading && !!gd && levels.length === 0,
       guideTabs: guideTabs,
       guideHasLevel: !!curLevel,
-      guideLevelZone: curLevel ? 'Level ' + curLevel.level + ' — ' + curLevel.zone : '',
+      guideLevelZone: curLevel ? 'Tier ' + curLevel.level + ' — ' + curLevel.zone.toUpperCase() : '',
       guideLevelTagline: curLevel ? curLevel.tagline : '',
       guideComingSoon: !!(curLevel && curLevel.coming_soon),
       guideCards: guideCards
