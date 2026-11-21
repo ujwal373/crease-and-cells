@@ -8,10 +8,9 @@ from backend.game_config import FAMILY_IDS
 from backend.question_gen import build_question, reward_for
 
 # Families whose model formulas use only functions currently in the engine.
-# text/date/lookup/stats/arrays use UPPER, LEFT, TRIM, DAYS, DATE, MONTH,
-# VLOOKUP, INDEX, MATCH, XLOOKUP, MEDIAN, LARGE, SUMPRODUCT, COUNTUNIQUE —
-# none of which are in the engine yet.  Add families here as functions land.
-_ENGINE_FAMILIES = ["maths", "logic"]
+# date uses DAYS, DATE, MONTH (date serial arithmetic) — not yet in the engine.
+# All other families now supported.
+_ENGINE_FAMILIES = ["maths", "logic", "text", "lookup", "stats", "arrays"]
 
 
 # ---------------------------------------------------------------------------

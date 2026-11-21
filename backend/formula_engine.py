@@ -84,10 +84,11 @@ _TOKEN = re.compile(
   | (?P<str>"(?:[^"]|"")*")
   | (?P<range>\$?[A-Za-z]{1,3}\$?\d+:\$?[A-Za-z]{1,3}\$?\d+)
   | (?P<cell>\$?[A-Za-z]{1,3}\$?\d+)(?![A-Za-z0-9_(])
+  | (?P<bool>TRUE|FALSE)(?![A-Za-z0-9_(])
   | (?P<func>[A-Za-z][A-Za-z0-9_.]*)(?=\s*\()
   | (?P<op><=|>=|<>|[-+*/^&=<>(),])
     """,
-    re.X,
+    re.X | re.I,
 )
 
 
@@ -380,6 +381,234 @@ def _fn_abs(a):
     return abs(_num(a[0]))
 
 
+# ---------- text functions ----------
+
+def _fn_trim(a):
+    if len(a) != 1:
+        raise FormulaError("#VALUE!", "TRIM takes 1 argument")
+    if a[0] is None:
+        return ""
+    return " ".join(str(a[0]).split())
+
+
+def _fn_upper(a):
+    if len(a) != 1:
+        raise FormulaError("#VALUE!", "UPPER takes 1 argument")
+    if a[0] is None:
+        return ""
+    return str(a[0]).upper()
+
+
+def _fn_lower(a):
+    if len(a) != 1:
+        raise FormulaError("#VALUE!", "LOWER takes 1 argument")
+    if a[0] is None:
+        return ""
+    return str(a[0]).lower()
+
+
+def _fn_len(a):
+    if len(a) != 1:
+        raise FormulaError("#VALUE!", "LEN takes 1 argument")
+    if a[0] is None:
+        return 0.0
+    return float(len(str(a[0])))
+
+
+def _fn_left(a):
+    if len(a) not in (1, 2):
+        raise FormulaError("#VALUE!", "LEFT takes 1 or 2 arguments")
+    text = "" if a[0] is None else str(a[0])
+    n = int(_num(a[1])) if len(a) == 2 else 1
+    if n < 0:
+        raise FormulaError("#VALUE!", "num_chars must be >= 0")
+    return text[:n]
+
+
+def _fn_right(a):
+    if len(a) not in (1, 2):
+        raise FormulaError("#VALUE!", "RIGHT takes 1 or 2 arguments")
+    text = "" if a[0] is None else str(a[0])
+    n = int(_num(a[1])) if len(a) == 2 else 1
+    if n < 0:
+        raise FormulaError("#VALUE!", "num_chars must be >= 0")
+    return text[-n:] if n > 0 else ""
+
+
+def _fn_mid(a):
+    if len(a) != 3:
+        raise FormulaError("#VALUE!", "MID takes 3 arguments")
+    text = "" if a[0] is None else str(a[0])
+    start = int(_num(a[1])) - 1
+    n = int(_num(a[2]))
+    if start < 0 or n < 0:
+        raise FormulaError("#VALUE!", "start and num_chars must be >= 1 and 0")
+    return text[start:start + n]
+
+
+# ---------- lookup functions ----------
+
+def _fn_vlookup(a):
+    if len(a) not in (3, 4):
+        raise FormulaError("#VALUE!", "VLOOKUP takes 3 or 4 arguments")
+    lookup_val = a[0]
+    table = _need_range(a[1])
+    col_idx = int(_num(a[2]))
+    exact = not _truthy(a[3]) if len(a) == 4 else False  # 4th arg FALSE=exact, TRUE=approx; default=approx
+
+    if col_idx < 1 or col_idx > table.ncols:
+        raise FormulaError("#REF!", "VLOOKUP: col_index out of range")
+
+    if exact:
+        for r in range(table.nrows):
+            if _compare(table.values[r * table.ncols], lookup_val, "="):
+                return table.values[r * table.ncols + col_idx - 1]
+        raise FormulaError("#N/A", "VLOOKUP: value not found")
+    else:
+        result = None
+        for r in range(table.nrows):
+            cell = table.values[r * table.ncols]
+            if _compare(cell, lookup_val, "<="):
+                result = table.values[r * table.ncols + col_idx - 1]
+            else:
+                break
+        if result is None:
+            raise FormulaError("#N/A", "VLOOKUP: value not found")
+        return result
+
+
+def _fn_match(a):
+    if len(a) not in (2, 3):
+        raise FormulaError("#VALUE!", "MATCH takes 2 or 3 arguments")
+    lookup_val = a[0]
+    rng = _need_range(a[1])
+    match_type = int(_num(a[2])) if len(a) == 3 else 1
+
+    if rng.nrows != 1 and rng.ncols != 1:
+        raise FormulaError("#VALUE!", "MATCH range must be one row or one column")
+
+    if match_type == 0:
+        for i, v in enumerate(rng.values):
+            if _compare(v, lookup_val, "="):
+                return float(i + 1)
+        raise FormulaError("#N/A", "MATCH: value not found")
+    elif match_type == 1:
+        result = None
+        for i, v in enumerate(rng.values):
+            if _compare(v, lookup_val, "<="):
+                result = float(i + 1)
+            else:
+                break
+        if result is None:
+            raise FormulaError("#N/A", "MATCH: value not found")
+        return result
+    else:
+        result = None
+        for i, v in enumerate(rng.values):
+            if _compare(v, lookup_val, ">="):
+                result = float(i + 1)
+        if result is None:
+            raise FormulaError("#N/A", "MATCH: value not found")
+        return result
+
+
+def _fn_index(a):
+    if len(a) not in (2, 3):
+        raise FormulaError("#VALUE!", "INDEX takes 2 or 3 arguments")
+    rng = _need_range(a[0])
+    row_num = int(_num(a[1]))
+    col_num = int(_num(a[2])) if len(a) == 3 else 1
+
+    if row_num < 1 or col_num < 1:
+        raise FormulaError("#VALUE!", "INDEX: row_num and col_num must be >= 1")
+    if row_num > rng.nrows or col_num > rng.ncols:
+        raise FormulaError("#REF!", "INDEX: row or column out of range")
+
+    return rng.values[(row_num - 1) * rng.ncols + (col_num - 1)]
+
+
+def _fn_xlookup(a):
+    if len(a) < 3:
+        raise FormulaError("#VALUE!", "XLOOKUP takes at least 3 arguments")
+    lookup_val = a[0]
+    lookup_rng = _need_range(a[1])
+    return_rng = _need_range(a[2])
+
+    if len(lookup_rng.values) != len(return_rng.values):
+        raise FormulaError("#VALUE!", "XLOOKUP: lookup and return arrays must be the same size")
+
+    for i, v in enumerate(lookup_rng.values):
+        if _compare(v, lookup_val, "="):
+            return return_rng.values[i]
+
+    if len(a) >= 4:
+        return a[3]
+    raise FormulaError("#N/A", "XLOOKUP: value not found")
+
+
+# ---------- stats functions ----------
+
+def _fn_median(a):
+    if not a:
+        raise FormulaError("#VALUE!", "MEDIAN requires at least one argument")
+    nums = sorted(_nums_from(a))
+    if not nums:
+        raise FormulaError("#NUM!", "MEDIAN: no numeric values found")
+    n = len(nums)
+    mid = n // 2
+    return nums[mid] if n % 2 == 1 else (nums[mid - 1] + nums[mid]) / 2.0
+
+
+def _fn_large(a):
+    if len(a) != 2:
+        raise FormulaError("#VALUE!", "LARGE takes 2 arguments")
+    nums = sorted(_nums_from([a[0]]), reverse=True)
+    k = int(_num(a[1]))
+    if k < 1 or k > len(nums):
+        raise FormulaError("#NUM!", "LARGE: k out of range")
+    return nums[k - 1]
+
+
+def _fn_small(a):
+    if len(a) != 2:
+        raise FormulaError("#VALUE!", "SMALL takes 2 arguments")
+    nums = sorted(_nums_from([a[0]]))
+    k = int(_num(a[1]))
+    if k < 1 or k > len(nums):
+        raise FormulaError("#NUM!", "SMALL: k out of range")
+    return nums[k - 1]
+
+
+# ---------- array functions ----------
+
+def _fn_sumproduct(a):
+    if not a:
+        raise FormulaError("#VALUE!", "SUMPRODUCT requires at least one argument")
+    ranges = [_need_range(x) for x in a]
+    n = len(ranges[0].values)
+    if any(len(r.values) != n for r in ranges):
+        raise FormulaError("#VALUE!", "SUMPRODUCT: arrays must be the same size")
+    total = 0.0
+    for i in range(n):
+        product = 1.0
+        for r in ranges:
+            v = r.values[i]
+            product *= float(v) if _is_number(v) else 0.0
+        total += product
+    return total
+
+
+def _fn_countunique(a):
+    seen: set = set()
+    for x in a:
+        vals = x.values if isinstance(x, Range) else [x]
+        for v in vals:
+            if v is None or v == "":
+                continue
+            seen.add((type(v).__name__, str(v)))
+    return float(len(seen))
+
+
 FUNCTIONS = {
     "SUM": _fn_sum, "AVERAGE": _fn_average, "MIN": _fn_min, "MAX": _fn_max,
     "COUNT": _fn_count, "COUNTA": _fn_counta, "COUNTIF": _fn_countif,
@@ -387,6 +616,16 @@ FUNCTIONS = {
     "AVERAGEIF": _fn_averageif, "IF": _fn_if, "IFS": _fn_ifs,
     "AND": _fn_and, "OR": _fn_or,
     "ROUND": _fn_round, "ABS": _fn_abs,
+    # text
+    "TRIM": _fn_trim, "UPPER": _fn_upper, "LOWER": _fn_lower,
+    "LEN": _fn_len, "LEFT": _fn_left, "RIGHT": _fn_right, "MID": _fn_mid,
+    # lookup
+    "VLOOKUP": _fn_vlookup, "MATCH": _fn_match, "INDEX": _fn_index,
+    "XLOOKUP": _fn_xlookup,
+    # stats
+    "MEDIAN": _fn_median, "LARGE": _fn_large, "SMALL": _fn_small,
+    # arrays
+    "SUMPRODUCT": _fn_sumproduct, "COUNTUNIQUE": _fn_countunique,
 }
 
 
@@ -476,6 +715,8 @@ class _Parser:
             return float(val)
         if kind == "str":
             return val[1:-1].replace('""', '"')
+        if kind == "bool":
+            return val.upper() == "TRUE"
         if kind == "cell":
             self.refs += 1
             return self.grid.cell(val)

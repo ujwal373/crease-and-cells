@@ -113,7 +113,7 @@ The project MCP server is registered in `.mcp.json`. Use it to play missions thr
 
 ## Engine functions supported today
 
-SUM, AVERAGE, MIN, MAX, COUNT, COUNTA, COUNTIF, COUNTIFS, SUMIF, SUMIFS, AVERAGEIF, IF, IFS, AND, OR, ROUND, ABS. Operators: + - * / ^ & and comparisons. ROUND follows Excel (half away from zero). Absolute references ($G$2, $G$2:$G$61) are handled. Next to add for Level 3: VLOOKUP, XLOOKUP, INDEX, MATCH, TRIM.
+Level 1-2: SUM, AVERAGE, MIN, MAX, COUNT, COUNTA, COUNTIF, COUNTIFS, SUMIF, SUMIFS, AVERAGEIF, IF, IFS, AND, OR, ROUND, ABS. Operators: + - * / ^ & and comparisons. ROUND follows Excel (half away from zero). Absolute references ($G$2, $G$2:$G$61) are handled. Level 3 (added): VLOOKUP, XLOOKUP, INDEX, MATCH, TRIM, UPPER, LOWER, LEN, LEFT, RIGHT, MID, MEDIAN, LARGE, SMALL, SUMPRODUCT, COUNTUNIQUE. Boolean literals TRUE/FALSE work in all formulas. Next to add for Level 4: pivot-style functions (DATE, DAYS, MONTH require date serial arithmetic — deferred).
 
 ## Adding a mission
 
@@ -174,7 +174,7 @@ Camera easing, chunked tile maps, spreadsheet overlay without scene change, mobi
 3. Phase 2, in progress: IFS, AND, OR added to engine, absolute references tested, 4 Level 2 missions added. Remaining: FastAPI layer, character creator, simple web grid UI, world map with 2 zones.
 4. Phase 3, done. Stage 3A: Tutor Agent live with Haiku, ai_config.py for model names and pricing, state.py extended with hint cache and daily caps, full tracing. Stage 3B: scripts/generate_missions.py (offline Sonnet generation with validation pipeline), scripts/review_missions.py (approve or reject workflow), scripts/merge_missions.py (promote to levelN.json), missions/generated/ pending directory. Stage 3C: adversarial eval set (evals/adversarial_cases.json, 27 cases), offline tutor evals and live eval mode in run_evals.py, scripts/trace_report.py for log summaries, HintProvider Protocol in tutor.py, DECISIONS.md entry for agent framework choice, CLAUDE.md updated.
 5. Phase 2 (FastAPI layer), Stage 2A done. backend/api.py wraps GameService: 10 frontend endpoints (world, player, encounter, answer, begin, lesson, facility, store/buy, avatar/equip, clubs, leaderboard), Bearer token player identity, NPC encounter service (EncounterService), question generator (question_gen.py), NPC config (npc_config.py), game config constants (game_config.py), new DB tables (skill_xp, encounters, sessions, checkpoints, facility_visits, leaderboard), player snapshot helper, appearance validation with hex colours. Frontend (game_frontend_new/project/Prototype.dc.html) wired to real backend via HttpAdapter; character creator, NPC encounters, formula answers, coins/XP, store and equip all persist to SQLite. Test suite: 289 passed, 2 skipped, 10 xfailed. Stage 2B: deeper frontend features (session/exam flow, club progression UI) pending.
-6. Phase 4: Dataset and Adaptive Difficulty agents, Levels 3 to 5.
+6. Phase 4, in progress. Engine stage done: VLOOKUP, XLOOKUP, INDEX, MATCH, TRIM, UPPER, LOWER, LEN, LEFT, RIGHT, MID, MEDIAN, LARGE, SMALL, SUMPRODUCT, COUNTUNIQUE added; boolean literals TRUE/FALSE supported; 375 tests pass. Remaining: Dataset Agent (cricket data beyond bowling_spells), Adaptive Difficulty Agent, Level 3-5 missions.
 6. Phase 5: Levels 6 and 7, polish, sound, playtest, Terraform deployment.
 
 ## Engineering showcase goals
