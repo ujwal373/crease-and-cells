@@ -830,6 +830,24 @@ def admin_players(token: str, request: Request):
 
 
 # ---------------------------------------------------------------------------
+# Formula guide — public, no auth, cached from disk on first request
+# ---------------------------------------------------------------------------
+
+_FORMULA_GUIDE: dict | None = None
+_FORMULA_GUIDE_PATH = ROOT / "missions" / "formula_guide.json"
+
+
+@app.get("/api/skills", response_model=dict)
+def get_skills():
+    """Return the formula catalogue organised by level. No auth required."""
+    global _FORMULA_GUIDE
+    if _FORMULA_GUIDE is None:
+        with open(_FORMULA_GUIDE_PATH, encoding="utf-8") as fh:
+            _FORMULA_GUIDE = json.load(fh)
+    return _FORMULA_GUIDE
+
+
+# ---------------------------------------------------------------------------
 # Static files — mounted last; FastAPI always matches /api/... routes first
 # ---------------------------------------------------------------------------
 

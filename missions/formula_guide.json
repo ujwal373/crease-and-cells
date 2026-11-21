@@ -1,0 +1,347 @@
+{
+  "levels": [
+    {
+      "level": 1,
+      "zone": "The Nets",
+      "tagline": "The basics every spreadsheet needs. Learn these before anything else.",
+      "formulas": [
+        {
+          "name": "SUM",
+          "syntax": "=SUM(range)",
+          "what": "Adds all numbers in a range.",
+          "example": "=SUM(B2:B11)",
+          "tip": "Add a bowler's total wickets across all matches."
+        },
+        {
+          "name": "AVERAGE",
+          "syntax": "=AVERAGE(range)",
+          "what": "Returns the mean of all numbers in a range.",
+          "example": "=AVERAGE(C2:C11)",
+          "tip": "Find a batsman's average runs per innings."
+        },
+        {
+          "name": "MIN",
+          "syntax": "=MIN(range)",
+          "what": "Returns the smallest number in a range.",
+          "example": "=MIN(D2:D11)",
+          "tip": "Find the best (lowest) economy rate in the squad."
+        },
+        {
+          "name": "MAX",
+          "syntax": "=MAX(range)",
+          "what": "Returns the largest number in a range.",
+          "example": "=MAX(B2:B11)",
+          "tip": "Find the highest score in a tournament."
+        },
+        {
+          "name": "COUNT",
+          "syntax": "=COUNT(range)",
+          "what": "Counts cells that contain numbers.",
+          "example": "=COUNT(B2:B11)",
+          "tip": "Count how many innings have been recorded."
+        },
+        {
+          "name": "COUNTA",
+          "syntax": "=COUNTA(range)",
+          "what": "Counts cells that are not empty (numbers or text).",
+          "example": "=COUNTA(A2:A11)",
+          "tip": "Count how many player names are listed."
+        },
+        {
+          "name": "ROUND",
+          "syntax": "=ROUND(number, digits)",
+          "what": "Rounds a number to a given number of decimal places.",
+          "example": "=ROUND(AVERAGE(B2:B11), 2)",
+          "tip": "Round a batting average to two decimal places."
+        },
+        {
+          "name": "ABS",
+          "syntax": "=ABS(number)",
+          "what": "Returns the absolute value (removes the minus sign).",
+          "example": "=ABS(C2-C3)",
+          "tip": "Find the run difference between two teams regardless of sign."
+        },
+        {
+          "name": "Cell reference",
+          "syntax": "=A2  or  =B5",
+          "what": "Points to a single cell. Use it inside formulas to refer to a value.",
+          "example": "=B2+B3",
+          "tip": "Add two individual scores together."
+        },
+        {
+          "name": "Range reference",
+          "syntax": "=A2:A11",
+          "what": "Points to a block of cells. Most functions accept a range.",
+          "example": "=SUM(B2:B11)",
+          "tip": "Refer to a whole column of run scores at once."
+        }
+      ]
+    },
+    {
+      "level": 2,
+      "zone": "Club House",
+      "tagline": "Make decisions with IF, count and sum with conditions, and lock references.",
+      "formulas": [
+        {
+          "name": "IF",
+          "syntax": "=IF(condition, value_if_true, value_if_false)",
+          "what": "Returns one value when a condition is true, another when false.",
+          "example": "=IF(B2>=30, \"Good\", \"Needs work\")",
+          "tip": "Flag players who scored 30 or more as 'Good'."
+        },
+        {
+          "name": "IFS",
+          "syntax": "=IFS(cond1, val1, cond2, val2, ...)",
+          "what": "Tests multiple conditions in order and returns the first matching value.",
+          "example": "=IFS(B2>=50, \"50+\", B2>=30, \"30+\", B2>=0, \"<30\")",
+          "tip": "Grade batsmen into tiers based on their score."
+        },
+        {
+          "name": "AND",
+          "syntax": "=AND(cond1, cond2, ...)",
+          "what": "Returns TRUE only when all conditions are true.",
+          "example": "=AND(B2>=30, C2>=2)",
+          "tip": "Find an all-rounder: scored 30 AND took 2 wickets."
+        },
+        {
+          "name": "OR",
+          "syntax": "=OR(cond1, cond2, ...)",
+          "what": "Returns TRUE when at least one condition is true.",
+          "example": "=OR(B2>=50, C2>=5)",
+          "tip": "Flag a standout match: 50 runs OR 5 wickets."
+        },
+        {
+          "name": "COUNTIF",
+          "syntax": "=COUNTIF(range, criteria)",
+          "what": "Counts cells that match a single condition.",
+          "example": "=COUNTIF(A2:A11, \"Ujwal\")",
+          "tip": "Count how many times Ujwal appears in the squad list."
+        },
+        {
+          "name": "COUNTIFS",
+          "syntax": "=COUNTIFS(range1, crit1, range2, crit2, ...)",
+          "what": "Counts rows where multiple conditions are all true.",
+          "example": "=COUNTIFS(A2:A11, \"Ujwal\", C2:C11, \">1\")",
+          "tip": "Count Ujwal's innings where he took more than one wicket."
+        },
+        {
+          "name": "SUMIF",
+          "syntax": "=SUMIF(range, criteria, sum_range)",
+          "what": "Adds values in sum_range only where range matches the criteria.",
+          "example": "=SUMIF(A2:A11, \"Ujwal\", B2:B11)",
+          "tip": "Total all runs scored by Ujwal."
+        },
+        {
+          "name": "SUMIFS",
+          "syntax": "=SUMIFS(sum_range, range1, crit1, range2, crit2, ...)",
+          "what": "Adds values where multiple conditions are all true.",
+          "example": "=SUMIFS(B2:B11, A2:A11, \"Ujwal\", C2:C11, \">1\")",
+          "tip": "Total Ujwal's runs in matches where he also took wickets."
+        },
+        {
+          "name": "AVERAGEIF",
+          "syntax": "=AVERAGEIF(range, criteria, average_range)",
+          "what": "Averages values in average_range only where range matches.",
+          "example": "=AVERAGEIF(A2:A11, \"Ujwal\", B2:B11)",
+          "tip": "Find Ujwal's batting average across all his innings."
+        },
+        {
+          "name": "Absolute reference",
+          "syntax": "=$A$2  or  =$B$1:$B$10",
+          "what": "The $ sign locks a row or column so the reference does not shift when you copy the formula.",
+          "example": "=B2/$B$12",
+          "tip": "Divide each player's runs by the team total in a fixed cell."
+        }
+      ]
+    },
+    {
+      "level": 3,
+      "zone": "Scouting Office",
+      "tagline": "Find data in tables, clean messy text, and use statistical rankings.",
+      "formulas": [
+        {
+          "name": "VLOOKUP",
+          "syntax": "=VLOOKUP(lookup_value, table_range, col_index, [exact])",
+          "what": "Searches the first column of a table and returns a value from another column in the same row.",
+          "example": "=VLOOKUP(\"Rohan\", A2:C11, 2, FALSE)",
+          "tip": "Look up a player name and return their batting average. Use FALSE for exact match."
+        },
+        {
+          "name": "XLOOKUP",
+          "syntax": "=XLOOKUP(lookup_value, lookup_range, return_range, [not_found])",
+          "what": "Modern lookup that searches any range and returns a value from a separate return range.",
+          "example": "=XLOOKUP(\"Rohan\", A2:A11, B2:B11, \"Not found\")",
+          "tip": "More flexible than VLOOKUP: the lookup and return columns can be anywhere."
+        },
+        {
+          "name": "MATCH",
+          "syntax": "=MATCH(lookup_value, range, [match_type])",
+          "what": "Returns the position (1-based) of a value inside a range. Use 0 for exact match.",
+          "example": "=MATCH(\"Rohan\", A2:A11, 0)",
+          "tip": "Find what row number Rohan is on in the squad list."
+        },
+        {
+          "name": "INDEX",
+          "syntax": "=INDEX(range, row_num, [col_num])",
+          "what": "Returns the value at a specific row and column position inside a range.",
+          "example": "=INDEX(B2:B11, 3)",
+          "tip": "Return the 3rd value in the runs column."
+        },
+        {
+          "name": "INDEX + MATCH",
+          "syntax": "=INDEX(return_range, MATCH(lookup, lookup_range, 0))",
+          "what": "Combines INDEX and MATCH to look up a value in any direction.",
+          "example": "=INDEX(B2:B11, MATCH(\"Rohan\", A2:A11, 0))",
+          "tip": "The go-to flexible lookup. MATCH finds the row, INDEX returns the value."
+        },
+        {
+          "name": "TRIM",
+          "syntax": "=TRIM(text)",
+          "what": "Removes leading, trailing, and extra internal spaces from text.",
+          "example": "=TRIM(A2)",
+          "tip": "Clean player names that have accidental spaces before or after them."
+        },
+        {
+          "name": "UPPER",
+          "syntax": "=UPPER(text)",
+          "what": "Converts all letters in a text string to upper case.",
+          "example": "=UPPER(A2)",
+          "tip": "Standardise team names to all capitals for consistency."
+        },
+        {
+          "name": "LOWER",
+          "syntax": "=LOWER(text)",
+          "what": "Converts all letters to lower case.",
+          "example": "=LOWER(A2)",
+          "tip": "Normalise email addresses or codes before comparing them."
+        },
+        {
+          "name": "LEN",
+          "syntax": "=LEN(text)",
+          "what": "Returns the number of characters in a text string.",
+          "example": "=LEN(A2)",
+          "tip": "Check if a player's jersey number code is exactly 3 characters."
+        },
+        {
+          "name": "LEFT",
+          "syntax": "=LEFT(text, num_chars)",
+          "what": "Returns the first N characters from the left of a string.",
+          "example": "=LEFT(A2, 3)",
+          "tip": "Extract the three-letter country code from a player ID."
+        },
+        {
+          "name": "RIGHT",
+          "syntax": "=RIGHT(text, num_chars)",
+          "what": "Returns the last N characters from the right of a string.",
+          "example": "=RIGHT(A2, 2)",
+          "tip": "Extract the two-digit number at the end of a match code."
+        },
+        {
+          "name": "MID",
+          "syntax": "=MID(text, start, num_chars)",
+          "what": "Returns N characters starting from a given position.",
+          "example": "=MID(A2, 4, 3)",
+          "tip": "Pull the zone code out of the middle of a stadium identifier string."
+        },
+        {
+          "name": "MEDIAN",
+          "syntax": "=MEDIAN(range)",
+          "what": "Returns the middle value when the range is sorted. Less affected by extreme scores than AVERAGE.",
+          "example": "=MEDIAN(B2:B11)",
+          "tip": "Find the typical score in a series without big centuries skewing the number."
+        },
+        {
+          "name": "LARGE",
+          "syntax": "=LARGE(range, k)",
+          "what": "Returns the k-th largest value in a range.",
+          "example": "=LARGE(B2:B11, 2)",
+          "tip": "Find the second-highest score in a match."
+        },
+        {
+          "name": "SMALL",
+          "syntax": "=SMALL(range, k)",
+          "what": "Returns the k-th smallest value in a range.",
+          "example": "=SMALL(C2:C11, 1)",
+          "tip": "Find the best (lowest) economy rate in the squad."
+        }
+      ]
+    },
+    {
+      "level": 4,
+      "zone": "Analytics Lab",
+      "tagline": "Multiply arrays, count unique items, and work across multiple data dimensions.",
+      "formulas": [
+        {
+          "name": "SUMPRODUCT",
+          "syntax": "=SUMPRODUCT(array1, array2, ...)",
+          "what": "Multiplies matching elements across arrays and sums all the products.",
+          "example": "=SUMPRODUCT(B2:B11, C2:C11)",
+          "tip": "Multiply overs by economy rate for each bowler, then sum to get total runs conceded."
+        },
+        {
+          "name": "COUNTUNIQUE",
+          "syntax": "=COUNTUNIQUE(range)",
+          "what": "Returns the number of distinct non-empty values in a range.",
+          "example": "=COUNTUNIQUE(A2:A11)",
+          "tip": "Count how many different venues have hosted matches this season."
+        }
+      ]
+    },
+    {
+      "level": 5,
+      "zone": "Press Box",
+      "tagline": "Dynamic array functions that return whole ranges of results at once.",
+      "coming_soon": true,
+      "formulas": [
+        {
+          "name": "FILTER",
+          "syntax": "=FILTER(range, condition)",
+          "what": "Returns only the rows from a range that match a condition.",
+          "example": "=FILTER(A2:C11, B2:B11>50)",
+          "tip": "Return all players who scored more than 50. Google Sheets only.",
+          "coming_soon": true
+        },
+        {
+          "name": "UNIQUE",
+          "syntax": "=UNIQUE(range)",
+          "what": "Returns one copy of each distinct row in a range.",
+          "example": "=UNIQUE(A2:A11)",
+          "tip": "Get a deduplicated list of venues from the match log. Google Sheets only.",
+          "coming_soon": true
+        },
+        {
+          "name": "SORT",
+          "syntax": "=SORT(range, [sort_index], [sort_order])",
+          "what": "Returns a sorted copy of a range without changing the original data.",
+          "example": "=SORT(A2:B11, 2, -1)",
+          "tip": "Sort the squad by runs in descending order. Google Sheets only.",
+          "coming_soon": true
+        }
+      ]
+    },
+    {
+      "level": 6,
+      "zone": "Auction Room",
+      "tagline": "Build reusable formula building blocks and model complex scenarios.",
+      "coming_soon": true,
+      "formulas": [
+        {
+          "name": "LET",
+          "syntax": "=LET(name, value, calculation)",
+          "what": "Assigns a name to a value inside a formula so you can reuse it without repeating it.",
+          "example": "=LET(avg, AVERAGE(B2:B11), IF(B2>avg, \"Above\", \"Below\"))",
+          "tip": "Name the squad average once and use it throughout a complex formula.",
+          "coming_soon": true
+        },
+        {
+          "name": "LAMBDA",
+          "syntax": "=LAMBDA(param, calculation)(value)",
+          "what": "Creates a reusable custom function. Assign it to a named range to call it like any built-in function.",
+          "example": "=LAMBDA(x, x * 6 / 100)(B2)",
+          "tip": "Build your own economy-rate formula and reuse it across the whole sheet.",
+          "coming_soon": true
+        }
+      ]
+    }
+  ]
+}

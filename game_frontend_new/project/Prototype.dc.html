@@ -636,6 +636,13 @@
             </svg>
             <span class="btn-label">Customise</span>
           </button>
+          <button type="button" onClick="{{openGuide}}"
+            style="min-height: 52px; min-width: 160px; padding: 0 18px; border-radius: 16px; border: 3px solid #2E6A3B; background: #2E6A3B; color: #FBF6E9; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 10px; cursor: pointer">
+            <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 4h16v16H4z M4 9h16 M9 9v11" fill="none" stroke="#FBF6E9" stroke-width="2" stroke-linejoin="round" />
+            </svg>
+            <span class="btn-label">Formula Guide</span>
+          </button>
         </div>
       </div>
 
@@ -1109,6 +1116,50 @@
             </sc-if>
           </sc-if>
 
+          <sc-if value="{{isGuide}}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; gap: 6px; flex-wrap: wrap">
+              <sc-for list="{{guideTabs}}" as="gt" hint-placeholder-count="6">
+                <button type="button" onClick="{{gt.pick}}" aria-pressed="{{gt.active}}"
+                  style="min-height: 40px; padding: 0 14px; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; border: 2px solid {{gt.bd}}; background: {{gt.bg}}; color: {{gt.fg}}; opacity: {{gt.op}}">{{gt.label}}</button>
+              </sc-for>
+            </div>
+            <sc-if value="{{guideLoading}}" hint-placeholder-val="{{ false }}">
+              <p style="margin: 0; font-size: 17px; color: #5A5648">Loading guide…</p>
+            </sc-if>
+            <sc-if value="{{guideEmpty}}" hint-placeholder-val="{{ false }}">
+              <p style="margin: 0; font-size: 17px; color: #5A5648">Could not load the guide. Make sure the server is running.</p>
+            </sc-if>
+            <sc-if value="{{guideHasLevel}}" hint-placeholder-val="{{ true }}">
+              <div style="padding: 10px 14px; border-radius: 12px; background: #E4F0D2; border: 2px solid #2E6A3B">
+                <div style="font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #2E6A3B">{{guideLevelZone}}</div>
+                <div style="font-size: 15px; margin-top: 2px; color: #1F2A24">{{guideLevelTagline}}</div>
+              </div>
+              <sc-if value="{{guideComingSoon}}" hint-placeholder-val="{{ false }}">
+                <div style="padding: 10px 14px; border-radius: 10px; background: #F6E7B8; border: 2px solid #F2B632; font-size: 15px; color: #1F2A24">
+                  These formulas are coming in a future update. Keep earning XP to unlock them!
+                </div>
+              </sc-if>
+              <sc-for list="{{guideCards}}" as="fc" hint-placeholder-count="6">
+                <div style="border-radius: 12px; border: 2px solid {{fc.bd}}; background: #FFFFFF; overflow: hidden">
+                  <div style="padding: 10px 14px; background: {{fc.hbg}}; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap">
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 16px; font-weight: 700; color: {{fc.hfg}}">{{fc.name}}</span>
+                    <sc-if value="{{fc.soon}}" hint-placeholder-val="{{ false }}">
+                      <span style="font-size: 12px; font-weight: 700; padding: 1px 7px; border-radius: 6px; background: #F2B632; color: #1F2A24">coming soon</span>
+                    </sc-if>
+                  </div>
+                  <div style="padding: 10px 14px; display: flex; flex-direction: column; gap: 6px">
+                    <code style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; background: #F0F0EC; padding: 4px 8px; border-radius: 6px; word-break: break-all">{{fc.syntax}}</code>
+                    <div style="font-size: 15px; color: #1F2A24">{{fc.what}}</div>
+                    <div style="font-size: 13px; padding: 6px 10px; border-radius: 8px; background: #F6E7B8; border-left: 3px solid #F2B632">
+                      <span style="font-weight: 700">Cricket: </span>{{fc.tip}}
+                    </div>
+                    <code style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #2E6A3B">{{fc.example}}</code>
+                  </div>
+                </div>
+              </sc-for>
+            </sc-if>
+          </sc-if>
+
         </div>
       </aside>
 
@@ -1122,7 +1173,7 @@ class Component extends DCLogic {
       scale: 1, px: 1250, py: 4700, camX: 1250, camY: 4700, flip: 1, moving: false, near: '', frame: 0, intro: true,
       knobX: 0, knobY: 0, toast: '',
       player: { coins: 20, xp: 0, level: 1, skills: {}, skillXp: {}, owned: { c_white: 1, j_white: 1, s_white: 1, a_white: 1 }, eq: { cap: 'c_white', jersey: 'j_white', shoes: 's_white', sleeve: 'a_white' }, tier: 0, cp: {}, look: null, created: true },
-      cfg: null, markers: {}, clubs: [],
+      cfg: null, markers: {}, clubs: [], guideData: null, guideLvl: 1, guideLoading: false,
       panel: '', sheetWin: false, npcId: '', enc: null, loading: false, err: '', formula: '', result: null, checking: false, hint: false, solved: false,
       shopOpen: false, tab: 'customise',
       deadline: 0, clockT: 0, pendingNext: null, sr: null, relaxed: false, lesson: null,
@@ -1344,6 +1395,7 @@ class Component extends DCLogic {
     if (kl === 'e') { this.interact(); return; }
     if (kl === 'm') { this.openMap(); return; }
     if (kl === 'c') { this.openCareer(); return; }
+    if (kl === 'g') { this.openGuide(); return; }
     if ((kl === 'enter' || kl === ' ') && e.target === e.currentTarget) { e.preventDefault(); this.interact(); return; }
     this.keys[kl] = true;
   }
@@ -1419,6 +1471,17 @@ class Component extends DCLogic {
   openCareer() { if (this.S().panel) return; this.stopInput(); this.refresh(); this.setState({ panel: 'career', loading: false, err: '', intro: false }); }
   openCustomise() { if (this.S().panel) return; this.stopInput(); this.setState({ panel: 'wardrobe', shopOpen: false, tab: 'customise', loading: false, err: '', intro: false, enc: null }); }
   openCreate() { this.stopInput(); const l = this.S().player.look; this.setState({ panel: 'create', loading: false, err: '', intro: false, cr: l ? Object.assign({}, this.S().cr, l) : this.S().cr }); }
+  openGuide() {
+    if (this.S().panel) return;
+    this.stopInput();
+    this.setState({ panel: 'guide', loading: false, err: '', intro: false });
+    if (!this.S().guideData) {
+      this.setState({ guideLoading: true });
+      window.CCApi.skills().then((d) => {
+        this.setState({ guideData: d, guideLoading: false, guideLvl: 1 });
+      }).catch(() => { this.setState({ guideData: null, guideLoading: false }); });
+    }
+  }
 
   closePanel() {
     if (this.S().panel === 'create' && !this.S().player.created) { this.finishCreate(); return; }
@@ -1728,7 +1791,7 @@ class Component extends DCLogic {
     const isQuestion = ok && !!q;
     const resOk = !!(st.result && st.result.ok);
     const resBad = !!(st.result && !st.result.ok);
-    const title = st.panel === 'map' ? 'World map' : st.panel === 'career' ? 'Career' : st.panel === 'create' ? 'Create your player' : st.panel === 'wardrobe' ? (st.shopOpen ? 'Akshita’s Store' : 'Customise') : lob ? ls.name : les ? les.npc : q ? (enc.npc || 'Question') : st.loading ? 'Talking' : (enc && enc.npc) || 'Conversation';
+    const title = st.panel === ‘map’ ? ‘World map’ : st.panel === ‘career’ ? ‘Career’ : st.panel === ‘create’ ? ‘Create your player’ : st.panel === ‘wardrobe’ ? (st.shopOpen ? ‘Akshita’s Store’ : ‘Customise’) : st.panel === ‘guide’ ? ‘Formula Guide’ : lob ? ls.name : les ? les.npc : q ? (enc.npc || ‘Question’) : st.loading ? ‘Talking’ : (enc && enc.npc) || ‘Conversation’;
 
     return {
       stageT: 'scale(' + st.scale + ') rotateX(58deg) rotateZ(45deg)',
@@ -1746,7 +1809,7 @@ class Component extends DCLogic {
       showPrompt: !open && !!nearNpc, nearName: nearNpc ? nearNpc.name : '',
       onKeyDown: (e) => this.onKeyDown(e), onKeyUp: (e) => this.onKeyUp(e), onBlur: () => this.onBlur(), focusWorld: () => this.focusWorld(),
       joyDown: (e) => this.joyDown(e), joyMove: (e) => this.joyMove(e), joyUp: () => this.joyUp(),
-      interact: () => this.interact(), openMap: () => this.openMap(), openCareer: () => this.openCareer(), openCustomise: () => this.openCustomise(),
+      interact: () => this.interact(), openMap: () => this.openMap(), openCareer: () => this.openCareer(), openCustomise: () => this.openCustomise(), openGuide: () => this.openGuide(),
       closePanel: () => this.closePanel(), onPanelKey: (e) => this.onPanelKey(e),
       openSheet: () => this.openSheet(), closeSheet: () => this.closeSheet(), onSheetKey: (e) => this.onSheetKey(e), sheetWin: !!st.sheetWin && !!q, cellsBig: cellsBig, gridColsBig: gridColsBig, formulaShown: st.formula || '(empty)',
       scrimO: open ? 1 : 0, scrimP: open ? 'auto' : 'none',
@@ -1756,7 +1819,7 @@ class Component extends DCLogic {
       pLoading: st.panel === 'enc' && st.loading, loadTitle: 'Waiting for ' + ((W.NPCS.find((n) => n.id === st.npcId) || {}).name || 'them'),
       pError: st.panel === 'enc' && !!st.err, errMsg: st.err, retry: () => this.retry(),
       isQuestion: isQuestion, isLobby: ok && !!lob, isChat: ok && enc.kind === 'chat', isLesson: ok && !!les, isCreate: st.panel === 'create',
-      isCareer: st.panel === 'career', isMap: st.panel === 'map', isWardrobe: st.panel === 'wardrobe',
+      isCareer: st.panel === 'career', isMap: st.panel === 'map', isWardrobe: st.panel === 'wardrobe', isGuide: st.panel === 'guide',
       qWho: enc && q ? (enc.npc || '') + (enc.family ? ' · ' + (cfg ? (cfg.families.find((f) => f.id === enc.family) || {}).name : '') + ' · level ' + enc.difficulty : '') : '',
       qStory: q ? q.prompt : '', qTask: q ? q.task : '', qHint: q ? q.hint : '', qRef: qRef,
       qCoins: enc && enc.reward ? enc.reward.coins : 0, qXp: enc && enc.reward ? enc.reward.xp : 0, qSkill: enc && enc.family ? 'Trains ' + (cfg ? (cfg.families.find((f) => f.id === enc.family) || {}).name : '') + '.' : '',
@@ -1792,7 +1855,44 @@ class Component extends DCLogic {
       tabStoreBd: tab === 'store' ? '#1F2A24' : '#8D887A', tabStoreBg: tab === 'store' ? '#F6E7B8' : '#FBF6E9',
       tabCustBd: tab === 'customise' ? '#1F2A24' : '#8D887A', tabCustBg: tab === 'customise' ? '#F6E7B8' : '#FBF6E9',
       wardNote: tab === 'store' ? (enc && enc.say ? enc.say + ' ' : '') + 'You have ' + p.coins + ' coins.' : st.shopOpen ? 'Pick what to wear.' : 'Pick what to wear. New gear is sold at the Kit Store in Town Square.',
-      rows: rows, rowsEmpty: rows.length === 0, emptyText: tab === 'store' ? 'You own everything on sale. Nice wardrobe.' : 'You own nothing yet.'
+      rows: rows, rowsEmpty: rows.length === 0, emptyText: tab === 'store' ? 'You own everything on sale. Nice wardrobe.' : 'You own nothing yet.',
+      ...this._guideProps(st)
+    };
+  }
+
+  _guideProps(st) {
+    const gd = st.guideData;
+    const levels = gd ? (gd.levels || []) : [];
+    const guideTabs = levels.map((lv) => ({
+      label: 'L' + lv.level + (lv.coming_soon ? ' ★' : ''),
+      pick: () => this.setState({ guideLvl: lv.level }),
+      active: st.guideLvl === lv.level,
+      bd: st.guideLvl === lv.level ? '#2E6A3B' : '#8D887A',
+      bg: st.guideLvl === lv.level ? '#E4F0D2' : '#FBF6E9',
+      fg: '#1F2A24',
+      op: lv.coming_soon ? '0.65' : '1'
+    }));
+    const curLevel = levels.find((lv) => lv.level === st.guideLvl) || null;
+    const guideCards = curLevel ? (curLevel.formulas || []).map((f) => ({
+      name: f.name,
+      syntax: f.syntax,
+      what: f.what,
+      tip: f.tip,
+      example: f.example,
+      soon: !!f.coming_soon,
+      bd: f.coming_soon ? '#E0D8C8' : '#C8DFB8',
+      hbg: f.coming_soon ? '#F0EBE0' : '#E4F0D2',
+      hfg: f.coming_soon ? '#8D887A' : '#2E6A3B'
+    })) : [];
+    return {
+      guideLoading: st.guideLoading,
+      guideEmpty: !st.guideLoading && !!gd && levels.length === 0,
+      guideTabs: guideTabs,
+      guideHasLevel: !!curLevel,
+      guideLevelZone: curLevel ? 'Level ' + curLevel.level + ' — ' + curLevel.zone : '',
+      guideLevelTagline: curLevel ? curLevel.tagline : '',
+      guideComingSoon: !!(curLevel && curLevel.coming_soon),
+      guideCards: guideCards
     };
   }
 }

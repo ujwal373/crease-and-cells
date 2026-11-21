@@ -384,7 +384,8 @@
       debugBoost: function () { return wait(function () { P.coins += 600; P.xp += 700; P.level = levelFor(P.xp); FAMILIES.forEach(function (f) { P.skillXp[f.id] += 200; P.skills[f.id] = skillFor(P.skillXp[f.id]); }); P.cool = {}; return { ok: true, player: snap() }; }); },
       debugTier: function (t) { return wait(function () { P.tier = t; P.level = Math.max(P.level, t + 1); P.xp = Math.max(P.xp, LEVEL_XP[P.level - 1]); P.cool = {}; return { ok: true, player: snap() }; }); },
       debugCooldowns: function () { return wait(function () { P.cool = {}; return { ok: true, player: snap() }; }); },
-      clubs: function () { return wait(function () { return CLUBS.map(clubState); }); }
+      clubs: function () { return wait(function () { return CLUBS.map(clubState); }); },
+      skills: function () { return fetch('/api/skills').then(function (r) { return r.json(); }).catch(function () { return { levels: [] }; }); }
     };
   }
 
@@ -408,7 +409,8 @@
       facility: function (fid) { return call('POST', '/api/facilities/' + id(fid) + '/visit'); },
       buy: function (itemId) { return call('POST', '/api/store/buy', { itemId: itemId }); },
       equip: function (itemId) { return call('POST', '/api/avatar/equip', { itemId: itemId }); },
-      clubs: function () { return call('GET', '/api/clubs'); }
+      clubs: function () { return call('GET', '/api/clubs'); },
+      skills: function () { return call('GET', '/api/skills'); }
     };
   }
 
@@ -427,6 +429,7 @@
     buy: function (i) { return current.buy(i); },
     equip: function (i) { return current.equip(i); },
     clubs: function () { return current.clubs(); },
+    skills: function () { return current.skills(); },
     debugBoost: dbg('debugBoost'), debugTier: dbg('debugTier'), debugCooldowns: dbg('debugCooldowns'),
     _test: { buildQuestion: buildQuestion, CLUBS: CLUBS, FAMILIES: FAMILIES, SESSIONS: SESSIONS, MockAdapter: MockAdapter }
   };

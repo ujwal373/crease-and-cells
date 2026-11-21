@@ -482,3 +482,20 @@ def test_concurrent_purchases_200_coins_leaves_120(client):
         f"Expected 120 coins (200 - 80), got {wallet['coins']}. "
         "If this fails, multiple purchases succeeded."
     )
+
+
+def test_skills_catalogue(client):
+    r = client.get("/api/skills")
+    assert r.status_code == 200
+    data = r.json()
+    assert "levels" in data
+    levels = data["levels"]
+    assert len(levels) >= 4
+    nums = [lv["level"] for lv in levels]
+    assert nums == sorted(nums), "levels must be in ascending order"
+    for lv in levels:
+        assert "zone" in lv
+        assert "tagline" in lv
+        assert isinstance(lv["formulas"], list) and len(lv["formulas"]) > 0
+        for f in lv["formulas"]:
+            assert "name" in f and "syntax" in f and "what" in f and "example" in f
