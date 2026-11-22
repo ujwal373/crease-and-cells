@@ -43,7 +43,7 @@
   function nmc(i, k, d) { return NM[i] && NM[i][k] ? NM[i][k] : d; }
   var CLUBS = [
     { tier: 1, id: 'univ', mode: 'exam', name: nmc(0, 'division', 'University'), venue: nmc(0, 'venue', 'University'), level: 2, skills: { maths: 1 }, gear: [] },
-    { tier: 2, id: 'shield', mode: 'match', name: nmc(1, 'division', 'Shield Cup'), venue: nmc(1, 'venue', 'University Ground'), level: 3, skills: { maths: 2, logic: 1 }, gear: [{ any: 'jersey' }] },
+    { tier: 2, id: 'shield', mode: 'match', name: nmc(1, 'division', 'Shield Cup'), venue: nmc(1, 'venue', 'University Maidan'), level: 3, skills: { maths: 2, logic: 1 }, gear: [{ any: 'jersey' }] },
     { tier: 3, id: 'intra', mode: 'checkpoints', name: nmc(2, 'division', 'Intra State'), venue: nmc(2, 'venue', 'District Club'), level: 4, skills: { logic: 2, text: 1 }, gear: [{ any: 'jersey' }, { any: 'cap' }] },
     { tier: 4, id: 'inter', mode: 'match', name: nmc(3, 'division', 'Inter Divisions'), venue: nmc(3, 'venue', 'District Club ground'), level: 5, skills: { lookup: 1, date: 1 }, gear: [{ any: 'jersey' }, { any: 'shoes' }] },
     { tier: 5, id: 'state', mode: 'exam', name: nmc(4, 'division', 'State Trophy'), venue: nmc(4, 'venue', 'State Ground'), level: 6, skills: { lookup: 2, stats: 1 }, gear: [{ any: 'jersey' }, { any: 'cap' }, { any: 'shoes' }] },

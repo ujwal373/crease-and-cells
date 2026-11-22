@@ -46,12 +46,12 @@ DEFAULT_EQ: dict[str, str] = {"cap": "c_white", "jersey": "j_white", "shoes": "s
 
 CLUBS: list[dict] = [
     {
-        "tier": 1, "id": "univ", "name": "University", "venue": "University Ground",
+        "tier": 1, "id": "univ", "name": "University", "venue": "University Maidan",
         "mode": "exam", "level": 2,
         "skills": {"maths": 1}, "gear": [],
     },
     {
-        "tier": 2, "id": "shield", "name": "Shield Cup", "venue": "University Ground",
+        "tier": 2, "id": "shield", "name": "Shield Cup", "venue": "University Maidan",
         "mode": "match", "level": 3,
         "skills": {"maths": 2, "logic": 1}, "gear": [{"any": "jersey"}],
     },

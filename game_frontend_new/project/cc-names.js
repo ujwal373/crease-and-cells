@@ -9,7 +9,7 @@
     /* division and venue labels, tier 1 to 7 */
     clubs: [
       { id: 'univ', division: 'University of Mumbai', venue: 'University of Mumbai' },
-      { id: 'shield', division: 'Shield Cup', venue: 'University Ground' },
+      { id: 'shield', division: 'Shield Cup', venue: 'University Maidan' },
       { id: 'intra', division: 'Suburban Association', venue: 'Borivali District Club' },
       { id: 'inter', division: 'Inter Divisions', venue: 'Borivali District Club ground' },
       { id: 'state', division: 'State Trophy', venue: 'State Cricket Ground' },
