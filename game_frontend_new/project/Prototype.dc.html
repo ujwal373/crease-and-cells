@@ -18,8 +18,15 @@
 
       function _startGame(uid) {
         CCApi.use('http', { baseUrl: '', headers: { Authorization: 'Bearer ' + uid } });
-        var hideGate = function () { var g = document.getElementById('cc-gate'); if (g) g.style.display = 'none'; };
-        if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', hideGate); } else { hideGate(); }
+        var init = function () {
+          var g = document.getElementById('cc-gate');
+          if (g) g.style.display = 'none';
+          if (!sessionStorage.getItem('cc-welcomed')) {
+            var w = document.getElementById('cc-welcome');
+            if (w) { w.style.display = 'block'; sessionStorage.setItem('cc-welcomed', '1'); }
+          }
+        };
+        if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init); } else { init(); }
       }
 
       function _status(msg, bad) {
@@ -28,10 +35,13 @@
       }
 
       window._ccShowTab = function (tab) {
-        document.getElementById('cc-login').style.display  = tab === 'login'    ? 'flex' : 'none';
-        document.getElementById('cc-reg').style.display    = tab === 'register' ? 'flex' : 'none';
-        document.getElementById('cc-tab-login').style.fontWeight    = tab === 'login'    ? '700' : '400';
-        document.getElementById('cc-tab-reg').style.fontWeight      = tab === 'register' ? '700' : '400';
+        document.getElementById('cc-login').style.display = tab === 'login' ? 'flex' : 'none';
+        document.getElementById('cc-reg').style.display   = tab === 'register' ? 'flex' : 'none';
+        var tl = document.getElementById('cc-tab-login'), tr = document.getElementById('cc-tab-reg');
+        tl.style.background = tab === 'login' ? '#F2B632' : 'transparent';
+        tl.style.color = tab === 'login' ? '#1F2A24' : '#C8DFB8';
+        tr.style.background = tab === 'register' ? '#F2B632' : 'transparent';
+        tr.style.color = tab === 'register' ? '#1F2A24' : '#C8DFB8';
         _status('');
       };
 
@@ -83,29 +93,214 @@
 </head>
 
 <body>
-  <div id="cc-gate" style="position:fixed;inset:0;background:#1F2A24;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999;font-family:'Atkinson Hyperlegible',sans-serif;overflow-y:auto;padding:24px 16px 32px;box-sizing:border-box;">
-    <h1 style="margin:0;color:#F2B632;font-family:'Baloo 2',sans-serif;font-size:2.4rem;">Crease &amp; Cells</h1>
-    <div style="display:flex;gap:24px;border-bottom:2px solid #3a4f3a;padding-bottom:8px;">
-      <button id="cc-tab-login" onclick="_ccShowTab('login')"
-        style="background:none;border:none;color:#F2B632;font-size:1rem;font-weight:700;cursor:pointer;padding:4px 0;">Login</button>
-      <button id="cc-tab-reg" onclick="_ccShowTab('register')"
-        style="background:none;border:none;color:#F2B632;font-size:1rem;font-weight:400;cursor:pointer;padding:4px 0;">Register</button>
+  <!-- Login / Register gate -->
+  <div id="cc-gate" style="position:fixed;inset:0;background:#1F2A24;z-index:9999;overflow-y:auto;font-family:'Atkinson Hyperlegible',sans-serif;">
+    <div style="max-width:900px;margin:0 auto;padding:40px 20px 60px;display:flex;flex-direction:column;gap:28px;">
+
+      <!-- Title -->
+      <div style="text-align:center;">
+        <div style="font-size:0.75rem;font-weight:700;letter-spacing:0.2em;color:#9fa;text-transform:uppercase;margin-bottom:6px;">Welcome to</div>
+        <h1 style="margin:0;color:#F2B632;font-family:'Baloo 2',sans-serif;font-size:2.8rem;line-height:1.1;">Crease &amp; Cells</h1>
+        <p style="margin:10px 0 0;color:#C8DFB8;font-size:0.95rem;font-style:italic;">Excel and Google Sheets, taught through cricket.</p>
+      </div>
+
+      <!-- Two-column body -->
+      <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;">
+
+        <!-- Left: description -->
+        <div style="flex:1;min-width:260px;display:flex;flex-direction:column;gap:16px;">
+          <div style="background:#2a3d2a;border-radius:16px;padding:20px 22px;border:2px solid #3a5a3a;">
+            <div style="font-size:1rem;font-weight:700;color:#F2B632;margin-bottom:8px;">What is this?</div>
+            <p style="margin:0;color:#d0e4c0;font-size:0.93rem;line-height:1.65;">
+              Crease and Cells is a browser game that teaches Microsoft Excel and Google Sheets through cricket. You walk a cricket world, talk to coaches and scouts, get real spreadsheet problems, and solve them with real formulas. Every formula you learn has a cricket context. No multiple choice — you type the actual formula.
+            </p>
+          </div>
+          <div style="background:#2a3d2a;border-radius:16px;padding:20px 22px;border:2px solid #3a5a3a;">
+            <div style="font-size:1rem;font-weight:700;color:#F2B632;margin-bottom:8px;">Signing In — Development Mode</div>
+            <p style="margin:0 0 14px;color:#d0e4c0;font-size:0.93rem;line-height:1.65;">
+              This project is in active development. There is no password. Your email address is your player ID and saves all your progress: coins, XP, completed missions, wardrobe, and career tier.
+            </p>
+            <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:14px;">
+              <div style="display:flex;align-items:flex-start;gap:9px;font-size:0.88rem;color:#C8DFB8;">
+                <span style="color:#F2B632;flex-shrink:0;">✓</span><span>Any valid email address you have access to</span>
+              </div>
+              <div style="display:flex;align-items:flex-start;gap:9px;font-size:0.88rem;color:#C8DFB8;">
+                <span style="color:#F2B632;flex-shrink:0;">✓</span><span>No verification email is sent right now</span>
+              </div>
+              <div style="display:flex;align-items:flex-start;gap:9px;font-size:0.88rem;color:#C8DFB8;">
+                <span style="color:#F2B632;flex-shrink:0;">✓</span><span>Your progress saves automatically to our server by email</span>
+              </div>
+            </div>
+            <div style="padding:10px 14px;border-radius:10px;background:#1a2d1a;border-left:3px solid #F2B632;font-size:0.85rem;color:#d4c472;line-height:1.5;">
+              <strong>Tip:</strong> Use a spare or test email during this phase. You can always transfer progress to your main account when we add full authentication.
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: form -->
+        <div style="flex:0 0 300px;min-width:260px;background:#2a3d2a;border-radius:16px;padding:24px;border:2px solid #3a5a3a;display:flex;flex-direction:column;gap:16px;">
+          <div style="font-size:1.05rem;font-weight:700;color:#F2B632;text-align:center;">Sign in to play</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;border-radius:10px;overflow:hidden;border:2px solid #3a5a3a;">
+            <button id="cc-tab-login" onclick="_ccShowTab('login')"
+              style="background:#F2B632;border:none;color:#1F2A24;font-size:0.93rem;font-weight:700;cursor:pointer;padding:11px 0;font-family:'Atkinson Hyperlegible',sans-serif;">Login</button>
+            <button id="cc-tab-reg" onclick="_ccShowTab('register')"
+              style="background:transparent;border:none;color:#C8DFB8;font-size:0.93rem;font-weight:700;cursor:pointer;padding:11px 0;font-family:'Atkinson Hyperlegible',sans-serif;">Register</button>
+          </div>
+          <div id="cc-login" style="display:flex;flex-direction:column;gap:10px;">
+            <label style="color:#9fa;font-size:0.78rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;">Email address</label>
+            <input id="cc-email-login" type="email" placeholder="you@example.com"
+              onkeydown="if(event.key==='Enter')_ccLogin()"
+              style="padding:12px 14px;border-radius:10px;border:2px solid #3a5a3a;font-size:1rem;background:#1a2d1a;color:#eee;outline:none;font-family:inherit;" />
+            <button onclick="_ccLogin()"
+              style="background:#F2B632;color:#1F2A24;border:none;padding:13px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;font-family:'Atkinson Hyperlegible',sans-serif;">Enter the game →</button>
+          </div>
+          <div id="cc-reg" style="display:none;flex-direction:column;gap:10px;">
+            <label style="color:#9fa;font-size:0.78rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;">Your name</label>
+            <input id="cc-name" type="text" placeholder="e.g. Ujwal" maxlength="30"
+              style="padding:12px 14px;border-radius:10px;border:2px solid #3a5a3a;font-size:1rem;background:#1a2d1a;color:#eee;outline:none;font-family:inherit;" />
+            <label style="color:#9fa;font-size:0.78rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;">Email address</label>
+            <input id="cc-email-reg" type="email" placeholder="you@example.com"
+              onkeydown="if(event.key==='Enter')_ccRegister()"
+              style="padding:12px 14px;border-radius:10px;border:2px solid #3a5a3a;font-size:1rem;background:#1a2d1a;color:#eee;outline:none;font-family:inherit;" />
+            <button onclick="_ccRegister()"
+              style="background:#F2B632;color:#1F2A24;border:none;padding:13px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;font-family:'Atkinson Hyperlegible',sans-serif;">Create character →</button>
+          </div>
+          <span id="cc-status" style="font-size:0.88rem;min-height:1.2em;color:#9fa;text-align:center;"></span>
+        </div>
+
+      </div>
     </div>
-    <div id="cc-login" style="display:flex;flex-direction:column;gap:10px;width:min(280px,100%);">
-      <input id="cc-email-login" type="email" placeholder="Your email"
-        style="padding:12px 14px;border-radius:8px;border:none;font-size:1rem;background:#2e3d2e;color:#eee;outline:none;" />
-      <button onclick="_ccLogin()"
-        style="background:#F2B632;color:#1F2A24;border:none;padding:12px;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;">Enter</button>
+  </div>
+
+  <!-- Post-login welcome popup (shown once per session) -->
+  <div id="cc-welcome" style="display:none;position:fixed;inset:0;background:rgba(20,32,20,0.96);z-index:9998;overflow-y:auto;font-family:'Atkinson Hyperlegible',sans-serif;">
+    <div style="max-width:720px;margin:0 auto;padding:36px 20px 56px;display:flex;flex-direction:column;gap:20px;">
+
+      <div style="text-align:center;">
+        <h2 style="margin:0;color:#F2B632;font-family:'Baloo 2',sans-serif;font-size:2rem;">Welcome to Crease &amp; Cells!</h2>
+        <p style="margin:8px 0 0;color:#C8DFB8;font-size:0.95rem;">Here is everything you need to get started.</p>
+      </div>
+
+      <!-- How a mission works -->
+      <div style="background:#2a3d2a;border-radius:16px;padding:20px 22px;border:2px solid #3a5a3a;">
+        <div style="font-size:1rem;font-weight:700;color:#F2B632;margin-bottom:14px;">How a Mission Works</div>
+        <div style="display:flex;flex-direction:column;gap:0;">
+          <div style="display:grid;grid-template-columns:max-content 1fr;gap:0 16px;padding:9px 0;border-bottom:1px solid #3a5a3a;font-size:0.9rem;">
+            <span style="font-weight:700;color:#C8DFB8;white-space:nowrap;">Walk to an NPC</span>
+            <span style="color:#d0e4c0;">The NPC gives you a story and a task</span>
+          </div>
+          <div style="display:grid;grid-template-columns:max-content 1fr;gap:0 16px;padding:9px 0;border-bottom:1px solid #3a5a3a;font-size:0.9rem;">
+            <span style="font-weight:700;color:#C8DFB8;white-space:nowrap;">Read the grid</span>
+            <span style="color:#d0e4c0;">A real cricket dataset (players, scores, overs) appears</span>
+          </div>
+          <div style="display:grid;grid-template-columns:max-content 1fr;gap:0 16px;padding:9px 0;border-bottom:1px solid #3a5a3a;font-size:0.9rem;">
+            <span style="font-weight:700;color:#C8DFB8;white-space:nowrap;">Type your formula</span>
+            <span style="color:#d0e4c0;">Use the formula bar at the bottom of the grid</span>
+          </div>
+          <div style="display:grid;grid-template-columns:max-content 1fr;gap:0 16px;padding:9px 0;border-bottom:1px solid #3a5a3a;font-size:0.9rem;">
+            <span style="font-weight:700;color:#C8DFB8;white-space:nowrap;">Hint button</span>
+            <span style="color:#d0e4c0;">Costs your no-hint bonus but gives a progressive clue</span>
+          </div>
+          <div style="display:grid;grid-template-columns:max-content 1fr;gap:0 16px;padding:9px 0;border-bottom:1px solid #3a5a3a;font-size:0.9rem;">
+            <span style="font-weight:700;color:#C8DFB8;white-space:nowrap;">Submit</span>
+            <span style="color:#d0e4c0;">The server validates the result — pass earns coins + XP</span>
+          </div>
+          <div style="display:grid;grid-template-columns:max-content 1fr;gap:0 16px;padding:9px 0;font-size:0.9rem;">
+            <span style="font-weight:700;color:#C8DFB8;white-space:nowrap;">Fail</span>
+            <span style="color:#d0e4c0;">You see what went wrong. Try again, no penalty</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Career ladder -->
+      <div style="background:#2a3d2a;border-radius:16px;padding:20px 22px;border:2px solid #3a5a3a;">
+        <div style="font-size:1rem;font-weight:700;color:#F2B632;margin-bottom:4px;">Career Ladder — 7 Tiers</div>
+        <p style="margin:0 0 14px;font-size:0.88rem;color:#9fa;line-height:1.5;">Progress from university cricket all the way to the National XI. Each tier unlocks when your skill level meets the requirement.</p>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:grid;grid-template-columns:max-content 1fr;gap:8px 14px;align-items:baseline;padding:8px 12px;border-radius:10px;background:#1a2d1a;border:1px solid #3a5a3a;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:0.82rem;font-weight:700;color:#F2B632;white-space:nowrap;">T1 · University</span>
+            <span style="font-size:0.88rem;color:#d0e4c0;">Maths foundations — SUM, AVERAGE, MIN, MAX, COUNT, COUNTA, ROUND, ABS</span>
+          </div>
+          <div style="display:grid;grid-template-columns:max-content 1fr;gap:8px 14px;align-items:baseline;padding:8px 12px;border-radius:10px;background:#1a2d1a;border:1px solid #3a5a3a;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:0.82rem;font-weight:700;color:#F2B632;white-space:nowrap;">T2 · Shield Cup</span>
+            <span style="font-size:0.88rem;color:#d0e4c0;">Logic and conditions — IF, IFS, AND, OR, COUNTIF, SUMIF, AVERAGEIF, absolute references</span>
+          </div>
+          <div style="display:grid;grid-template-columns:max-content 1fr;gap:8px 14px;align-items:baseline;padding:8px 12px;border-radius:10px;background:#1a2d1a;border:1px solid #3a5a3a;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:0.82rem;font-weight:700;color:#F2B632;white-space:nowrap;">T3 · Intra State</span>
+            <span style="font-size:0.88rem;color:#d0e4c0;">Data cleaning — TRIM, UPPER, LOWER, LEN, LEFT, RIGHT, MID</span>
+          </div>
+          <div style="display:grid;grid-template-columns:max-content 1fr;gap:8px 14px;align-items:baseline;padding:8px 12px;border-radius:10px;background:#1a2d1a;border:1px solid #3a5a3a;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:0.82rem;font-weight:700;color:#F2B632;white-space:nowrap;">T4 · Inter Divisions</span>
+            <span style="font-size:0.88rem;color:#d0e4c0;">Lookups — VLOOKUP, XLOOKUP, MATCH, INDEX, INDEX + MATCH</span>
+          </div>
+          <div style="display:grid;grid-template-columns:max-content 1fr;gap:8px 14px;align-items:baseline;padding:8px 12px;border-radius:10px;background:#1a2d1a;border:1px solid #3a5a3a;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:0.82rem;font-weight:700;color:#F2B632;white-space:nowrap;">T5 · State Trophy</span>
+            <span style="font-size:0.88rem;color:#d0e4c0;">Statistics — MEDIAN, LARGE, SMALL, SUMPRODUCT</span>
+          </div>
+          <div style="display:grid;grid-template-columns:max-content 1fr;gap:8px 14px;align-items:baseline;padding:8px 12px;border-radius:10px;background:#1a2d1a;border:1px solid #3a5a3a;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:0.82rem;font-weight:700;color:#F2B632;white-space:nowrap;">T6 · Franchise League</span>
+            <span style="font-size:0.88rem;color:#d0e4c0;">Dynamic arrays — COUNTUNIQUE (live). FILTER, UNIQUE, SORT (coming soon)</span>
+          </div>
+          <div style="display:grid;grid-template-columns:max-content 1fr;gap:8px 14px;align-items:baseline;padding:8px 12px;border-radius:10px;background:#1a2d1a;border:1px solid #3a5a3a;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:0.82rem;font-weight:700;color:#F2B632;white-space:nowrap;">T7 · National XI</span>
+            <span style="font-size:0.88rem;color:#d0e4c0;">Advanced building blocks — LET, LAMBDA (coming soon)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div style="background:#2a3d2a;border-radius:16px;padding:20px 22px;border:2px solid #3a5a3a;">
+        <div style="font-size:1rem;font-weight:700;color:#F2B632;margin-bottom:14px;">Controls</div>
+        <div style="display:flex;flex-direction:column;gap:0;">
+          <div style="display:grid;grid-template-columns:max-content 1fr;gap:0 16px;padding:8px 0;border-bottom:1px solid #3a5a3a;font-size:0.9rem;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-weight:700;color:#C8DFB8;white-space:nowrap;">Arrow keys / WASD</span>
+            <span style="color:#d0e4c0;">Walk around the world</span>
+          </div>
+          <div style="display:grid;grid-template-columns:max-content 1fr;gap:0 16px;padding:8px 0;border-bottom:1px solid #3a5a3a;font-size:0.9rem;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-weight:700;color:#C8DFB8;white-space:nowrap;">E or Space</span>
+            <span style="color:#d0e4c0;">Talk to nearest NPC / interact</span>
+          </div>
+          <div style="display:grid;grid-template-columns:max-content 1fr;gap:0 16px;padding:8px 0;border-bottom:1px solid #3a5a3a;font-size:0.9rem;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-weight:700;color:#C8DFB8;white-space:nowrap;">M</span>
+            <span style="color:#d0e4c0;">Open world map</span>
+          </div>
+          <div style="display:grid;grid-template-columns:max-content 1fr;gap:0 16px;padding:8px 0;border-bottom:1px solid #3a5a3a;font-size:0.9rem;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-weight:700;color:#C8DFB8;white-space:nowrap;">C</span>
+            <span style="color:#d0e4c0;">Open career and skills panel</span>
+          </div>
+          <div style="display:grid;grid-template-columns:max-content 1fr;gap:0 16px;padding:8px 0;font-size:0.9rem;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-weight:700;color:#C8DFB8;white-space:nowrap;">Esc</span>
+            <span style="color:#d0e4c0;">Close any open panel</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formula Guide -->
+      <div style="background:#2a3d2a;border-radius:16px;padding:20px 22px;border:2px solid #3a5a3a;">
+        <div style="font-size:1rem;font-weight:700;color:#F2B632;margin-bottom:8px;">The Formula Guide</div>
+        <p style="margin:0 0 10px;color:#d0e4c0;font-size:0.93rem;line-height:1.65;">
+          Find the <strong style="color:#C8DFB8;">Formula Guide</strong> button in the HUD at the bottom of the screen at any time, even during a mission. The guide has every formula organised by the 7 career tiers. Tap a formula name to see the syntax, a plain-English description, a cricket-specific tip, and a ready-to-copy example.
+        </p>
+      </div>
+
+      <!-- Coins and store -->
+      <div style="background:#2a3d2a;border-radius:16px;padding:20px 22px;border:2px solid #3a5a3a;">
+        <div style="font-size:1rem;font-weight:700;color:#F2B632;margin-bottom:8px;">Coins and the Kit Store</div>
+        <p style="margin:0;color:#d0e4c0;font-size:0.93rem;line-height:1.65;">
+          Coins come from completing missions. Each mission has a base reward. Solve it without using any hints and you earn an extra no-hint bonus on top. Spend coins at the <strong style="color:#C8DFB8;">Kit Store</strong> in Town Square — jerseys, caps, shoes and sleeves. All items are cosmetic. Nothing you can buy blocks your ability to progress.
+        </p>
+      </div>
+
+      <!-- Dismiss -->
+      <div style="text-align:center;padding-top:8px;">
+        <button onclick="document.getElementById('cc-welcome').style.display='none'"
+          style="background:#F2B632;color:#1F2A24;border:none;padding:16px 48px;border-radius:12px;font-size:1.05rem;font-weight:700;cursor:pointer;font-family:'Atkinson Hyperlegible',sans-serif;">
+          Got it, let's play! →
+        </button>
+        <p style="margin:12px 0 0;font-size:0.82rem;color:#9fa;">You can find this information again in the Formula Guide button at the bottom of the screen.</p>
+      </div>
+
     </div>
-    <div id="cc-reg" style="display:none;flex-direction:column;gap:10px;width:min(280px,100%);">
-      <input id="cc-name" type="text" placeholder="Your name" maxlength="30"
-        style="padding:12px 14px;border-radius:8px;border:none;font-size:1rem;background:#2e3d2e;color:#eee;outline:none;" />
-      <input id="cc-email-reg" type="email" placeholder="Your email"
-        style="padding:12px 14px;border-radius:8px;border:none;font-size:1rem;background:#2e3d2e;color:#eee;outline:none;" />
-      <button onclick="_ccRegister()"
-        style="background:#F2B632;color:#1F2A24;border:none;padding:12px;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;">Start Playing</button>
-    </div>
-    <span id="cc-status" style="font-size:0.9rem;min-height:1.2em;color:#9fa;"></span>
   </div>
   <x-dc>
     <helmet>
@@ -1431,7 +1626,6 @@ class Component extends DCLogic {
     if (kl === 'e') { this.interact(); return; }
     if (kl === 'm') { this.openMap(); return; }
     if (kl === 'c') { this.openCareer(); return; }
-    if (kl === 'g') { this.openGuide(); return; }
     if ((kl === 'enter' || kl === ' ') && e.target === e.currentTarget) { e.preventDefault(); this.interact(); return; }
     this.keys[kl] = true;
   }
