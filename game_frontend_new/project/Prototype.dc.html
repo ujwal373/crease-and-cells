@@ -1254,7 +1254,7 @@
             <div style="display: flex; gap: 10px; flex-wrap: wrap; padding-top: 4px">
               <button type="button" onClick="{{openCreate}}"
                 style="flex: 1; min-height: 48px; padding: 0 18px; border-radius: 12px; border: 3px solid #1F2A24; background: #FBF6E9; color: #1F2A24; font-size: 17px; font-weight: 700; cursor: pointer">Edit profile</button>
-              <button type="button" onclick="_ccLogout()"
+              <button type="button" onClick="{{ccLogout}}"
                 style="flex: 1; min-height: 48px; padding: 0 18px; border-radius: 12px; border: 3px solid #d04040; background: transparent; color: #d04040; font-size: 17px; font-weight: 700; cursor: pointer">Log out</button>
             </div>
           </sc-if>
@@ -2125,7 +2125,7 @@ class Component extends DCLogic {
       showPrompt: !open && !!nearNpc, nearName: nearNpc ? nearNpc.name : '',
       onKeyDown: (e) => this.onKeyDown(e), onKeyUp: (e) => this.onKeyUp(e), onBlur: () => this.onBlur(), focusWorld: () => this.focusWorld(),
       joyDown: (e) => this.joyDown(e), joyMove: (e) => this.joyMove(e), joyUp: () => this.joyUp(),
-      interact: () => this.interact(), openMap: () => this.openMap(), openCareer: () => this.openCareer(), openCustomise: () => this.openCustomise(), openGuide: () => this.openGuide(), openInfo: () => this.openInfo(), openCreate: () => this.openCreate(),
+      interact: () => this.interact(), openMap: () => this.openMap(), openCareer: () => this.openCareer(), openCustomise: () => this.openCustomise(), openGuide: () => this.openGuide(), openInfo: () => this.openInfo(), openCreate: () => this.openCreate(), ccLogout: () => window._ccLogout(),
       closePanel: () => this.closePanel(), onPanelKey: (e) => this.onPanelKey(e),
       openSheet: () => this.openSheet(), closeSheet: () => this.closeSheet(), onSheetKey: (e) => this.onSheetKey(e), sheetWin: !!st.sheetWin && !!q, cellsBig: cellsBig, gridColsBig: gridColsBig, formulaShown: st.formula || '(empty)',
       scrimO: open ? 1 : 0, scrimP: open ? 'auto' : 'none',
