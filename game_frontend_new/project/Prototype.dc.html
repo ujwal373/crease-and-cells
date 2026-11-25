@@ -85,6 +85,12 @@
           }).catch(function () { _status('Network error. Try again.', true); });
       };
 
+      window._ccLogout = function () {
+        localStorage.removeItem(UID_KEY);
+        sessionStorage.removeItem('cc-welcomed');
+        location.reload();
+      };
+
       /* Sync fast path — returning player has UID cached in localStorage. */
       var _uid = localStorage.getItem(UID_KEY);
       if (_uid && /^[0-9a-f-]{36}$/.test(_uid)) { _startGame(_uid); }
@@ -839,6 +845,14 @@
             </svg>
             <span class="btn-label">Formula Guide</span>
           </button>
+          <button type="button" onClick="{{openInfo}}"
+            style="min-height: 52px; min-width: 160px; padding: 0 18px; border-radius: 16px; border: 3px solid #3a5a8a; background: #3a5a8a; color: #FBF6E9; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 10px; cursor: pointer">
+            <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" fill="none" stroke="#FBF6E9" stroke-width="2"/>
+              <path d="M12 16v-4 M12 8h.01" fill="none" stroke="#FBF6E9" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+            <span class="btn-label">Game Guide</span>
+          </button>
         </div>
       </div>
 
@@ -1237,6 +1251,12 @@
                 style="align-self: flex-start; min-height: 48px; padding: 0 18px; border-radius: 12px; border: 3px solid #1F2A24; background: #FBF6E9; color: #1F2A24; font-size: 17px; font-weight: 700; cursor: pointer">Skip
                 ahead</button>
             </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; padding-top: 4px">
+              <button type="button" onClick="{{openCreate}}"
+                style="flex: 1; min-height: 48px; padding: 0 18px; border-radius: 12px; border: 3px solid #1F2A24; background: #FBF6E9; color: #1F2A24; font-size: 17px; font-weight: 700; cursor: pointer">Edit profile</button>
+              <button type="button" onclick="_ccLogout()"
+                style="flex: 1; min-height: 48px; padding: 0 18px; border-radius: 12px; border: 3px solid #d04040; background: transparent; color: #d04040; font-size: 17px; font-weight: 700; cursor: pointer">Log out</button>
+            </div>
           </sc-if>
 
           <sc-if value="{{isMap}}" hint-placeholder-val="{{ false }}">
@@ -1389,6 +1409,71 @@
               </sc-if>
 
             </sc-if>
+          </sc-if>
+
+          <sc-if value="{{isInfo}}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; gap: 16px; font-family: 'Atkinson Hyperlegible', sans-serif">
+
+              <!-- How a mission works -->
+              <div style="background: #F6EDD5; border-radius: 14px; padding: 16px 18px; border: 2px solid #E8D8A0">
+                <div style="font-size: 15px; font-weight: 700; color: #1F2A24; margin-bottom: 10px">How a Mission Works</div>
+                <div style="display: flex; flex-direction: column; gap: 0">
+                  <div style="display: grid; grid-template-columns: max-content 1fr; gap: 0 12px; padding: 7px 0; border-bottom: 1px solid #E0CC88; font-size: 14px">
+                    <span style="font-weight: 700; color: #3a3020; white-space: nowrap">Walk to an NPC</span><span style="color: #4a4030">The NPC gives you a story and a task</span>
+                  </div>
+                  <div style="display: grid; grid-template-columns: max-content 1fr; gap: 0 12px; padding: 7px 0; border-bottom: 1px solid #E0CC88; font-size: 14px">
+                    <span style="font-weight: 700; color: #3a3020; white-space: nowrap">Read the grid</span><span style="color: #4a4030">A real cricket dataset appears in the spreadsheet</span>
+                  </div>
+                  <div style="display: grid; grid-template-columns: max-content 1fr; gap: 0 12px; padding: 7px 0; border-bottom: 1px solid #E0CC88; font-size: 14px">
+                    <span style="font-weight: 700; color: #3a3020; white-space: nowrap">Type your formula</span><span style="color: #4a4030">Use the formula bar at the bottom of the grid</span>
+                  </div>
+                  <div style="display: grid; grid-template-columns: max-content 1fr; gap: 0 12px; padding: 7px 0; border-bottom: 1px solid #E0CC88; font-size: 14px">
+                    <span style="font-weight: 700; color: #3a3020; white-space: nowrap">Hint button</span><span style="color: #4a4030">Costs your no-hint bonus but gives a progressive clue</span>
+                  </div>
+                  <div style="display: grid; grid-template-columns: max-content 1fr; gap: 0 12px; padding: 7px 0; border-bottom: 1px solid #E0CC88; font-size: 14px">
+                    <span style="font-weight: 700; color: #3a3020; white-space: nowrap">Submit</span><span style="color: #4a4030">The server validates — a pass earns coins and XP</span>
+                  </div>
+                  <div style="display: grid; grid-template-columns: max-content 1fr; gap: 0 12px; padding: 7px 0; font-size: 14px">
+                    <span style="font-weight: 700; color: #3a3020; white-space: nowrap">Fail</span><span style="color: #4a4030">You see what went wrong. Try again, no penalty</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Career ladder -->
+              <div style="background: #F6EDD5; border-radius: 14px; padding: 16px 18px; border: 2px solid #E8D8A0">
+                <div style="font-size: 15px; font-weight: 700; color: #1F2A24; margin-bottom: 10px">Career Ladder — 7 Tiers</div>
+                <div style="display: flex; flex-direction: column; gap: 6px">
+                  <div style="display: grid; grid-template-columns: max-content 1fr; gap: 6px 10px; padding: 7px 10px; border-radius: 8px; background: #EDE0C0; font-size: 13px"><span style="font-family: 'IBM Plex Mono', monospace; font-weight: 700; color: #1F2A24; white-space: nowrap">T1 · University</span><span style="color: #3a3020">SUM, AVERAGE, MIN, MAX, COUNT, COUNTA, ROUND, ABS</span></div>
+                  <div style="display: grid; grid-template-columns: max-content 1fr; gap: 6px 10px; padding: 7px 10px; border-radius: 8px; background: #EDE0C0; font-size: 13px"><span style="font-family: 'IBM Plex Mono', monospace; font-weight: 700; color: #1F2A24; white-space: nowrap">T2 · Shield Cup</span><span style="color: #3a3020">IF, IFS, AND, OR, COUNTIF, SUMIF, AVERAGEIF, absolute refs</span></div>
+                  <div style="display: grid; grid-template-columns: max-content 1fr; gap: 6px 10px; padding: 7px 10px; border-radius: 8px; background: #EDE0C0; font-size: 13px"><span style="font-family: 'IBM Plex Mono', monospace; font-weight: 700; color: #1F2A24; white-space: nowrap">T3 · Intra State</span><span style="color: #3a3020">TRIM, UPPER, LOWER, LEN, LEFT, RIGHT, MID</span></div>
+                  <div style="display: grid; grid-template-columns: max-content 1fr; gap: 6px 10px; padding: 7px 10px; border-radius: 8px; background: #EDE0C0; font-size: 13px"><span style="font-family: 'IBM Plex Mono', monospace; font-weight: 700; color: #1F2A24; white-space: nowrap">T4 · Inter Divisions</span><span style="color: #3a3020">VLOOKUP, XLOOKUP, MATCH, INDEX, INDEX + MATCH</span></div>
+                  <div style="display: grid; grid-template-columns: max-content 1fr; gap: 6px 10px; padding: 7px 10px; border-radius: 8px; background: #EDE0C0; font-size: 13px"><span style="font-family: 'IBM Plex Mono', monospace; font-weight: 700; color: #1F2A24; white-space: nowrap">T5 · State Trophy</span><span style="color: #3a3020">MEDIAN, LARGE, SMALL, SUMPRODUCT</span></div>
+                  <div style="display: grid; grid-template-columns: max-content 1fr; gap: 6px 10px; padding: 7px 10px; border-radius: 8px; background: #EDE0C0; font-size: 13px"><span style="font-family: 'IBM Plex Mono', monospace; font-weight: 700; color: #1F2A24; white-space: nowrap">T6 · Franchise League</span><span style="color: #3a3020">COUNTUNIQUE (live), FILTER, UNIQUE, SORT (coming soon)</span></div>
+                  <div style="display: grid; grid-template-columns: max-content 1fr; gap: 6px 10px; padding: 7px 10px; border-radius: 8px; background: #EDE0C0; font-size: 13px"><span style="font-family: 'IBM Plex Mono', monospace; font-weight: 700; color: #1F2A24; white-space: nowrap">T7 · National XI</span><span style="color: #3a3020">LET, LAMBDA (coming soon)</span></div>
+                </div>
+              </div>
+
+              <!-- Controls -->
+              <div style="background: #F6EDD5; border-radius: 14px; padding: 16px 18px; border: 2px solid #E8D8A0">
+                <div style="font-size: 15px; font-weight: 700; color: #1F2A24; margin-bottom: 10px">Controls</div>
+                <div style="display: flex; flex-direction: column; gap: 0">
+                  <div style="display: grid; grid-template-columns: max-content 1fr; gap: 0 12px; padding: 6px 0; border-bottom: 1px solid #E0CC88; font-size: 14px"><span style="font-family: 'IBM Plex Mono', monospace; font-weight: 700; color: #3a3020; white-space: nowrap">Arrow keys / WASD</span><span style="color: #4a4030">Walk around the world</span></div>
+                  <div style="display: grid; grid-template-columns: max-content 1fr; gap: 0 12px; padding: 6px 0; border-bottom: 1px solid #E0CC88; font-size: 14px"><span style="font-family: 'IBM Plex Mono', monospace; font-weight: 700; color: #3a3020; white-space: nowrap">E or Space</span><span style="color: #4a4030">Talk to nearest NPC</span></div>
+                  <div style="display: grid; grid-template-columns: max-content 1fr; gap: 0 12px; padding: 6px 0; border-bottom: 1px solid #E0CC88; font-size: 14px"><span style="font-family: 'IBM Plex Mono', monospace; font-weight: 700; color: #3a3020; white-space: nowrap">M</span><span style="color: #4a4030">Open world map</span></div>
+                  <div style="display: grid; grid-template-columns: max-content 1fr; gap: 0 12px; padding: 6px 0; border-bottom: 1px solid #E0CC88; font-size: 14px"><span style="font-family: 'IBM Plex Mono', monospace; font-weight: 700; color: #3a3020; white-space: nowrap">C</span><span style="color: #4a4030">Career and skills panel</span></div>
+                  <div style="display: grid; grid-template-columns: max-content 1fr; gap: 0 12px; padding: 6px 0; font-size: 14px"><span style="font-family: 'IBM Plex Mono', monospace; font-weight: 700; color: #3a3020; white-space: nowrap">Esc</span><span style="color: #4a4030">Close any open panel</span></div>
+                </div>
+              </div>
+
+              <!-- Formula Guide & Coins -->
+              <div style="background: #F6EDD5; border-radius: 14px; padding: 16px 18px; border: 2px solid #E8D8A0">
+                <div style="font-size: 15px; font-weight: 700; color: #1F2A24; margin-bottom: 6px">Formula Guide</div>
+                <p style="margin: 0 0 14px; font-size: 14px; color: #4a4030; line-height: 1.6">Tap the Formula Guide button in the HUD to browse every formula by career tier. Tap a name to see syntax, description, cricket tip and a copy-ready example.</p>
+                <div style="font-size: 15px; font-weight: 700; color: #1F2A24; margin-bottom: 6px">Coins and the Kit Store</div>
+                <p style="margin: 0; font-size: 14px; color: #4a4030; line-height: 1.6">Coins come from completing missions. Solve without hints and earn the no-hint bonus. Spend coins at the Kit Store on jerseys, caps, shoes and sleeves. All items are cosmetic only.</p>
+              </div>
+
+            </div>
           </sc-if>
 
         </div>
@@ -1712,6 +1797,7 @@ class Component extends DCLogic {
       }).catch(() => { this.setState({ guideData: null, guideLoading: false }); });
     }
   }
+  openInfo() { if (this.S().panel) return; this.stopInput(); this.setState({ panel: 'info', loading: false, err: '', intro: false }); }
 
   closePanel() {
     if (this.S().panel === 'create' && !this.S().player.created) { this.finishCreate(); return; }
@@ -2021,7 +2107,7 @@ class Component extends DCLogic {
     const isQuestion = ok && !!q;
     const resOk = !!(st.result && st.result.ok);
     const resBad = !!(st.result && !st.result.ok);
-    const title = st.panel === "map" ? "World map" : st.panel === "career" ? "Career" : st.panel === "create" ? "Create your player" : st.panel === "wardrobe" ? (st.shopOpen ? "Akshita’s Store" : "Customise") : st.panel === "guide" ? "Formula Guide" : lob ? ls.name : les ? les.npc : q ? (enc.npc || "Question") : st.loading ? "Talking" : (enc && enc.npc) || "Conversation";
+    const title = st.panel === "map" ? "World map" : st.panel === "career" ? "Career" : st.panel === "create" ? "Edit profile" : st.panel === "wardrobe" ? (st.shopOpen ? "Akshita’s Store" : "Customise") : st.panel === "guide" ? "Formula Guide" : st.panel === "info" ? "Game Guide" : lob ? ls.name : les ? les.npc : q ? (enc.npc || "Question") : st.loading ? "Talking" : (enc && enc.npc) || "Conversation";
 
     return {
       stageT: 'scale(' + st.scale + ') rotateX(58deg) rotateZ(45deg)',
@@ -2039,7 +2125,7 @@ class Component extends DCLogic {
       showPrompt: !open && !!nearNpc, nearName: nearNpc ? nearNpc.name : '',
       onKeyDown: (e) => this.onKeyDown(e), onKeyUp: (e) => this.onKeyUp(e), onBlur: () => this.onBlur(), focusWorld: () => this.focusWorld(),
       joyDown: (e) => this.joyDown(e), joyMove: (e) => this.joyMove(e), joyUp: () => this.joyUp(),
-      interact: () => this.interact(), openMap: () => this.openMap(), openCareer: () => this.openCareer(), openCustomise: () => this.openCustomise(), openGuide: () => this.openGuide(),
+      interact: () => this.interact(), openMap: () => this.openMap(), openCareer: () => this.openCareer(), openCustomise: () => this.openCustomise(), openGuide: () => this.openGuide(), openInfo: () => this.openInfo(), openCreate: () => this.openCreate(),
       closePanel: () => this.closePanel(), onPanelKey: (e) => this.onPanelKey(e),
       openSheet: () => this.openSheet(), closeSheet: () => this.closeSheet(), onSheetKey: (e) => this.onSheetKey(e), sheetWin: !!st.sheetWin && !!q, cellsBig: cellsBig, gridColsBig: gridColsBig, formulaShown: st.formula || '(empty)',
       scrimO: open ? 1 : 0, scrimP: open ? 'auto' : 'none',
@@ -2049,7 +2135,7 @@ class Component extends DCLogic {
       pLoading: st.panel === 'enc' && st.loading, loadTitle: 'Waiting for ' + ((W.NPCS.find((n) => n.id === st.npcId) || {}).name || 'them'),
       pError: st.panel === 'enc' && !!st.err, errMsg: st.err, retry: () => this.retry(),
       isQuestion: isQuestion, isLobby: ok && !!lob, isChat: ok && enc.kind === 'chat', isLesson: ok && !!les, isCreate: st.panel === 'create',
-      isCareer: st.panel === 'career', isMap: st.panel === 'map', isWardrobe: st.panel === 'wardrobe', isGuide: st.panel === 'guide',
+      isCareer: st.panel === 'career', isMap: st.panel === 'map', isWardrobe: st.panel === 'wardrobe', isGuide: st.panel === 'guide', isInfo: st.panel === 'info',
       qWho: enc && q ? (enc.npc || '') + (enc.family ? ' · ' + (cfg ? (cfg.families.find((f) => f.id === enc.family) || {}).name : '') + ' · level ' + enc.difficulty : '') : '',
       qStory: q ? q.prompt : '', qTask: q ? q.task : '', qHint: q ? q.hint : '', qRef: qRef,
       qCoins: enc && enc.reward ? enc.reward.coins : 0, qXp: enc && enc.reward ? enc.reward.xp : 0, qSkill: enc && enc.family ? 'Trains ' + (cfg ? (cfg.families.find((f) => f.id === enc.family) || {}).name : '') + '.' : '',
